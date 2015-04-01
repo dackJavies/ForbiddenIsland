@@ -22,7 +22,17 @@ class Cons<T> implements IList<T> {
     T first;
     IList<T> rest;
     
+    Cons(T first, IList<T> rest) {
+        
+        this.first = first;
+        this.rest = rest;
+        
+    }
+    
 }
+
+// To represent an empty list of T
+class Mt<T> implements IList<T> { }
 
 // Represents a single square of the game area
 class Cell {
