@@ -11,7 +11,7 @@ import javalib.colors.*;
 import javalib.worldimages.*;
 
 interface IList<T> {
-    
+    applesssfhsglkdngkdfl;gn
     
     
 }
