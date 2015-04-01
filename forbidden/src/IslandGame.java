@@ -11,7 +11,7 @@ import javalib.colors.*;
 import javalib.worldimages.*;
 
 interface IList<T> {
-    applesssfhsglkdngkdfl;gn
+    
     
     
 }
@@ -27,7 +27,7 @@ class Cons<T> implements IList<T> {
         this.first = first;
         this.rest = rest;
         
-    }
+    } //GUESS WHAT CHICKEN BUT
     
 }
 
