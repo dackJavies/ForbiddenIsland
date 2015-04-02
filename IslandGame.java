@@ -5,6 +5,7 @@
 // acherry
 
 import java.util.ArrayList;
+import java.util.*;
 
 import tester.*;
 import javalib.impworld.*;
@@ -94,10 +95,10 @@ class ForbiddenIslandWorld extends World {
         IList<Cell> board = null;
         
         if (gameMode.equals("m")) {
-            board = this.makeMountain();
+            board = this.makeMountain(false);
         }
         else if (gameMode.equals("r")) {
-            board = this.makeRandom();
+            board = this.makeMountain(true);
         }
         else  if(gameMode.equals("t")) {
             board = this.makeTerrain();
@@ -105,7 +106,9 @@ class ForbiddenIslandWorld extends World {
         
     }
     // Creates a mountain map
-    IList<Cell> makeMountain() {
+    IList<Cell> makeMountain(boolean isRandom) {
+        
+        Random randy = new Random(666);
         
         final double MAX_HEIGHT = ISLAND_SIZE / 2;
         
@@ -117,7 +120,12 @@ class ForbiddenIslandWorld extends World {
             
             for (int index2 = 0; index2 < ISLAND_SIZE; index2 += 1) {
                 
-                newBoard.get(index1).add(MAX_HEIGHT - (Math.abs(MAX_HEIGHT - index1) + (Math.abs(MAX_HEIGHT - index2))));
+                if (!isRandom) {
+                    newBoard.get(index1).add(MAX_HEIGHT - (Math.abs(MAX_HEIGHT - index1) + (Math.abs(MAX_HEIGHT - index2))));
+                }
+                else {
+                    newBoard.get(index1).add((double)randy.nextInt(32) + 1);
+                }
                 
             }
             
@@ -125,10 +133,6 @@ class ForbiddenIslandWorld extends World {
         
         return this.arrDoubleToCell(newBoard);
         
-    }
-    // TODO
-    IList<Cell> makeRandom() {
-        return new Mt<Cell>();
     }
     // TODO
     IList<Cell> makeTerrain() {
