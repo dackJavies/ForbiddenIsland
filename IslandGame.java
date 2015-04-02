@@ -5,40 +5,36 @@
 // acherry
 
 import java.util.ArrayList;
+
 import tester.*;
 import javalib.impworld.*;
 import javalib.colors.*;
 import javalib.worldimages.*;
 
+// represents a list of T
 interface IList<T> {
-    
-    // Add this T
+    // Adds the given item to the front of this list
     IList<T> add(T t);
-    
 }
 
 // To represent a non-empty list of T
 class Cons<T> implements IList<T> {
-    
     T first;
-    IList<T> rest;
-    
+    IList<T> rest;    
     Cons(T first, IList<T> rest) {
-        
         this.first = first;
         this.rest = rest;
-        
     }
-    
-    public IList<T> add(T t) {
-        return new Cons<T>(t, this);
+    // Adds the given item to the front of this list
+    public IList<T> add(T item) {
+        return new Cons<T>(item, this);
     }
     
 }
 
 // To represent an empty list of T
 class Mt<T> implements IList<T> {
-    
+    // Adds the given item to the front of this empty list
     public IList<T> add(T t) {
         return new Cons<T>(t, this);
     }
@@ -67,12 +63,22 @@ class Cell {
         this.right = null;
         this.bottom = null;
         
-        this.isFlooded = true;
-        
+        this.isFlooded = true;  
+    }
+    // Determines whether this is an OceanCell
+    boolean isOcean() {
+        return false;
     }
 }
 
 class OceanCell extends Cell {
+    OceanCell(double height, int x, int y) {
+        super(height, x, y);
+    }
+    // Determines whether this is an OceanCell
+    boolean isOcean() {
+        return true;
+    }
 }
  
 class ForbiddenIslandWorld extends World {
@@ -82,7 +88,6 @@ class ForbiddenIslandWorld extends World {
     IList<Cell> board;
     // the current height of the ocean
     int waterHeight;
-    
     ForbiddenIslandWorld(String gameMode) {
         
         this.waterHeight = 0;
@@ -99,7 +104,7 @@ class ForbiddenIslandWorld extends World {
         }
         
     }
-    
+    // Creates a mountain map
     IList<Cell> makeMountain() {
         
         final double MAX_HEIGHT = ISLAND_SIZE / 2;
@@ -112,7 +117,7 @@ class ForbiddenIslandWorld extends World {
             
             for (int index2 = 0; index2 < ISLAND_SIZE; index2 += 1) {
                 
-                newBoard.get(index1).add(MAX_HEIGHT - (Math.abs(MAX_HEIGHT - index1) + (Math.abs(MAX_HEIGHT - index2)));
+                newBoard.get(index1).add(MAX_HEIGHT - (Math.abs(MAX_HEIGHT - index1) + (Math.abs(MAX_HEIGHT - index2))));
                 
             }
             
@@ -121,11 +126,15 @@ class ForbiddenIslandWorld extends World {
         return this.arrDoubleToCell(newBoard);
         
     }
-    
-    IList<Cell> makeRandom() { }
-    
-    IList<Cell> makeTerrain() { }
-    
+    // TODO
+    IList<Cell> makeRandom() {
+        return new Mt<Cell>();
+    }
+    // TODO
+    IList<Cell> makeTerrain() {
+        return new Mt<Cell>();
+    }
+    // returns an IList of Cells from the given ArrayList<ArrayList<Double>>
     IList<Cell> arrDoubleToCell(ArrayList<ArrayList<Double>> toChange) {
         
         ArrayList<ArrayList<Cell>> result = new ArrayList<ArrayList<Cell>>();
@@ -136,39 +145,52 @@ class ForbiddenIslandWorld extends World {
             
             for (int index2 = 0; index2 < ISLAND_SIZE; index2 += 1) {
                 
-                Cell toAdd = new Cell(toChange.get(index1).get(index2), index1, index2);
+                Cell land = new Cell(toChange.get(index1).get(index2), index1, index2);
+                Cell ocean = new OceanCell(toChange.get(index1).get(index2), index1, index2);
                 
-                result.get(index1).add(toAdd);
+                Cell tempCell;
                 
-                if (index1 == 0) {
-                    toAdd.left = toAdd;
+                if (toChange.get(index1).get(index2) <= 0) {
+                    tempCell = ocean;
                 }
                 else {
-                    toAdd.left = result.get(index1 - 1).get(index2);
+                    land.isFlooded = false;
+                    tempCell = land;
+                }
+                
+                result.get(index1).add(tempCell);
+                
+                
+                
+                if (index1 == 0) {
+                    tempCell.left = tempCell;
+                }
+                else {
+                    tempCell.left = result.get(index1 - 1).get(index2);
                 }
                 
                 if (index1 == ISLAND_SIZE - 1) {
-                    toAdd.right = toAdd;
+                    tempCell.right = tempCell;
                 }
                 else {
-                    toAdd.right = result.get(index1 + 1).get(index2);
+                    tempCell.right = result.get(index1 + 1).get(index2);
                 }
                 
                 if (index2 == 0) {
-                    toAdd.top = toAdd;
+                    tempCell.top = tempCell;
                 }
                 else {
-                    toAdd.top = result.get(index1).get(index2 - 1);
+                    tempCell.top = result.get(index1).get(index2 - 1);
                 }
                 
                 if(index2 == ISLAND_SIZE - 1) {
-                    toAdd.bottom = toAdd;
+                    tempCell.bottom = tempCell;
                 }
                 else {
-                    toAdd.bottom = result.get(index1).get(index2 + 1);
+                    tempCell.bottom = result.get(index1).get(index2 + 1);
                 }
                 
-                toAdd.isFlooded = toAdd.height <= 0;
+                
                 
             }
             
@@ -188,6 +210,11 @@ class ForbiddenIslandWorld extends World {
         
         return result2;
         
+    }
+
+    // TODO
+    public WorldImage makeImage() {
+        return null;
     }
     
 }
