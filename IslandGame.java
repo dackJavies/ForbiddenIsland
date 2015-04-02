@@ -66,6 +66,11 @@ class Cell {
         
         this.isFlooded = true;  
     }
+    // constructor for testing
+    Cell(double height, int x, int y, boolean isFlooded) {
+        this(height, x, y);
+        this.isFlooded = isFlooded;
+    }
     // Determines whether this is an OceanCell
     boolean isOcean() {
         return false;
@@ -138,22 +143,50 @@ class ForbiddenIslandWorld extends World {
     IList<Cell> makeTerrain() {
         return new Mt<Cell>();
     }
+    // determines the top, left, right, and bottom of a the cells in this world
+    void assignNeighbors(Cell tempCell, int index1, int index2, ArrayList<ArrayList<Cell>> result) {
+        if (index1 == 0) {
+            tempCell.left = tempCell;
+        }
+        else {
+            tempCell.left = result.get(index1 - 1).get(index2);
+        }
+        if (index1 == ISLAND_SIZE - 1) {
+            tempCell.right = tempCell;
+        }
+        else {
+            tempCell.right = result.get(index1 + 1).get(index2);
+        }
+        if (index2 == 0) {
+            tempCell.top = tempCell;
+        }
+        else {
+            tempCell.top = result.get(index1).get(index2 - 1);
+        }
+
+        if(index2 == ISLAND_SIZE - 1) {
+            tempCell.bottom = tempCell;
+        }
+        else {
+            tempCell.bottom = result.get(index1).get(index2 + 1);
+        }
+    }
     // returns an IList of Cells from the given ArrayList<ArrayList<Double>>
     IList<Cell> arrDoubleToCell(ArrayList<ArrayList<Double>> toChange) {
         
         ArrayList<ArrayList<Cell>> result = new ArrayList<ArrayList<Cell>>();
-        
+
         for (int index1 = 0; index1 < ISLAND_SIZE; index1 += 1) {
-            
+
             result.add(new ArrayList<Cell>());
-            
+
             for (int index2 = 0; index2 < ISLAND_SIZE; index2 += 1) {
-                
+
                 Cell land = new Cell(toChange.get(index1).get(index2), index1, index2);
                 Cell ocean = new OceanCell(toChange.get(index1).get(index2), index1, index2);
-                
+
                 Cell tempCell;
-                
+
                 if (toChange.get(index1).get(index2) <= 0) {
                     tempCell = ocean;
                 }
@@ -163,41 +196,10 @@ class ForbiddenIslandWorld extends World {
                 }
                 
                 result.get(index1).add(tempCell);
-                
-                
-                
-                if (index1 == 0) {
-                    tempCell.left = tempCell;
-                }
-                else {
-                    tempCell.left = result.get(index1 - 1).get(index2);
-                }
-                
-                if (index1 == ISLAND_SIZE - 1) {
-                    tempCell.right = tempCell;
-                }
-                else {
-                    tempCell.right = result.get(index1 + 1).get(index2);
-                }
-                
-                if (index2 == 0) {
-                    tempCell.top = tempCell;
-                }
-                else {
-                    tempCell.top = result.get(index1).get(index2 - 1);
-                }
-                
-                if(index2 == ISLAND_SIZE - 1) {
-                    tempCell.bottom = tempCell;
-                }
-                else {
-                    tempCell.bottom = result.get(index1).get(index2 + 1);
-                }
-                
-                
+                this.assignNeighbors(tempCell, index1, index2, result);
                 
             }
-            
+
         }
         
         IList<Cell> result2 = new Mt<Cell>();
@@ -222,3 +224,42 @@ class ForbiddenIslandWorld extends World {
     }
     
 }
+
+
+class ExamplesIsland {
+    ForbiddenIslandWorld mountain = new ForbiddenIslandWorld("m");
+     // ForbiddenIslandWorld random = new ForbiddenIslandWorld("r");
+     // TODO ForbiddenIslandWorld terrain = new ForbiddenIslandWorld("t");
+     ArrayList<ArrayList<Double>> arrayListD = new ArrayList<ArrayList<Double>>();
+     Cell land1 = new Cell(1.0, 1, 0, false);
+     Cell land2 = new Cell(1.0, 1, 1, false);
+     Cell ocean1 = new OceanCell(0, 0, 0);
+     Cell ocean2 = new OceanCell(0, 0, 1);
+     IList<Cell> iList = new Cons<Cell>(ocean1, new Cons<Cell>(ocean2, new Cons<Cell>(land1, new Cons<Cell>(land2, new Mt<Cell>()))));
+     void initialize() {
+         
+         this.land1 = new Cell(1.0, 1, 0, false);
+         this.land2 = new Cell(1.0, 1, 1, false);
+         this.ocean1 = new OceanCell(0, 0, 0);
+         this.ocean2 = new OceanCell(0, 0, 1);
+         
+         this.arrayListD.clear();
+         int size = 2;
+         for (int index1 = 0; index1 < size - 1; index1 += 1) {
+             
+             arrayListD.add(new ArrayList<Double>());
+             
+             for (int index2 = 0; index2 < size - 1; index2 += 1) {
+                 
+                 arrayListD.get(index1).add((double)index1);
+             }
+         }
+     }
+     
+     // tests arrDoubleToCell for the class ForbiddenIslandWorld
+    // void testArrDoubleToCell(Tester t) {
+      //   this.initialize();
+        // t.checkExpect(this.doubToCell.apply(this.arrayListD), this.iList);
+    // }
+     
+ }
