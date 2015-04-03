@@ -4,12 +4,11 @@
 // Cherry Alex
 // acherry
 
-import java.util.ArrayList;
+import java.awt.Color;
 import java.util.*;
 
 import tester.*;
-import javalib.impworld.*;
-import javalib.colors.*;
+import javalib.funworld.*;
 import javalib.worldimages.*;
 
 // represents a list of T
@@ -37,10 +36,10 @@ class Cons<T> implements IList<T> {
 class Mt<T> implements IList<T> {
     // Adds the given item to the front of this empty list
     public IList<T> add(T t) {
-        return new Cons<T>(t, this);
+        return new Cons<T>(t, this); 
     }
     
-}
+}   
 
 // Represents a single square of the game area
 class Cell {
@@ -75,6 +74,53 @@ class Cell {
     boolean isOcean() {
         return false;
     }
+    // Displays this cell 
+    WorldImage displayCell() {
+        return new RectangleImage(new Posn(this.x, this.y), 10, 10, this.cellColor());
+    }
+    // Displays this cell and its neighbord
+    WorldImage displayNeighbors() {
+        if (!(this.right == this || this.bottom == this)) {
+            return new OverlayImages(this.displayCell(), 
+                    new OverlayImages(this.right.displayCell(), this.bottom.displayCell()));
+        }
+        else if (this.right == this) {
+            return new OverlayImages(this.displayCell(),
+                    this.bottom.displayCell());
+        }
+        else if (this.bottom == this) {
+            return new OverlayImages(this.displayCell(),
+                    this.bottom.displayCell());
+        }
+        else {
+            return this.displayCell();
+        }
+    }
+    // Displays all of the cells connected to this one
+    WorldImage displayAllCells() {
+        if ((this.right.right == this.right) && this.bottom.bottom == this.bottom) {
+            return this.displayNeighbors();
+        }
+        else if (!(this.right.right == this.right && this.bottom.bottom == this.bottom) {
+           // return new OverlayImages(this.displayNeighbors(), new OverlayImages(this.right.rightdisplayNeighbors());
+        }
+        else if (this.right.right)
+    }
+    // Computes this cell's color
+    Color cellColor() {
+        // Flooded cells range from blue to black
+        if (this.isFlooded) {
+            return new Color(0, 0, 0);
+        }
+        // cells in danger of flooding range from green to red
+        else if (this.height <= 0) {
+            return new Color(50, 0, 0);
+        }
+        else {
+            return new Color(0, 70, 0);
+                
+        }
+    }
 }
 
 class OceanCell extends Cell {
@@ -84,6 +130,10 @@ class OceanCell extends Cell {
     // Determines whether this is an OceanCell
     boolean isOcean() {
         return true;
+    }
+    // Computes this cell's color
+    Color cellColor() {
+        return new Color(0, 0, 255);
     }
 }
  
@@ -176,11 +226,11 @@ class ForbiddenIslandWorld extends World {
         
         ArrayList<ArrayList<Cell>> result = new ArrayList<ArrayList<Cell>>();
 
-        for (int index1 = 0; index1 < ISLAND_SIZE; index1 += 1) {
+        for (int index1 = 0; index1 <= ISLAND_SIZE; index1 += 1) {
 
             result.add(new ArrayList<Cell>());
 
-            for (int index2 = 0; index2 < ISLAND_SIZE; index2 += 1) {
+            for (int index2 = 0; index2 <= ISLAND_SIZE; index2 += 1) {
 
                 Cell land = new Cell(toChange.get(index1).get(index2), index1, index2);
                 Cell ocean = new OceanCell(toChange.get(index1).get(index2), index1, index2);
@@ -227,7 +277,8 @@ class ForbiddenIslandWorld extends World {
 
 
 class ExamplesIsland {
-    ForbiddenIslandWorld mountain = new ForbiddenIslandWorld("m");
+     ForbiddenIslandWorld nullWorld = new ForbiddenIslandWorld("not a world");
+     // ForbiddenIslandWorld mountain = new ForbiddenIslandWorld("m");
      // ForbiddenIslandWorld random = new ForbiddenIslandWorld("r");
      // TODO ForbiddenIslandWorld terrain = new ForbiddenIslandWorld("t");
      ArrayList<ArrayList<Double>> arrayListD = new ArrayList<ArrayList<Double>>();
@@ -256,10 +307,9 @@ class ExamplesIsland {
          }
      }
      
-     // tests arrDoubleToCell for the class ForbiddenIslandWorld
-    // void testArrDoubleToCell(Tester t) {
-      //   this.initialize();
-        // t.checkExpect(this.doubToCell.apply(this.arrayListD), this.iList);
-    // }
-     
- }
+      //tests arrDoubleToCell for the class ForbiddenIslandWorld
+      void testArrDoubleToCell(Tester t) {
+          this.initialize();
+          t.checkExpect(this.nullWorld.arrDoubleToCell(this.arrayListD), this.iList);
+      }
+}
