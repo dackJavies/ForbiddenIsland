@@ -159,7 +159,7 @@ class Cell {
     }
     // TODO 
     boolean floodDanger() {
-        return true;
+        return true; // Would this just be: return this.height <= 0 && !this.isFlooded?
     }
 }
 
@@ -230,7 +230,13 @@ class ForbiddenIslandWorld extends World {
         
     }
     // TODO
-    IList<Cell> makeTerrain() {
+    IList<Cell> makeTerrain(double tl, double tr, double br, double bl) {
+        double t = Math.random() * Math.abs(tl - tr) + (tl + tr) / 2;
+        double r = Math.random() * Math.abs(tr - br) + (tr + br) / 2;
+        double b = Math.random() * Math.abs(br - bl) + (br + bl) / 2;
+        double l = Math.random() * Math.abs(tl - bl) + (tl + bl) / 2;
+        
+        double m = Math.random() * Math.abs(tl - br) + (tl + tr + br + bl) / 4;
         return new Mt<Cell>();
     }
     // determines the top, left, right, and bottom of a the cells in this world
