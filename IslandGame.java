@@ -143,7 +143,7 @@ class Cell {
         }
         // cells in danger of flooding range from green to red
         else if (this.height <= 0) {
-            return new Color(50, 0, 0);
+            return new Color(150, 0, 0);
         }
         else {
             return new Color(0, 70, 0);
@@ -299,7 +299,7 @@ class ForbiddenIslandWorld extends World {
 
     // Draws the World
     public WorldImage makeImage() {
-        return new OverlayImages(new RectangleImage(new Posn(0, 0), 1280, 1280, new Color(255, 10, /* Real Value: 0, 0, 120 */ 10)), 
+        return new OverlayImages(new RectangleImage(new Posn(0, 0), 1280, 1280, new Color(255, 255, /* Real Value: 0, 0, 120 */ 255)), 
                 this.board.accept(new DisplayCellsVisitor()));
     }
 } 
@@ -313,13 +313,13 @@ class ExamplesIsland {
     // ForbiddenIslandWorld random = new ForbiddenIslandWorld("r");
     // TODO ForbiddenIslandWorld terrain = new ForbiddenIslandWorld("t");
     ArrayList<ArrayList<Double>> arrayListD = new ArrayList<ArrayList<Double>>();
-    Cell land1 = new Cell(20.0, 30, 30, false);
-    Cell land2 = new Cell(-10, 50, 0, false);
-    Cell land3 = new Cell(20.0, 50, 50, true);
+    Cell land1 = new Cell(-5, 30, 30, false);
+    Cell land2 = new Cell(-10, 90, 90, true);
+    Cell land3 = new Cell(50.0, 30, 90, false);
     Cell land4 = new Cell(-10, 50, 50, false);
     Cell land5 = new Cell(20.0, 60, 60, true);
     Cell land6 = new Cell(-10, 1, 1, false);
-    Cell ocean1 = new OceanCell(0, 60, 30);
+    Cell ocean1 = new OceanCell(0, 90, 30);
     Cell ocean2 = new OceanCell(0, 0, 20);
     Cell ocean3 = new OceanCell(0, 50, 50);
     Cell ocean4 = new OceanCell(0, 0, 20);
@@ -331,7 +331,7 @@ class ExamplesIsland {
             new Cons<Cell>(land5, new Cons<Cell>(land6, new Cons<Cell>(ocean1, new Cons<Cell>(ocean2,
                     new Cons<Cell>(ocean3, new Cons<Cell>(ocean4, new Cons<Cell>(ocean5, new Cons<Cell>(ocean6,
                             new Mt<Cell>()))))))))))));
-    IList<Cell> iList2 = new Cons<Cell>(land1, new Cons<Cell>(ocean1, new Mt<Cell>()));
+    IList<Cell> iList2 = new Cons<Cell>(land1, new Cons<Cell>(land2, new Cons<Cell>(land3, new Cons<Cell>(ocean1, new Mt<Cell>()))));
     // TODO
     void initialize() {
         
