@@ -9,12 +9,31 @@ import java.util.*;
 
 import tester.*;
 import javalib.funworld.*;
+import javalib.worldcanvas.CanvasPanel;
 import javalib.worldimages.*;
+
+// represents a visitor object
+interface IVisitor<T, R> {
+    R visit(Cons<T> c);
+    R visit(Mt<T> m);
+}
+
+// represents a function that displays the cells in a list
+class DisplayCellsVisitor implements IVisitor<Cell, WorldImage> {
+    public WorldImage visit(Cons<Cell> c) {
+        return new OverlayImages(c.first.displayCell(), c.rest.accept(this));
+    }
+    public WorldImage visit(Mt<Cell> m) {
+        return new LineImage(new Posn(-1, -1), new Posn(-1, -1), new Color(255, 255, 255));
+    }
+}
 
 // represents a list of T
 interface IList<T> {
     // Adds the given item to the front of this list
     IList<T> add(T t);
+    // Draws the list according to its visitor
+    <R> R accept(IVisitor<T, R> visitor);
 }
 
 // To represent a non-empty list of T
@@ -29,6 +48,10 @@ class Cons<T> implements IList<T> {
     public IList<T> add(T item) {
         return new Cons<T>(item, this);
     }
+    // accepts a visitor object
+    public <R> R accept(IVisitor<T, R> visitor) {
+        return visitor.visit(this);
+    }
     
 }
 
@@ -38,6 +61,10 @@ class Mt<T> implements IList<T> {
     public IList<T> add(T t) {
         return new Cons<T>(t, this); 
     }
+    // accepts a visitor object
+    public <R> R accept(IVisitor<T, R> visitor) {
+        return visitor.visit(this);
+    } 
     
 }   
 
@@ -76,9 +103,11 @@ class Cell {
     }
     // Displays this cell 
     WorldImage displayCell() {
-        return new RectangleImage(new Posn(this.x, this.y), 10, 10, this.cellColor());
-    }
-    // Displays this cell and its neighbord
+        int sideLength = 30;
+        int posnShift = sideLength / 2;
+        return new RectangleImage(new Posn(this.x + posnShift, this.y + posnShift), sideLength, sideLength, this.cellColor());
+    }/*
+    // Displays this cell and its neighbors
     WorldImage displayNeighbors() {
         if (!(this.right == this || this.bottom == this)) {
             return new OverlayImages(this.displayCell(), 
@@ -102,10 +131,10 @@ class Cell {
             return this.displayNeighbors();
         }
         else if (!(this.right.right == this.right && this.bottom.bottom == this.bottom) {
-           // return new OverlayImages(this.displayNeighbors(), new OverlayImages(this.right.rightdisplayNeighbors());
+            return new OverlayImages(this.displayNeighbors(), new OverlayImages(this.right.rightdisplayNeighbors());
         }
         else if (this.right.right)
-    }
+    }*/
     // Computes this cell's color
     Color cellColor() {
         // Flooded cells range from blue to black
@@ -133,7 +162,7 @@ class OceanCell extends Cell {
     }
     // Computes this cell's color
     Color cellColor() {
-        return new Color(0, 0, 255);
+        return new Color(0, 0, 120);
     }
 }
  
@@ -232,8 +261,8 @@ class ForbiddenIslandWorld extends World {
 
             for (int index2 = 0; index2 <= ISLAND_SIZE; index2 += 1) {
 
-                Cell land = new Cell(toChange.get(index1).get(index2), index1, index2);
-                Cell ocean = new OceanCell(toChange.get(index1).get(index2), index1, index2);
+                Cell land = new Cell(toChange.get(index1).get(index2), index1 + 5, index2 + 5);
+                Cell ocean = new OceanCell(toChange.get(index1).get(index2), index1 + 5, index2 + 5);
 
                 Cell tempCell;
 
@@ -268,48 +297,67 @@ class ForbiddenIslandWorld extends World {
         
     }
 
-    // TODO
+    // Draws the World
     public WorldImage makeImage() {
-        return null;
+        return new OverlayImages(new RectangleImage(new Posn(0, 0), 1280, 1280, new Color(255, 10, /* Real Value: 0, 0, 120 */ 10)), 
+                this.board.accept(new DisplayCellsVisitor()));
     }
+} 
     
-}
+
 
 
 class ExamplesIsland {
-     ForbiddenIslandWorld nullWorld = new ForbiddenIslandWorld("not a world");
-     // ForbiddenIslandWorld mountain = new ForbiddenIslandWorld("m");
-     // ForbiddenIslandWorld random = new ForbiddenIslandWorld("r");
-     // TODO ForbiddenIslandWorld terrain = new ForbiddenIslandWorld("t");
-     ArrayList<ArrayList<Double>> arrayListD = new ArrayList<ArrayList<Double>>();
-     Cell land1 = new Cell(1.0, 1, 0, false);
-     Cell land2 = new Cell(1.0, 1, 1, false);
-     Cell ocean1 = new OceanCell(0, 0, 0);
-     Cell ocean2 = new OceanCell(0, 0, 1);
-     IList<Cell> iList = new Cons<Cell>(ocean1, new Cons<Cell>(ocean2, new Cons<Cell>(land1, new Cons<Cell>(land2, new Mt<Cell>()))));
-     void initialize() {
-         
-         this.land1 = new Cell(1.0, 1, 0, false);
-         this.land2 = new Cell(1.0, 1, 1, false);
-         this.ocean1 = new OceanCell(0, 0, 0);
-         this.ocean2 = new OceanCell(0, 0, 1);
-         
-         this.arrayListD.clear();
-         int size = 2;
-         for (int index1 = 0; index1 < size - 1; index1 += 1) {
-             
-             arrayListD.add(new ArrayList<Double>());
-             
-             for (int index2 = 0; index2 < size - 1; index2 += 1) {
-                 
-                 arrayListD.get(index1).add((double)index1);
-             }
-         }
-     }
-     
-      //tests arrDoubleToCell for the class ForbiddenIslandWorld
-      void testArrDoubleToCell(Tester t) {
-          this.initialize();
-          t.checkExpect(this.nullWorld.arrDoubleToCell(this.arrayListD), this.iList);
-      }
+    ForbiddenIslandWorld nullWorld = new ForbiddenIslandWorld("not a world");
+    // ForbiddenIslandWorld mountain = new ForbiddenIslandWorld("m");
+    // ForbiddenIslandWorld random = new ForbiddenIslandWorld("r");
+    // TODO ForbiddenIslandWorld terrain = new ForbiddenIslandWorld("t");
+    ArrayList<ArrayList<Double>> arrayListD = new ArrayList<ArrayList<Double>>();
+    Cell land1 = new Cell(20.0, 30, 30, false);
+    Cell land2 = new Cell(-10, 50, 0, false);
+    Cell land3 = new Cell(20.0, 50, 50, true);
+    Cell land4 = new Cell(-10, 50, 50, false);
+    Cell land5 = new Cell(20.0, 60, 60, true);
+    Cell land6 = new Cell(-10, 1, 1, false);
+    Cell ocean1 = new OceanCell(0, 60, 30);
+    Cell ocean2 = new OceanCell(0, 0, 20);
+    Cell ocean3 = new OceanCell(0, 50, 50);
+    Cell ocean4 = new OceanCell(0, 0, 20);
+    Cell ocean5 = new OceanCell(0, 50, 0);
+    Cell ocean6 = new OceanCell(0, 0, 20);
+    
+    Cell s = new OceanCell(0, 0, 1);
+    IList<Cell> iList = new Cons<Cell>(land1, new Cons<Cell>(land2, new Cons<Cell>(land3, new Cons<Cell>(land4,
+            new Cons<Cell>(land5, new Cons<Cell>(land6, new Cons<Cell>(ocean1, new Cons<Cell>(ocean2,
+                    new Cons<Cell>(ocean3, new Cons<Cell>(ocean4, new Cons<Cell>(ocean5, new Cons<Cell>(ocean6,
+                            new Mt<Cell>()))))))))))));
+    IList<Cell> iList2 = new Cons<Cell>(land1, new Cons<Cell>(ocean1, new Mt<Cell>()));
+    // TODO
+    void initialize() {
+        
+        this.land1 = new Cell(1.0, 1, 0, false);
+        this.land2 = new Cell(1.0, 1, 1, false);
+        this.ocean1 = new OceanCell(0, 0, 0);
+        this.ocean2 = new OceanCell(0, 0, 1);     
+        
+        this.arrayListD.clear();
+        int size = 2;
+        for (int index1 = 0; index1 < size - 1; index1 += 1) {
+            
+            arrayListD.add(new ArrayList<Double>());
+            
+            for (int index2 = 0; index2 < size - 1; index2 += 1) {
+                
+                arrayListD.get(index1).add((double)index1);
+            }
+        }
+    }
+/*
+    //tests arrDoubleToCell for the class ForbiddenIslandWorld
+    void testArrDoubleToCell(Tester t) {
+        this.initialize();
+        t.checkExpect(this.nullWorld.arrDoubleToCell(this.arrayListD), this.iList);
+    }*/
+    {this.nullWorld.board = this.iList2;} 
+    boolean runAnimation = this.nullWorld.bigBang(640, 640);
 }
