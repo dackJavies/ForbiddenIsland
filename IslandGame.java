@@ -139,16 +139,27 @@ class Cell {
     Color cellColor() {
         // Flooded cells range from blue to black
         if (this.isFlooded) {
+            int blue = 255; // TODO
             return new Color(0, 0, 0);
         }
         // cells in danger of flooding range from green to red
-        else if (this.height <= 0) {
-            return new Color(150, 0, 0);
+        else if (this.floodDanger()) {
+            int red = Math.min(255, (((int)this.height) -1));
+            int green = 255 + Math.max(255, ((int)this.height + 1));
+            // TODO red, green
+            return new Color(red, green, 0);
         }
         else {
-            return new Color(0, 70, 0);
+            // TODO find better way?
+            int red = Math.min(255, (int)this.height * 10);
+            int blue = Math.min(255, (int)this.height * 10);
+            return new Color(red, 255, blue);
                 
         }
+    }
+    // TODO 
+    boolean floodDanger() {
+        return true;
     }
 }
 
