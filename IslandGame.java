@@ -229,16 +229,41 @@ class ForbiddenIslandWorld extends World {
         return this.arrDoubleToCell(newBoard);
         
     }
-    // TODO
-    IList<Cell> makeTerrain(double tl, double tr, double br, double bl) {
+    
+    IList<Cell> makeTerrain() {
+        
+        ArrayList<ArrayList<Double>> newBoard = new ArrayList<ArrayList<Double>>();
+        
+        for (int index1 = 0; index1 < ISLAND_SIZE + 1; index1 += 1) {
+            
+            newBoard.add(new ArrayList<Double>());
+            
+            for (int index2 = 0; index2 < ISLAND_SIZE + 1; index2 += 1) {
+                
+                newBoard.get(index1).add(0.0);
+                
+            }
+            
+        }
+        
+        // TODO
+        return new Mt<Cell>();
+        
+    }
+    
+    double calculateMiddle(double tl, double tr, double br, double bl) {
+        
         double t = Math.random() * Math.abs(tl - tr) + (tl + tr) / 2;
         double r = Math.random() * Math.abs(tr - br) + (tr + br) / 2;
         double b = Math.random() * Math.abs(br - bl) + (br + bl) / 2;
         double l = Math.random() * Math.abs(tl - bl) + (tl + bl) / 2;
         
         double m = Math.random() * Math.abs(tl - br) + (tl + tr + br + bl) / 4;
-        return new Mt<Cell>();
+        
+        return m;
+        
     }
+    
     // determines the top, left, right, and bottom of a the cells in this world
     void assignNeighbors(Cell tempCell, int index1, int index2, ArrayList<ArrayList<Cell>> result) {
         if (index1 == 0) {
