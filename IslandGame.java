@@ -124,7 +124,7 @@ class Cell {
     }
     // Determines whether this is an OceanCell
     boolean updateFloodHelp(int waterLevel) {
-        return this.height - waterLevel > 0;
+        return (this.height - waterLevel) <= 0;
     }
     // Displays this cell 
     WorldImage displayCell(int waterLevel) {
@@ -328,8 +328,8 @@ class ForbiddenIslandWorld extends World {
 
             for (int index2 = 0; index2 <= ISLAND_SIZE; index2 += 1) {
 
-                Cell land = new Cell(toChange.get(index1).get(index2), index1 + 5, index2 + 5);
-                Cell ocean = new OceanCell(index1 + 5, index2 + 5);
+                Cell land = new Cell(toChange.get(index1).get(index2), index1, index2);
+                Cell ocean = new OceanCell(index1, index2);
 
                 Cell tempCell;
 
@@ -379,7 +379,7 @@ class UpdateFlood implements IFunc<Cell, Cell> {
     
     public Cell apply(Cell t) {
         
-        return new Cell(t.height, t.x, t.y, t.updateFloodHelp(waterLevel));
+        return new Cell(t.height, t.x, t.y, t.updateFloodHelp(this.waterLevel));
         
     }
     
@@ -413,14 +413,32 @@ class ExamplesIsland {
     IList<Cell> iList2 = new Cons<Cell>(landSunk1, new Cons<Cell>(landSunk1, new Cons<Cell>(landSunk1, new Cons<Cell>(landSunk1, new Mt<Cell>()))));
     IList<Cell> iList3 = new Cons<Cell>(landAbove1, new Cons<Cell>(landAbove2, new Cons<Cell>(landAbove3, new Cons<Cell>(landAbove4, new Mt<Cell>()))));
     IList<Cell> iList4 = new Cons<Cell>(landDan1, new Cons<Cell>(landDan2, new Cons<Cell>(landDan3, new Cons<Cell>(landDan4, new Mt<Cell>()))));
+    Cell s = new OceanCell(0, 1);
     
+    
+    
+    Cell land7 = new Cell(0, 10, 10);
+    Cell land8 = new Cell(-1, 10, 11);
+    Cell land9 = new Cell(70, 10, 12);
+    IList<Cell> list1 = new Cons<Cell>(land7, new Cons<Cell>(land8,
+            new Cons<Cell>(land9, new Mt<Cell>())));
+    Cell land7_2 = new Cell(0, 10, 10, true);
+    Cell land8_2 = new Cell(-1, 10, 11, true);
+    Cell land9_2 = new Cell(70, 10, 12, false);
+    IList<Cell> list1_2 = new Cons<Cell>(land7_2, new Cons<Cell>(land8_2,
+            new Cons<Cell>(land9_2, new Mt<Cell>())));    
+    IFunc<Cell, Cell> upFld = new UpdateFlood(64);
     // TODO
-    void initialize() {
+    void initialize() {}
+    /*    
+    boolean testUpdateFlood(Tester t) {
         
+        //IList<Cell> map1 = this.list1.map(this.upFld);
         
+        return t.checkExpect(this.list1.map(this.upFld), this.list1_2);
         
     }
-    /*
+/*
     //tests arrDoubleToCell for the class ForbiddenIslandWorld
     void testArrDoubleToCell(Tester t) {
         this.initialize();
