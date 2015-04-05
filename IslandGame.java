@@ -192,16 +192,16 @@ class ForbiddenIslandWorld extends World {
     ForbiddenIslandWorld(String gameMode) {
         
         this.waterHeight = 0;
-        IList<Cell> board = null;
+        this.board = null;
         
         if (gameMode.equals("m")) {
-            board = this.makeMountain(false);
+            this.board = this.makeMountain(false);
         }
         else if (gameMode.equals("r")) {
-            board = this.makeMountain(true);
+            this.board = this.makeMountain(true);
         }
         else  if(gameMode.equals("t")) {
-            board = this.makeTerrain();
+            this.board = this.makeTerrain();
         }
         
     }
