@@ -20,13 +20,18 @@ interface IVisitor<T, R> {
 
 // represents a function that displays the cells in a list
 class DisplayCellsVisitor implements IVisitor<Cell, WorldImage> {
+    int waterLevel;
+    DisplayCellsVisitor(int w) {
+        this.waterLevel = w;
+    }
     public WorldImage visit(Cons<Cell> c) {
-        return new OverlayImages(c.first.displayCell(), c.rest.accept(this));
+        return new OverlayImages(c.first.displayCell(waterLevel), c.rest.accept(this));
     }
     public WorldImage visit(Mt<Cell> m) {
         return new LineImage(new Posn(-1, -1), new Posn(-1, -1), new Color(255, 255, 255));
     }
 }
+
 
 // represents a list of T
 interface IList<T> {
@@ -102,10 +107,10 @@ class Cell {
         return false;
     }
     // Displays this cell 
-    WorldImage displayCell() {
+    WorldImage displayCell(int waterLevel) {
         int sideLength = 30;
         int posnShift = sideLength / 2;
-        return new RectangleImage(new Posn(this.x + posnShift, this.y + posnShift), sideLength, sideLength, this.cellColor());
+        return new RectangleImage(new Posn(this.x + posnShift, this.y + posnShift), sideLength, sideLength, this.cellColor(waterLevel));
     }/*
     // Displays this cell and its neighbors
     WorldImage displayNeighbors() {
@@ -136,43 +141,43 @@ class Cell {
         else if (this.right.right)
     }*/
     // Computes this cell's color
-    Color cellColor() {
+    Color cellColor(int waterLevel) {
         // Flooded cells range from blue to black
         if (this.isFlooded) {
-            int blue = 255; // TODO
-            return new Color(0, 0, 0);
+            int blue = 120 + Math.min((int)this.height - waterLevel, -120); // TODO
+            return new Color(0, 0, blue);
         }
         // cells in danger of flooding range from green to red
-        else if (this.floodDanger()) {
-            int red = Math.min(255, (((int)this.height) -1));
-            int green = 255 + Math.max(255, ((int)this.height + 1));
+        else if (this.floodDanger(waterLevel)) {
+            int red = Math.min(255, ((int)this.height - waterLevel) - 1);
+            int green = 255 + Math.max(255, ((int)this.height - waterLevel) + 1);
             // TODO red, green
-            return new Color(red, green, 0);
+            return new Color(255, 255, 255);
         }
         else {
             // TODO find better way?
-            int red = Math.min(255, (int)this.height * 10);
-            int blue = Math.min(255, (int)this.height * 10);
-            return new Color(red, 255, blue);
+            int red = Math.min(255, ((int)this.height - waterLevel) * 10);
+            int blue = Math.min(255, ((int)this.height - waterLevel) * 10);
+            return new Color(255, 255, 255);
                 
         }
     }
-    // TODO 
-    boolean floodDanger() {
-        return true; // Would this just be: return this.height <= 0 && !this.isFlooded?
+    // Determines whether this cell is in danger of flooding or flooded
+    boolean floodDanger(int waterLevel) {
+        return this.height <= waterLevel || this.isFlooded;
     }
 }
 
 class OceanCell extends Cell {
-    OceanCell(double height, int x, int y) {
-        super(height, x, y);
+    OceanCell(int x, int y) {
+        super(0, x, y);
     }
     // Determines whether this is an OceanCell
     boolean isOcean() {
         return true;
     }
     // Computes this cell's color
-    Color cellColor() {
+    Color cellColor(int waterLevel) {
         return new Color(0, 0, 120);
     }
 }
@@ -304,7 +309,7 @@ class ForbiddenIslandWorld extends World {
             for (int index2 = 0; index2 <= ISLAND_SIZE; index2 += 1) {
 
                 Cell land = new Cell(toChange.get(index1).get(index2), index1 + 5, index2 + 5);
-                Cell ocean = new OceanCell(toChange.get(index1).get(index2), index1 + 5, index2 + 5);
+                Cell ocean = new OceanCell(index1 + 5, index2 + 5);
 
                 Cell tempCell;
 
@@ -342,7 +347,7 @@ class ForbiddenIslandWorld extends World {
     // Draws the World
     public WorldImage makeImage() {
         return new OverlayImages(new RectangleImage(new Posn(0, 0), 1280, 1280, new Color(255, 255, /* Real Value: 0, 0, 120 */ 255)), 
-                this.board.accept(new DisplayCellsVisitor()));
+                this.board.accept(new DisplayCellsVisitor(this.waterHeight)));
     }
 } 
     
@@ -356,19 +361,19 @@ class ExamplesIsland {
     // TODO ForbiddenIslandWorld terrain = new ForbiddenIslandWorld("t");
     ArrayList<ArrayList<Double>> arrayListD = new ArrayList<ArrayList<Double>>();
     Cell land1 = new Cell(-5, 30, 30, false);
-    Cell land2 = new Cell(-10, 90, 90, true);
+    Cell land2 = new Cell(-10, 90, 30, true);
     Cell land3 = new Cell(50.0, 30, 90, false);
-    Cell land4 = new Cell(-10, 50, 50, false);
+    Cell land4 = new Cell(-10, 90, 50, false);
     Cell land5 = new Cell(20.0, 60, 60, true);
     Cell land6 = new Cell(-10, 1, 1, false);
-    Cell ocean1 = new OceanCell(0, 90, 30);
-    Cell ocean2 = new OceanCell(0, 0, 20);
-    Cell ocean3 = new OceanCell(0, 50, 50);
-    Cell ocean4 = new OceanCell(0, 0, 20);
-    Cell ocean5 = new OceanCell(0, 50, 0);
-    Cell ocean6 = new OceanCell(0, 0, 20);
+    Cell ocean1 = new OceanCell(150, 150);
+    Cell ocean2 = new OceanCell(0, 20);
+    Cell ocean3 = new OceanCell(50, 50);
+    Cell ocean4 = new OceanCell(0, 20);
+    Cell ocean5 = new OceanCell(50, 0);
+    Cell ocean6 = new OceanCell(0, 20);
+    Cell s = new OceanCell(0, 1);
     
-    Cell s = new OceanCell(0, 0, 1);
     IList<Cell> iList = new Cons<Cell>(land1, new Cons<Cell>(land2, new Cons<Cell>(land3, new Cons<Cell>(land4,
             new Cons<Cell>(land5, new Cons<Cell>(land6, new Cons<Cell>(ocean1, new Cons<Cell>(ocean2,
                     new Cons<Cell>(ocean3, new Cons<Cell>(ocean4, new Cons<Cell>(ocean5, new Cons<Cell>(ocean6,
@@ -379,8 +384,8 @@ class ExamplesIsland {
         
         this.land1 = new Cell(1.0, 1, 0, false);
         this.land2 = new Cell(1.0, 1, 1, false);
-        this.ocean1 = new OceanCell(0, 0, 0);
-        this.ocean2 = new OceanCell(0, 0, 1);     
+        this.ocean1 = new OceanCell(0, 0);
+        this.ocean2 = new OceanCell(0, 1);     
         
         this.arrayListD.clear();
         int size = 2;
