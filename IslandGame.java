@@ -383,8 +383,95 @@ class UpdateFlood implements IFunc<Cell, Cell> {
     
     public Cell apply(Cell t) {
         
-        return new Cell(t.height, t.x, t.y, t.updateFloodHelp(this.waterLevel));
+        if (t.isOcean()) {
+            return t;
+        }
+        else {
+            return new Cell(t.height, t.x, t.y, t.updateFloodHelp(waterLevel));
+        }
         
+    }
+    
+}
+
+class ArrDub2Cell implements IFunc<ArrayList<ArrayList<Double>>, IList<Cell>> {
+    
+    int ISLAND_SIZE;
+    
+    ArrDub2Cell(int ISLAND_SIZE) { this.ISLAND_SIZE = ISLAND_SIZE; }
+    
+    public IList<Cell> apply(ArrayList<ArrayList<Double>> t) {
+        
+        ArrayList<ArrayList<Cell>> result = new ArrayList<ArrayList<Cell>>();
+
+        for (int index1 = 0; index1 <= ISLAND_SIZE; index1 += 1) {
+
+            result.add(new ArrayList<Cell>());
+
+            for (int index2 = 0; index2 <= ISLAND_SIZE; index2 += 1) {
+
+                Cell land = new Cell(t.get(index1).get(index2), index1, index2);
+                Cell ocean = new OceanCell(index1, index2);
+
+                Cell tempCell;
+
+                if (t.get(index1).get(index2) <= 0) {
+                    tempCell = ocean;
+                }
+                else {
+                    land.isFlooded = false;
+                    tempCell = land;
+                }
+                
+                result.get(index1).add(tempCell);
+                this.assignNeighbors(tempCell, index1, index2, result);
+                
+            }
+
+        }
+        
+        IList<Cell> result2 = new Mt<Cell>();
+        
+        for (int index3 = 0; index3 < ISLAND_SIZE; index3 += 1) {
+            
+            for (int index4 = 0; index4 < ISLAND_SIZE; index4 += 1) {
+                
+                result2.add(result.get(index3).get(index4));
+                
+            }
+            
+        }
+        
+        return result2;
+        
+    }
+    
+    void assignNeighbors(Cell tempCell, int index1, int index2, ArrayList<ArrayList<Cell>> result) {
+        if (index1 == 0) {
+            tempCell.left = tempCell;
+        }
+        else {
+            tempCell.left = result.get(index1 - 1).get(index2);
+        }
+        if (index1 == ISLAND_SIZE - 1) {
+            tempCell.right = tempCell;
+        }
+        else {
+            tempCell.right = result.get(index1 + 1).get(index2);
+        }
+        if (index2 == 0) {
+            tempCell.top = tempCell;
+        }
+        else {
+            tempCell.top = result.get(index1).get(index2 - 1);
+        }
+
+        if(index2 == ISLAND_SIZE - 1) {
+            tempCell.bottom = tempCell;
+        }
+        else {
+            tempCell.bottom = result.get(index1).get(index2 + 1);
+        }
     }
     
 }
@@ -424,30 +511,64 @@ class ExamplesIsland {
     Cell land7 = new Cell(0, 10, 10);
     Cell land8 = new Cell(-1, 10, 11);
     Cell land9 = new Cell(70, 10, 12);
+    OceanCell ocean7 = new OceanCell(13, 13);
     IList<Cell> list1 = new Cons<Cell>(land7, new Cons<Cell>(land8,
-            new Cons<Cell>(land9, new Mt<Cell>())));
+            new Cons<Cell>(land9, new Cons<Cell>(ocean7, new Mt<Cell>()))));
     Cell land7_2 = new Cell(0, 10, 10, true);
     Cell land8_2 = new Cell(-1, 10, 11, true);
     Cell land9_2 = new Cell(70, 10, 12, false);
     IList<Cell> list1_2 = new Cons<Cell>(land7_2, new Cons<Cell>(land8_2,
-            new Cons<Cell>(land9_2, new Mt<Cell>())));    
+            new Cons<Cell>(land9_2, new Cons<Cell>(ocean7, new Mt<Cell>()))));   
+    
+    IList<Cell> list2 = new Mt<Cell>();
+    
     IFunc<Cell, Cell> upFld = new UpdateFlood(64);
+    IFunc<ArrayList<ArrayList<Double>>, IList<Cell>> ar2Dub = new ArrDub2Cell(64);
     // TODO
-    void initialize() {}
-    /*    
-    boolean testUpdateFlood(Tester t) {
+    void initialize() {
         
-        //IList<Cell> map1 = this.list1.map(this.upFld);
+        for (int index1 = 0; index1 < 64; index1 += 1) {
+            
+            this.arrayListD.add(new ArrayList<Double>());
+            
+            for (int index2 = 0; index2 < 64; index2 += 1) {
+                
+                this.arrayListD.get(index1).add(0.0);
+                
+            }
+            
+        }
+        
+        for (int index3 = 0; index3 < 64; index3 += 1) {
+            
+            for (int index4 = 0; index4 < 64; index4 += 1) {
+                
+                list2.add(new Cell(0.0, index3, index4));
+                
+            }
+            
+        }
+        
+    }
+    
+    boolean testUpdateFlood(Tester t) {
         
         return t.checkExpect(this.list1.map(this.upFld), this.list1_2);
         
-    }
-/*
+    } 
+
     //tests arrDoubleToCell for the class ForbiddenIslandWorld
     void testArrDoubleToCell(Tester t) {
         this.initialize();
+<<<<<<< HEAD
         t.checkExpect(this.nullWorld.arrDoubleToCell(this.arrayListD), this.iList);
     }*/
     {this.nullWorld.board = this.iList3;} 
     boolean runAnimation = this.nullWorld.bigBang(640, 640);
+=======
+        t.checkExpect(this.ar2Dub.apply(arrayListD), this.list2);
+    }
+    //{this.nullWorld.board = this.iList2;} 
+    //boolean runAnimation = this.nullWorld.bigBang(640, 640);
+>>>>>>> origin/master
 }
