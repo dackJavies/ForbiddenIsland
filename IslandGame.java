@@ -18,6 +18,12 @@ interface IVisitor<T, R> {
     R visit(Mt<T> m);
 }
 
+interface IFunc<T, R> {
+    
+    R apply(T t);
+    
+}
+
 // represents a function that displays the cells in a list
 class DisplayCellsVisitor implements IVisitor<Cell, WorldImage> {
     int waterLevel;
@@ -39,6 +45,8 @@ interface IList<T> {
     IList<T> add(T t);
     // Draws the list according to its visitor
     <R> R accept(IVisitor<T, R> visitor);
+    // Maps the given IFunc object through this list
+    <R> IList<R> map(IFunc<T, R> func);
 }
 
 // To represent a non-empty list of T
@@ -58,6 +66,12 @@ class Cons<T> implements IList<T> {
         return visitor.visit(this);
     }
     
+    public <R> IList<R> map(IFunc<T, R> func) {
+        
+        return new Cons<R>(func.apply(this.first), this.rest.map(func));
+        
+    }
+    
 }
 
 // To represent an empty list of T
@@ -70,6 +84,12 @@ class Mt<T> implements IList<T> {
     public <R> R accept(IVisitor<T, R> visitor) {
         return visitor.visit(this);
     } 
+    
+    public <R> IList<R> map(IFunc<T, R> func) {
+        
+        return new Mt<R>();
+        
+    }
     
 }   
 
@@ -103,8 +123,8 @@ class Cell {
         this.isFlooded = isFlooded;
     }
     // Determines whether this is an OceanCell
-    boolean isOcean() {
-        return false;
+    boolean updateFloodHelp(int waterLevel) {
+        return this.height - waterLevel > 0;
     }
     // Displays this cell 
     WorldImage displayCell(int waterLevel) {
@@ -351,8 +371,19 @@ class ForbiddenIslandWorld extends World {
     }
 } 
     
-
-
+class UpdateFlood implements IFunc<Cell, Cell> {
+    
+    int waterLevel;
+    
+    UpdateFlood(int waterLevel) { this.waterLevel = waterLevel; }
+    
+    public Cell apply(Cell t) {
+        
+        return new Cell(t.height, t.x, t.y, t.updateFloodHelp(waterLevel));
+        
+    }
+    
+}
 
 class ExamplesIsland {
     ForbiddenIslandWorld nullWorld = new ForbiddenIslandWorld("not a world");
@@ -379,6 +410,7 @@ class ExamplesIsland {
                     new Cons<Cell>(ocean3, new Cons<Cell>(ocean4, new Cons<Cell>(ocean5, new Cons<Cell>(ocean6,
                             new Mt<Cell>()))))))))))));
     IList<Cell> iList2 = new Cons<Cell>(land1, new Cons<Cell>(land2, new Cons<Cell>(land3, new Cons<Cell>(ocean1, new Mt<Cell>()))));
+    
     // TODO
     void initialize() {
         
@@ -405,6 +437,6 @@ class ExamplesIsland {
         this.initialize();
         t.checkExpect(this.nullWorld.arrDoubleToCell(this.arrayListD), this.iList);
     }*/
-    {this.nullWorld.board = this.iList2;} 
-    boolean runAnimation = this.nullWorld.bigBang(640, 640);
+    //{this.nullWorld.board = this.iList2;} 
+    //boolean runAnimation = this.nullWorld.bigBang(640, 640);
 }
