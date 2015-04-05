@@ -560,15 +560,10 @@ class ExamplesIsland {
     //tests arrDoubleToCell for the class ForbiddenIslandWorld
     void testArrDoubleToCell(Tester t) {
         this.initialize();
-<<<<<<< HEAD
-        t.checkExpect(this.nullWorld.arrDoubleToCell(this.arrayListD), this.iList);
-    }*/
-    {this.nullWorld.board = this.iList3;} 
-    boolean runAnimation = this.nullWorld.bigBang(640, 640);
-=======
         t.checkExpect(this.ar2Dub.apply(arrayListD), this.list2);
     }
-    //{this.nullWorld.board = this.iList2;} 
-    //boolean runAnimation = this.nullWorld.bigBang(640, 640);
->>>>>>> origin/master
+    
+    {this.nullWorld.board = this.iList3;} 
+    boolean runAnimation = this.nullWorld.bigBang(640, 640);
 }
+
