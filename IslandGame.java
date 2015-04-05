@@ -164,8 +164,8 @@ class Cell {
     Color cellColor(int waterLevel) {
         // Flooded cells range from blue to black
         if (this.isFlooded) {
-            int blue = 120 + Math.min((int)this.height - waterLevel, -120); // TODO
-            return new Color(0, 0, blue);
+            int b = Math.max((int)this.height - waterLevel, -120); // TODO
+            return new Color(0, 0, 120 + b);
         }
         // cells in danger of flooding range from green to red
         else if (this.floodDanger(waterLevel)) {
@@ -225,7 +225,7 @@ class ForbiddenIslandWorld extends World {
         }
         
     }
-    // Creates a mountain map
+    // Creates a standard map
     IList<Cell> makeMountain(boolean isRandom) {
         
         Random randy = new Random(666);
@@ -254,7 +254,7 @@ class ForbiddenIslandWorld extends World {
         return this.arrDoubleToCell(newBoard);
         
     }
-    
+    // Makes a standard island with random heights
     IList<Cell> makeTerrain() {
         
         ArrayList<ArrayList<Double>> newBoard = new ArrayList<ArrayList<Double>>();
@@ -387,56 +387,45 @@ class UpdateFlood implements IFunc<Cell, Cell> {
 
 class ExamplesIsland {
     ForbiddenIslandWorld nullWorld = new ForbiddenIslandWorld("not a world");
-    // ForbiddenIslandWorld mountain = new ForbiddenIslandWorld("m");
+    //ForbiddenIslandWorld mountain = new ForbiddenIslandWorld("m");
     // ForbiddenIslandWorld random = new ForbiddenIslandWorld("r");
     // TODO ForbiddenIslandWorld terrain = new ForbiddenIslandWorld("t");
     ArrayList<ArrayList<Double>> arrayListD = new ArrayList<ArrayList<Double>>();
-    Cell land1 = new Cell(-5, 30, 30, false);
-    Cell land2 = new Cell(-10, 90, 30, true);
-    Cell land3 = new Cell(50.0, 30, 90, false);
-    Cell land4 = new Cell(-10, 90, 50, false);
-    Cell land5 = new Cell(20.0, 60, 60, true);
-    Cell land6 = new Cell(-10, 1, 1, false);
+    Cell landSunk1 = new Cell(-5, 0, 0, true);
+    Cell landSunk2 = new Cell(-300, 100, 0, true);
+    Cell landSunk3 = new Cell(-5, 0, 100, true);
+    Cell landSunk4 = new Cell(-100, 100, 100, true);
+    Cell landAbove1 = new Cell(20.0, 60, 60, false);
+    Cell landAbove2 = new Cell(-10, 1, 1, false);
+    Cell landAbove3 = new Cell(20.0, 60, 60, false);
+    Cell landAbove4 = new Cell(-10, 1, 1, false);
+    Cell landDan1 = new Cell(-10, 60, 60, false);
+    Cell landDan2 = new Cell(-50, 1, 1, false);
+    Cell landDan3 = new Cell(-100, 60, 60, false);
+    Cell landDan4 = new Cell(-150, 1, 1, false);
+    
     Cell ocean1 = new OceanCell(150, 150);
     Cell ocean2 = new OceanCell(0, 20);
     Cell ocean3 = new OceanCell(50, 50);
     Cell ocean4 = new OceanCell(0, 20);
     Cell ocean5 = new OceanCell(50, 0);
     Cell ocean6 = new OceanCell(0, 20);
-    Cell s = new OceanCell(0, 1);
-    
-    IList<Cell> iList = new Cons<Cell>(land1, new Cons<Cell>(land2, new Cons<Cell>(land3, new Cons<Cell>(land4,
-            new Cons<Cell>(land5, new Cons<Cell>(land6, new Cons<Cell>(ocean1, new Cons<Cell>(ocean2,
-                    new Cons<Cell>(ocean3, new Cons<Cell>(ocean4, new Cons<Cell>(ocean5, new Cons<Cell>(ocean6,
-                            new Mt<Cell>()))))))))))));
-    IList<Cell> iList2 = new Cons<Cell>(land1, new Cons<Cell>(land2, new Cons<Cell>(land3, new Cons<Cell>(ocean1, new Mt<Cell>()))));
+    IList<Cell> iList2 = new Cons<Cell>(landSunk1, new Cons<Cell>(landSunk1, new Cons<Cell>(landSunk1, new Cons<Cell>(landSunk1, new Mt<Cell>()))));
+    IList<Cell> iList3 = new Cons<Cell>(landAbove1, new Cons<Cell>(landAbove2, new Cons<Cell>(landAbove3, new Cons<Cell>(landAbove4, new Mt<Cell>()))));
+    IList<Cell> iList4 = new Cons<Cell>(landDan1, new Cons<Cell>(landDan2, new Cons<Cell>(landDan3, new Cons<Cell>(landDan4, new Mt<Cell>()))));
     
     // TODO
     void initialize() {
         
-        this.land1 = new Cell(1.0, 1, 0, false);
-        this.land2 = new Cell(1.0, 1, 1, false);
-        this.ocean1 = new OceanCell(0, 0);
-        this.ocean2 = new OceanCell(0, 1);     
         
-        this.arrayListD.clear();
-        int size = 2;
-        for (int index1 = 0; index1 < size - 1; index1 += 1) {
-            
-            arrayListD.add(new ArrayList<Double>());
-            
-            for (int index2 = 0; index2 < size - 1; index2 += 1) {
-                
-                arrayListD.get(index1).add((double)index1);
-            }
-        }
+        
     }
-/*
+    /*
     //tests arrDoubleToCell for the class ForbiddenIslandWorld
     void testArrDoubleToCell(Tester t) {
         this.initialize();
         t.checkExpect(this.nullWorld.arrDoubleToCell(this.arrayListD), this.iList);
     }*/
-    //{this.nullWorld.board = this.iList2;} 
-    //boolean runAnimation = this.nullWorld.bigBang(640, 640);
+    {this.nullWorld.board = this.iList2;} 
+    boolean runAnimation = this.nullWorld.bigBang(640, 640);
 }
