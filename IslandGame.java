@@ -169,23 +169,27 @@ class Cell {
         }
         // cells in danger of flooding range from green to red
         else if (this.floodDanger(waterLevel)) {
-            int red = Math.min(255, ((int)this.height - waterLevel) - 1);
-            int green = 255 + Math.max(255, ((int)this.height - waterLevel) + 1);
-            // TODO red, green
-            return new Color(255, 255, 255);
+            int red = Math.max(waterLevel - (int)this.height, -120);
+            int green = Math.max((int)this.height - waterLevel, -120);
+            return new Color(red, 120 + green, 0);
         }
         else {
-            // TODO find better way?
-            int red = Math.min(255, ((int)this.height - waterLevel) * 10);
-            int blue = Math.min(255, ((int)this.height - waterLevel) * 10);
-            return new Color(255, 255, 255);
-                
+            if ((int)this.height - waterLevel >= 12) {
+                int other = Math.min(Math.max(0, ((((int)this.height - waterLevel) - 11) * (255 / 20))), 255);
+                return new Color(other, 255, other);
+            }
+            else {
+                int other = Math.min(Math.max(120, (((int)this.height - waterLevel) * (255 / 12))), 255);
+                return new Color(0, other, 0);
+            }
         }
     }
     // Determines whether this cell is in danger of flooding or flooded
     boolean floodDanger(int waterLevel) {
         return this.height <= waterLevel || this.isFlooded;
     }
+    // Determines whether this is an OceanCell 
+    boolean isOcean() { return false; }
 }
 
 class OceanCell extends Cell {
@@ -394,15 +398,15 @@ class ExamplesIsland {
     Cell landSunk1 = new Cell(-5, 0, 0, true);
     Cell landSunk2 = new Cell(-300, 100, 0, true);
     Cell landSunk3 = new Cell(-5, 0, 100, true);
-    Cell landSunk4 = new Cell(-100, 100, 100, true);
-    Cell landAbove1 = new Cell(20.0, 60, 60, false);
-    Cell landAbove2 = new Cell(-10, 1, 1, false);
-    Cell landAbove3 = new Cell(20.0, 60, 60, false);
-    Cell landAbove4 = new Cell(-10, 1, 1, false);
-    Cell landDan1 = new Cell(-10, 60, 60, false);
-    Cell landDan2 = new Cell(-50, 1, 1, false);
-    Cell landDan3 = new Cell(-100, 60, 60, false);
-    Cell landDan4 = new Cell(-150, 1, 1, false);
+    Cell landSunk4 = new Cell(-70, 100, 100, true);
+    Cell landAbove1 = new Cell(1, 0, 0, false);
+    Cell landAbove2 = new Cell(10, 100, 0, false);
+    Cell landAbove3 = new Cell(12, 0, 100, false);
+    Cell landAbove4 = new Cell(32, 100, 100, false);
+    Cell landDan1 = new Cell(-10, 0, 0, false);
+    Cell landDan2 = new Cell(-50, 100, 0, false);
+    Cell landDan3 = new Cell(-100, 0, 100, false);
+    Cell landDan4 = new Cell(-150, 100, 100, false);
     
     Cell ocean1 = new OceanCell(150, 150);
     Cell ocean2 = new OceanCell(0, 20);
@@ -410,7 +414,7 @@ class ExamplesIsland {
     Cell ocean4 = new OceanCell(0, 20);
     Cell ocean5 = new OceanCell(50, 0);
     Cell ocean6 = new OceanCell(0, 20);
-    IList<Cell> iList2 = new Cons<Cell>(landSunk1, new Cons<Cell>(landSunk1, new Cons<Cell>(landSunk1, new Cons<Cell>(landSunk1, new Mt<Cell>()))));
+    IList<Cell> iList2 = new Cons<Cell>(landSunk1, new Cons<Cell>(landSunk2, new Cons<Cell>(landSunk3, new Cons<Cell>(landSunk4, new Mt<Cell>()))));
     IList<Cell> iList3 = new Cons<Cell>(landAbove1, new Cons<Cell>(landAbove2, new Cons<Cell>(landAbove3, new Cons<Cell>(landAbove4, new Mt<Cell>()))));
     IList<Cell> iList4 = new Cons<Cell>(landDan1, new Cons<Cell>(landDan2, new Cons<Cell>(landDan3, new Cons<Cell>(landDan4, new Mt<Cell>()))));
     Cell s = new OceanCell(0, 1);
@@ -444,6 +448,6 @@ class ExamplesIsland {
         this.initialize();
         t.checkExpect(this.nullWorld.arrDoubleToCell(this.arrayListD), this.iList);
     }*/
-    {this.nullWorld.board = this.iList2;} 
+    {this.nullWorld.board = this.iList3;} 
     boolean runAnimation = this.nullWorld.bigBang(640, 640);
 }
