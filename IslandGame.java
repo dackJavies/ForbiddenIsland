@@ -15,58 +15,57 @@ import javalib.worldimages.*;
 
 //represents a list of T
 interface IList<T> {
-    // Adds the given item to the front of this list
-    IList<T> add(T t);
-    // Draws the list according to its visitor
-    <R> R accept(IVisitor<T, R> visitor);
-    // Maps the given IFunc object through this list
-    <R> IList<R> map(IFunc<T, R> func);
+  // Adds the given item to the front of this list
+  IList<T> add(T t);
+  // Draws the list according to its visitor
+  <R> R accept(IVisitor<T, R> visitor);
+  // Maps the given IFunc object through this list
+  <R> IList<R> map(IFunc<T, R> func);
 }
 
 //To represent a non-empty list of T
 class Cons<T> implements IList<T> {
-    T first;
-    IList<T> rest;    
-    Cons(T first, IList<T> rest) {
-        this.first = first;
-        this.rest = rest;
-    }
-    // Adds the given item to the front of this list
-    public IList<T> add(T item) {
-        return new Cons<T>(item, this);
-    }
-    // accepts a visitor object
-    public <R> R accept(IVisitor<T, R> visitor) {
-        return visitor.visit(this);
-    }
+  T first;
+  IList<T> rest;    
+  Cons(T first, IList<T> rest) {
+      this.first = first;
+      this.rest = rest;
+  }
+  // Adds the given item to the front of this list
+  public IList<T> add(T item) {
+      return new Cons<T>(item, this);
+  }
+  // accepts a visitor object
+  public <R> R accept(IVisitor<T, R> visitor) {
+      return visitor.visit(this);
+  }
 
-    public <R> IList<R> map(IFunc<T, R> func) {
+  public <R> IList<R> map(IFunc<T, R> func) {
 
-        return new Cons<R>(func.apply(this.first), this.rest.map(func));
+      return new Cons<R>(func.apply(this.first), this.rest.map(func));
 
-    }
+  }
 
 }
 
 //To represent an empty list of T
 class Mt<T> implements IList<T> {
-    // Adds the given item to the front of this empty list
-    public IList<T> add(T t) {
-        return new Cons<T>(t, this); 
-    }
-    // accepts a visitor object
-    public <R> R accept(IVisitor<T, R> visitor) {
-        return visitor.visit(this);
-    } 
+  // Adds the given item to the front of this empty list
+  public IList<T> add(T t) {
+      return new Cons<T>(t, this); 
+  }
+  // accepts a visitor object
+  public <R> R accept(IVisitor<T, R> visitor) {
+      return visitor.visit(this);
+  } 
 
-    public <R> IList<R> map(IFunc<T, R> func) {
+  public <R> IList<R> map(IFunc<T, R> func) {
 
-        return new Mt<R>();
+      return new Mt<R>();
 
-    }
+  }
 
 }   
-
 
 class ArrDub2ListCell {
 
@@ -90,8 +89,17 @@ class ArrDub2ListCell {
     // converts an ArrayList<Double> to a new ArrayList<Cell> 
     ArrayList<Cell> doubleArr2CellArr(ArrayList<Double> doubArr, int x) {
         ArrayList<Cell> result = new ArrayList<Cell>();
-        for(int i = 0; i < islandSize; i += 1) {
+        for(int i = 0; i < doubArr.size(); i += 1) {
             result.add(this.height2Cell(doubArr.get(i), x, i));
+        }
+        return result;
+    }
+    // converts an ArrayList<ArrayList<Double>> to a new ArrayList<ArrayList<Cell>> 
+    ArrayList<ArrayList<Cell>> dubArrArr2CellArrArr(ArrayList<ArrayList<Double>> doubArr) {
+        ArrayList<ArrayList<Cell>> result = new ArrayList<ArrayList<Cell>>();
+        for (int i = 0; i < doubArr.size(); i += 1) {
+            ArrayList<Cell> inList = this.doubleArr2CellArr(doubArr.get(i), i); 
+            result.add(inList);
         }
         return result;
     }
@@ -125,7 +133,6 @@ class ArrDub2ListCell {
     }
 
 }
-
 
 // represents a visitor object
 interface IVisitor<T, R> {
@@ -302,9 +309,7 @@ class ForbiddenIslandWorld extends World {
                 else {
                     newBoard.get(index1).add((double)randy.nextInt(32) + 1);
                 }
-
             }
-
         }
 
         return new Mt<Cell>();
@@ -557,7 +562,48 @@ class ExamplesIsland {
         t.checkExpect(aDLCx.height2Cell(0, 20, 45), new OceanCell(20, 45));
     }
 
-    //tests arrDoubleToCell for the class ForbiddenIslandWorld
+    //tests dubArrArr2CellArrArr for the class ForbiddenIslandWorld
+    void testhelp(Tester t) {
+        this.initialize();
+        ArrayList<ArrayList<Double>> aDub = new ArrayList<ArrayList<Double>>();
+        ArrayList<ArrayList<Cell>> aCell = new ArrayList<ArrayList<Cell>>();
+        ArrDub2ListCell aDLC0 = new ArrDub2ListCell(0, 0);
+        ArrDub2ListCell aDLC1 = new ArrDub2ListCell(1, 0);
+        ArrDub2ListCell aDLC2 = new ArrDub2ListCell(2, 0);
+        ArrDub2ListCell aDLC3 = new ArrDub2ListCell(3, 0);
+        ArrayList<Double> a1 = new ArrayList<Double>();
+        ArrayList<Double> a2 = new ArrayList<Double>();
+        ArrayList<Cell> c1 = new ArrayList<Cell>();
+        ArrayList<Cell> c2 = new ArrayList<Cell>();
+        // empty list check
+        t.checkExpect(aDub, aCell);
+        t.checkExpect(aDLC0.dubArrArr2CellArrArr(aDub), aCell);
+        
+        // one list with one item
+        aDub.add(a1);
+        aCell.add(c1);
+
+        a1.add(1.0);
+        c1.add(new Cell(1.0, 0, 0));
+        t.checkExpect(aDLC1.dubArrArr2CellArrArr(aDub), aCell);
+        
+        a1.add(3.0);
+        a1.add(2.0);
+        c1.add(new Cell(3.0, 0, 1));
+        c1.add(new Cell(2.0, 0, 2));
+        t.checkExpect(aDLC1.dubArrArr2CellArrArr(aDub), aCell);
+        
+        // two lists plus ocean
+        a2.add(5.0);
+        //ocean cell
+        a2.add(-6.0);
+        c2.add(new Cell(5.0, 1, 0));
+        c2.add(new OceanCell(1, 1));
+        t.checkExpect(aDLC1.dubArrArr2CellArrArr(aDub), aCell);
+
+    }
+    
+  //tests arrDoubleToCell for the class ForbiddenIslandWorld
     void testArrDoubleToCell(Tester t) {
         this.initialize();
         ArrDub2ListCell aDLC1 = new ArrDub2ListCell(1, 0);
