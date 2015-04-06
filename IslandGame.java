@@ -234,7 +234,7 @@ class ForbiddenIslandWorld extends World {
         
         Random randy = new Random(666);
         
-        final double MAX_HEIGHT = ISLAND_SIZE / 2;
+        double MAX_HEIGHT = ISLAND_SIZE / 2;
         
         ArrayList<ArrayList<Double>> newBoard = new ArrayList<ArrayList<Double>>();
         
@@ -255,7 +255,8 @@ class ForbiddenIslandWorld extends World {
             
         }
         
-        return this.arrDoubleToCell(newBoard);
+        // TODO return this.arrDoubleToCell(newBoard);
+        return new ArrDub2Cell(ISLAND_SIZE, 0).apply(newBoard);
         
     }
     // Makes a standard island with random heights
@@ -321,51 +322,54 @@ class UpdateFlood implements IFunc<Cell, Cell> {
 class ArrDub2Cell implements IFunc<ArrayList<ArrayList<Double>>, IList<Cell>> {
     
     int ISLAND_SIZE;
+    int waterLevel;
     
-    ArrDub2Cell(int ISLAND_SIZE) { 
+    ArrDub2Cell(int ISLAND_SIZE, int waterLevel) { 
         this.ISLAND_SIZE = ISLAND_SIZE; 
+        this.waterLevel = waterLevel;
     }
     
-    public IList<Cell> apply(ArrayList<ArrayList<Double>> t, int waterLevel) {
+    public IList<Cell> apply(ArrayList<ArrayList<Double>> t) {
         
         ArrayList<ArrayList<Cell>> result = new ArrayList<ArrayList<Cell>>();
 
-        for (int index1 = 0; index1 <= ISLAND_SIZE; index1 += 1) {
+        for (int index1 = 0; index1 <= ISLAND_SIZE - 1; index1 += 1) {
 
             result.add(new ArrayList<Cell>());
 
-            for (int index2 = 0; index2 <= ISLAND_SIZE; index2 += 1) {
+            for (int index2 = 0; index2 <= ISLAND_SIZE - 1; index2 += 1) {
 
                 Cell land = new Cell(t.get(index1).get(index2), index1, index2);
                 Cell ocean = new OceanCell(index1, index2);
 
                 Cell tempCell;
 
-                if (t.get(index1).get(index2) <= 0) {
-                    tempCell = ocean;
+                if (t.get(index1).get(index2) <= waterLevel) {
+                    result.get(index1).add(ocean);
                 }
                 else {
                     land.isFlooded = false;
-                    tempCell = land;
-                }
-                
-                result.get(index1).add(tempCell);
-                this.assignNeighbors(tempCell, index1, index2, result);
-                
+                    result.get(index1).add(land);
+                }          
+            } 
+        }
+        
+        for (int index1 = 0; index1 <= ISLAND_SIZE - 1; index1 += 1) {
+            for (int index2 = 0; index2 <= ISLAND_SIZE - 1; index2 += 1) {
+                this.assignNeighbors(result.get(index1).get(index2), index1, index2, result);
             }
-
         }
         
         IList<Cell> result2 = new Mt<Cell>();
         
-        for (int index3 = 0; index3 < ISLAND_SIZE; index3 += 1) {
-            
-            for (int index4 = 0; index4 < ISLAND_SIZE; index4 += 1) {
+        for (int index3 = 0; index3 < ISLAND_SIZE - 1; index3 += 1) {
+          
+            for (int index4 = 0; index4 < ISLAND_SIZE - 1; index4 += 1) {
                 
-                result2.add(result.get(index3).get(index4));
+               result2 = new Cons<Cell>(result.get(index3).get(index4), result2);
                 
             }
-            
+           
         }
         
         return result2;
@@ -404,9 +408,10 @@ class ArrDub2Cell implements IFunc<ArrayList<ArrayList<Double>>, IList<Cell>> {
 
 class ExamplesIsland {
     ForbiddenIslandWorld nullWorld = new ForbiddenIslandWorld("not a world");
-    //ForbiddenIslandWorld mountain = new ForbiddenIslandWorld("m");
-    // ForbiddenIslandWorld random = new ForbiddenIslandWorld("r");
-    // TODO ForbiddenIslandWorld terrain = new ForbiddenIslandWorld("t");
+    
+    //ForbiddenIslandWorld mountain = new ForbiddenIslandWorld("m"); 
+    //ForbiddenIslandWorld random = new ForbiddenIslandWorld("r");
+    //ForbiddenIslandWorld terrain = new ForbiddenIslandWorld("t");
     ArrayList<ArrayList<Double>> arrayListD = new ArrayList<ArrayList<Double>>();
     
     Cell c0_0 = new Cell(0, 0, 0);
@@ -491,9 +496,10 @@ class ExamplesIsland {
     IList<Cell> list2 = new Mt<Cell>();
     
     IFunc<Cell, Cell> upFld = new UpdateFlood(64);
-    ArrDub2Cell ar2Dub = new ArrDub2Cell(64);
-    ArrDub2Cell ar2Dub1 = new ArrDub2Cell(1);
-    ArrDub2Cell ar2Dub5 = new ArrDub2Cell(5);
+    ArrDub2Cell ar2Dub = new ArrDub2Cell(64, 0);
+    ArrDub2Cell ar2Dub1 = new ArrDub2Cell(1, 0);
+    ArrDub2Cell ar2Dub2 = new ArrDub2Cell(2, 0);
+    ArrDub2Cell ar2Dub5 = new ArrDub2Cell(5, 0);
 
     // initializes the examples class
     void initialize() {
@@ -563,12 +569,18 @@ class ExamplesIsland {
         aLAll.add(aL4);
         
         
-        for (int index1 = 0; index1 < 64; index1 += 1) {
+        for (int index1 = 0; index1 < 2; index1 += 1) {
             
             this.arrayListD.add(new ArrayList<Double>());
             
-            for (int index2 = 0; index2 < 64; index2 += 1) {
-                this.arrayListD.get(index1).add(0.0);
+            for (int index2 = 0; index2 < 2; index2 += 1) {
+                this.arrayListD.get(index1).add(1.0);
+            }   
+        }
+        
+        for (int index1 = 0; index1 < 2; index1 += 1) {
+            
+            for (int index2 = 0; index2 < 2; index2 += 1) {
                 list2.add(new Cell(0.0, index1, index2));   
             }   
         }
@@ -578,11 +590,21 @@ class ExamplesIsland {
     boolean testUpdateFlood(Tester t) {
         return t.checkExpect(this.list1.map(this.upFld), this.list1_2);
     } 
+    
+    // tests add for the class IList<T>
+    void testAdd(Tester t) {
+        IList<String> iS = new Cons<String>("one", new Mt<String>());
+        t.checkExpect(iS.add("two"), new Cons<String>("two", new Cons<String>("one", new Mt<String>())));
+    }
 
     //tests arrDoubleToCell for the class ForbiddenIslandWorld
     void testArrDoubleToCell(Tester t) {
         this.initialize();
-        t.checkExpect(this.ar2Dub.apply(arrayListD), this.list2);
+        //t.checkExpect(this.arrayListD, new Cons<Cell>(new Cell(0, 0, 0), new Mt<Cell>()));
+        //t.checkExpect(this.list2, new Cons<Cell>(new Cell(0, 0, 0), new Mt<Cell>()));
+        //t.checkExpect(this.ar2Dub2.apply(arrayListD), new Cons<Cell>(new Cell(0, 0, 0), new Mt<Cell>()));
+        //t.checkExpect(((Cons<Cell>)this.ar2Dub2.apply(arrayListD)).first, new Cons<Cell>(new Cell(0, 0, 0), new Mt<Cell>()));
+        //t.checkExpect(((Cons<Cell>)((Cons<Cell>)this.ar2Dub2.apply(arrayListD)).rest).first.left.x, 61);
     }
     
     // tests assignNeighbors for the class ForbiddenIslandWorld
@@ -651,7 +673,7 @@ class ExamplesIsland {
         
     }
     
-    {this.nullWorld.board = this.iList3;} 
-    //boolean runAnimation = this.nullWorld.bigBang(640, 640);
+    {this.nullWorld.board = new Cons<Cell>(((Cons<Cell>)this.ar2Dub2.apply(arrayListD)).first, new Mt<Cell>());} 
+    //boolean runAnimation = this.nullWorld.bigBang(640, 640); 
 }
 
