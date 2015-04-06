@@ -152,7 +152,12 @@ class ArrDub2ListCell {
         }
         return result;
     }
-    
+    // converts an ArrayList<ArrayList<Double>> to a new IList<Cell>
+    IList<Cell> apply(ArrayList<ArrayList<Double>> arrDub) {
+        ArrayList<ArrayList<Cell>> arrCell = this.dubArrArr2CellArrArr(arrDub);
+        IList<Cell> result = this.cellArrArr2cellList(arrCell);
+        return result;
+    }
 }
 
 // represents a visitor object
@@ -333,8 +338,7 @@ class ForbiddenIslandWorld extends World {
             }
         }
 
-        return new Mt<Cell>();
-        // TODOreturn new ArrDub2ListCell(ISLAND_SIZE, 0).apply(newBoard);
+        return new ArrDub2ListCell(ISLAND_SIZE, 0).apply(newBoard);
 
     }
     // Makes a standard island with random heights
