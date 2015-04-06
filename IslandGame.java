@@ -292,82 +292,6 @@ class ForbiddenIslandWorld extends World {
         return m;
         
     }
-    
-    // determines the top, left, right, and bottom of a the cells in this world
-    void assignNeighbors(Cell tempCell, int index1, int index2, ArrayList<ArrayList<Cell>> result) {
-        if (index1 == 0) {
-            tempCell.left = tempCell;
-        }
-        else {
-            tempCell.left = result.get(index1 - 1).get(index2);
-        }
-        if (index1 == ISLAND_SIZE - 1) {
-            tempCell.right = tempCell;
-        }
-        else {
-            tempCell.right = result.get(index1 + 1).get(index2);
-        }
-        if (index2 == 0) {
-            tempCell.top = tempCell;
-        }
-        else {
-            tempCell.top = result.get(index1).get(index2 - 1);
-        }
-
-        if(index2 == ISLAND_SIZE - 1) {
-            tempCell.bottom = tempCell;
-        }
-        else {
-            tempCell.bottom = result.get(index1).get(index2 + 1);
-        }
-    }
-    // returns an IList of Cells from the given ArrayList<ArrayList<Double>>
-    IList<Cell> arrDoubleToCell(ArrayList<ArrayList<Double>> toChange) {
-        
-        ArrayList<ArrayList<Cell>> result = new ArrayList<ArrayList<Cell>>();
-
-        for (int index1 = 0; index1 <= ISLAND_SIZE; index1 += 1) {
-
-            result.add(new ArrayList<Cell>());
-
-            for (int index2 = 0; index2 <= ISLAND_SIZE; index2 += 1) {
-
-                Cell land = new Cell(toChange.get(index1).get(index2), index1, index2);
-                Cell ocean = new OceanCell(index1, index2);
-
-                Cell tempCell;
-
-                if (toChange.get(index1).get(index2) <= 0) {
-                    tempCell = ocean;
-                }
-                else {
-                    land.isFlooded = false;
-                    tempCell = land;
-                }
-                
-                result.get(index1).add(tempCell);
-                this.assignNeighbors(tempCell, index1, index2, result);
-                
-            }
-
-        }
-        
-        IList<Cell> result2 = new Mt<Cell>();
-        
-        for (int index3 = 0; index3 < ISLAND_SIZE; index3 += 1) {
-            
-            for (int index4 = 0; index4 < ISLAND_SIZE; index4 += 1) {
-                
-                result2.add(result.get(index3).get(index4));
-                
-            }
-            
-        }
-        
-        return result2;
-        
-    }
-
     // Draws the World
     public WorldImage makeImage() {
         return new OverlayImages(new RectangleImage(new Posn(0, 0), 1280, 1280, new Color(255, 255, /* Real Value: 0, 0, 120 */ 255)), 
@@ -402,7 +326,7 @@ class ArrDub2Cell implements IFunc<ArrayList<ArrayList<Double>>, IList<Cell>> {
         this.ISLAND_SIZE = ISLAND_SIZE; 
     }
     
-    public IList<Cell> apply(ArrayList<ArrayList<Double>> t) {
+    public IList<Cell> apply(ArrayList<ArrayList<Double>> t, int waterLevel) {
         
         ArrayList<ArrayList<Cell>> result = new ArrayList<ArrayList<Cell>>();
 
@@ -520,6 +444,12 @@ class ExamplesIsland {
     ArrayList<ArrayList<Cell>> aLAll = new ArrayList<ArrayList<Cell>>();
     
     
+    Cell c00 = new Cell(0, 0, 0);
+    Cell c01 = new Cell(20, 0, 1);
+    OceanCell c10 = new OceanCell(1, 0);
+    Cell c11 = new Cell(-20, 0, 3);
+    
+    
     Cell landSunk1 = new Cell(-5, 0, 0, true);
     Cell landSunk2 = new Cell(-300, 100, 0, true);
     Cell landSunk3 = new Cell(-5, 0, 100, true);
@@ -565,7 +495,7 @@ class ExamplesIsland {
     ArrDub2Cell ar2Dub1 = new ArrDub2Cell(1);
     ArrDub2Cell ar2Dub5 = new ArrDub2Cell(5);
 
-    // TODO
+    // initializes the examples class
     void initialize() {
         
         this.c0_0 = new Cell(0, 0, 0);
@@ -649,11 +579,11 @@ class ExamplesIsland {
         return t.checkExpect(this.list1.map(this.upFld), this.list1_2);
     } 
 
-    /*tests arrDoubleToCell for the class ForbiddenIslandWorld
+    //tests arrDoubleToCell for the class ForbiddenIslandWorld
     void testArrDoubleToCell(Tester t) {
         this.initialize();
         t.checkExpect(this.ar2Dub.apply(arrayListD), this.list2);
-    } */
+    }
     
     // tests assignNeighbors for the class ForbiddenIslandWorld
     void testAssignNeighbors(Tester t) {
