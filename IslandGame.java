@@ -15,58 +15,65 @@ import javalib.worldimages.*;
 
 //represents a list of T
 interface IList<T> {
-    // Adds the given item to the front of this list
-    IList<T> add(T t);
-    // Draws the list according to its visitor
-    <R> R accept(IVisitor<T, R> visitor);
-    // Maps the given IFunc object through this list
-    <R> IList<R> map(IFunc<T, R> func);
+  // Adds the given item to the front of this list
+  IList<T> add(T t);
+  // Draws the list according to its visitor
+  <R> R accept(IVisitor<T, R> visitor);
+  // Maps the given IFunc object through this list
+  <R> IList<R> map(IFunc<T, R> func);
+  // Appends this list to the given list
+  IList<T> append(IList<T> other);
 }
 
 //To represent a non-empty list of T
 class Cons<T> implements IList<T> {
-    T first;
-    IList<T> rest;    
-    Cons(T first, IList<T> rest) {
-        this.first = first;
-        this.rest = rest;
-    }
-    // Adds the given item to the front of this list
-    public IList<T> add(T item) {
-        return new Cons<T>(item, this);
-    }
-    // accepts a visitor object
-    public <R> R accept(IVisitor<T, R> visitor) {
-        return visitor.visit(this);
-    }
+  T first;
+  IList<T> rest;    
+  Cons(T first, IList<T> rest) {
+      this.first = first;
+      this.rest = rest;
+  }
+  // Adds the given item to the front of this list
+  public IList<T> add(T item) {
+      return new Cons<T>(item, this);
+  }
+  // accepts a visitor object
+  public <R> R accept(IVisitor<T, R> visitor) {
+      return visitor.visit(this);
+  }
+  // Maps the given IFunc object through this list
+  public <R> IList<R> map(IFunc<T, R> func) {
 
-    public <R> IList<R> map(IFunc<T, R> func) {
+      return new Cons<R>(func.apply(this.first), this.rest.map(func));
 
-        return new Cons<R>(func.apply(this.first), this.rest.map(func));
-
-    }
-
+  }
+  // appends this list to the given list
+  public IList<T> append(IList<T> other) {
+      return new Cons<T>(this.first, this.rest.append(other));
+  }
 }
 
 //To represent an empty list of T
 class Mt<T> implements IList<T> {
-    // Adds the given item to the front of this empty list
-    public IList<T> add(T t) {
-        return new Cons<T>(t, this); 
-    }
-    // accepts a visitor object
-    public <R> R accept(IVisitor<T, R> visitor) {
-        return visitor.visit(this);
-    } 
+  // Adds the given item to the front of this empty list
+  public IList<T> add(T t) {
+      return new Cons<T>(t, this); 
+  }
+  // accepts a visitor object
+  public <R> R accept(IVisitor<T, R> visitor) {
+      return visitor.visit(this);
+  } 
+  // Maps the given IFunc object through this list
+  public <R> IList<R> map(IFunc<T, R> func) {
 
-    public <R> IList<R> map(IFunc<T, R> func) {
+      return new Mt<R>();
 
-        return new Mt<R>();
-
-    }
-
-}   
-
+  }
+  // appends this list to the given list
+  public IList<T> append(IList<T> other) {
+      return other;
+  }
+} 
 // represents a function that converts ArrayListArrayList<Double>> to IList<Cell> 
 class ArrDub2ListCell implements IFunc<ArrayList<ArrayList<Double>>, IList<Cell>> {
 
@@ -132,14 +139,14 @@ class ArrDub2ListCell implements IFunc<ArrayList<ArrayList<Double>>, IList<Cell>
             }
         }
     }
-    // converts an ArrayList<ArrayList<Cell>> to a new IList<Cell> and assigns their neighbors
+ // converts an ArrayList<ArrayList<Cell>> to a new IList<Cell> and assigns their neighbors
     IList<Cell> cellArrArr2cellList(ArrayList<ArrayList<Cell>> cellArr) {
         ArrayList<ArrayList<Cell>> temp = cellArr;
         this.assignAllNeighbors(temp);
         IList<Cell> result = new Mt<Cell>();
         for (int i = 0; i < temp.size(); i += 1) {
             for (int i2 = 0; i2 < temp.get(i).size(); i2 += 1) {
-                result = new Cons<Cell>(temp.get(i).get(i2), result);
+                result = result.append(new Cons<Cell>(temp.get(i).get(i2), new Mt<Cell>()));
             }
         }
         return result;
@@ -862,14 +869,15 @@ class ExamplesIsland {
         IList<Cell> iCell1 = new Cons<Cell>(cell4, new Cons<Cell>(cell3, new Cons<Cell>(cell2, new Cons<Cell>(cell1, new Mt<Cell>()))));
         ArrayList<Cell> aCell1 = new ArrayList<Cell>();
         ArrayList<Cell> aCell2 = new ArrayList<Cell>();
-        aCell1.add(new Cell(6, 0, 0));
-        aCell1.add(new Cell(5, 0, 1));
-        aCell2.add(new Cell(5, 1, 0));
         aCell2.add(new OceanCell(1, 1));
-        arr1.add(aCell1);
+        aCell1.add(new Cell(5, 1, 0));
+        aCell1.add(new Cell(5, 0, 1));
+        aCell2.add(new Cell(6, 0, 0));
         arr1.add(aCell2);
-        t.checkExpect(aDLC.cellArrArr2cellList(arr1), iCell1);
-        // TODO t.checkExpect(aDLC.cellArrArr2cellList(aLAll), iLAll);
+        arr1.add(aCell1);
+        
+     // TODO   t.checkExpect(aDLC.cellArrArr2cellList(arr1), iCell1);
+        t.checkExpect(aDLC.cellArrArr2cellList(aLAll), iLAll);
     }
     //tests apply for the class ForbiddenIslandWorld
     void testApply(Tester t) {
@@ -905,11 +913,22 @@ class ExamplesIsland {
         aDoub2.add(3.0);
         arr1.add(aDoub1);
         arr1.add(aDoub2);
-        t.checkExpect(aDLC.apply(arr1), iCell1);
-        // TODO t.checkExpect(aDLC.apply(this.aIAll), this.iLAll);
+       // TODO t.checkExpect(aDLC.apply(arr1), iCell1);
+        t.checkExpect(aDLC.apply(this.aIAll), this.iLAll);
         
     }
     
+    // tests append for the IList interface
+    void testAppend(Tester t) {
+        IList<String> mTS = new Mt<String>();
+        IList<String> i1 = new Cons<String>("happy", new Cons<String>("birthday", mTS));
+        IList<String> i2 = new Cons<String>("Mr", new Cons<String>("Jones", mTS));
+        IList<String> i3 = new Cons<String>("happy", new Cons<String>("birthday", 
+                new Cons<String>("Mr", new Cons<String>("Jones", mTS))));
+        t.checkExpect(i1.append(i2), i3);
+        t.checkExpect(mTS.append(i1), i1);
+        t.checkExpect(i2.append(mTS), i2);
+    }
 
     //{this.nullWorld.board = iList2;}
     
