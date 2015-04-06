@@ -421,7 +421,12 @@ class ExamplesIsland {
     ArrayList<Cell> aL3 = new ArrayList<Cell>();
     ArrayList<Cell> aL4 = new ArrayList<Cell>();
     ArrayList<ArrayList<Cell>> aLAll = new ArrayList<ArrayList<Cell>>();
-
+    ArrayList<Double> aI0 = new ArrayList<Double>();
+    ArrayList<Double> aI1 = new ArrayList<Double>();
+    ArrayList<Double> aI2 = new ArrayList<Double>();
+    ArrayList<Double> aI3 = new ArrayList<Double>();
+    ArrayList<Double> aI4 = new ArrayList<Double>();
+    ArrayList<ArrayList<Double>> aIAll = new ArrayList<ArrayList<Double>>();
 
     Cell c00 = new Cell(0, 0, 0);
     Cell c01 = new Cell(20, 0, 1);
@@ -451,6 +456,7 @@ class ExamplesIsland {
     IList<Cell> iList2 = new Cons<Cell>(landSunk1, new Cons<Cell>(landSunk2, new Cons<Cell>(landSunk3, new Cons<Cell>(landSunk4, new Mt<Cell>()))));
     IList<Cell> iList3 = new Cons<Cell>(landAbove1, new Cons<Cell>(landAbove2, new Cons<Cell>(landAbove3, new Cons<Cell>(landAbove4, new Mt<Cell>()))));
     IList<Cell> iList4 = new Cons<Cell>(landDan1, new Cons<Cell>(landDan2, new Cons<Cell>(landDan3, new Cons<Cell>(landDan4, new Mt<Cell>()))));
+    IList<Cell> iLAll = new Mt<Cell>();
     Cell s = new OceanCell(0, 1);
 
 
@@ -475,33 +481,61 @@ class ExamplesIsland {
     // initializes the examples class
     void initialize() {
 
-        this.c0_0 = new Cell(0, 0, 0);
-        this.c0_1 = new Cell(0, 0, 1);
-        this.c0_2 = new Cell(0, 0, 2);
-        this.c0_3 = new Cell(0, 0, 3);
-        this.c0_4 = new Cell(0, 0, 4);
-        this.c1_0 = new Cell(0, 1, 0);
-        this.c1_1 = new Cell(0, 1, 1);
-        this.c1_2 = new Cell(0, 1, 2);
-        this.c1_3 = new Cell(0, 1, 3);
-        this.c1_4 = new Cell(0, 1, 4);
-        this.c2_0 = new Cell(0, 2, 0);
-        this.c2_1 = new Cell(0, 2, 1);
-        this.c2_2 = new Cell(0, 2, 2);
-        this.c2_3 = new Cell(0, 2, 3);
-        this.c2_4 = new Cell(0, 2, 4);
-        this.c3_0 = new Cell(0, 3, 0);
-        this.c3_1 = new Cell(0, 3, 1);
-        this.c3_2 = new Cell(0, 3, 2);
-        this.c3_3 = new Cell(0, 3, 3);
-        this.c3_4 = new Cell(0, 3, 4);
-        this.c4_0 = new Cell(0, 4, 0);
-        this.c4_1 = new Cell(0, 4, 1);
-        this.c4_2 = new Cell(0, 4, 2);
-        this.c4_3 = new Cell(0, 4, 3);
-        this.c4_4 = new Cell(0, 4, 4);
+        this.c0_0 = new Cell(1, 0, 0);
+        this.c0_1 = new Cell(1, 0, 1);
+        this.c0_2 = new Cell(1, 0, 2);
+        this.c0_3 = new Cell(1, 0, 3);
+        this.c0_4 = new Cell(1, 0, 4);
+        this.c1_0 = new Cell(1, 1, 0);
+        this.c1_1 = new Cell(1, 1, 1);
+        this.c1_2 = new Cell(1, 1, 2);
+        this.c1_3 = new Cell(1, 1, 3);
+        this.c1_4 = new Cell(1, 1, 4);
+        this.c2_0 = new Cell(1, 2, 0);
+        this.c2_1 = new Cell(1, 2, 1);
+        this.c2_2 = new Cell(1, 2, 2);
+        this.c2_3 = new Cell(1, 2, 3);
+        this.c2_4 = new Cell(1, 2, 4);
+        this.c3_0 = new Cell(1, 3, 0);
+        this.c3_1 = new Cell(1, 3, 1);
+        this.c3_2 = new Cell(1, 3, 2);
+        this.c3_3 = new Cell(1, 3, 3);
+        this.c3_4 = new Cell(1, 3, 4);
+        this.c4_0 = new OceanCell(4, 0);
+        this.c4_1 = new OceanCell(4, 1);
+        this.c4_2 = new OceanCell(4, 2);
+        this.c4_3 = new OceanCell(4, 3);
+        this.c4_4 = new OceanCell(4, 4);
+        
+        // IList cell
+        IList<Cell> iL1 = new Cons<Cell>(c4_1,
+                new Cons<Cell>(c4_2,
+                        new Cons<Cell>(c4_3,
+                                new Cons<Cell>(c4_4, new Mt<Cell>()))));
+        IList<Cell> iL2 = new Cons<Cell>(c3_1,
+                new Cons<Cell>(c3_2,
+                        new Cons<Cell>(c3_3,
+                                new Cons<Cell>(c3_4,
+                                        new Cons<Cell>(c4_0, iL1)))));
+        IList<Cell> iL3 = new Cons<Cell>(c2_1,
+                new Cons<Cell>(c2_2,
+                        new Cons<Cell>(c2_3,
+                                new Cons<Cell>(c2_4,
+                                        new Cons<Cell>(c3_0, iL2)))));
+        IList<Cell> iL4 = new Cons<Cell>(c1_1,
+                new Cons<Cell>(c1_2,
+                        new Cons<Cell>(c1_3,
+                                new Cons<Cell>(c1_4,
+                                        new Cons<Cell>(c2_0, iL3)))));
+        this.iLAll = new Cons<Cell>(c0_0,      
+                new Cons<Cell>(c0_1,
+                        new Cons<Cell>(c0_2,
+                                new Cons<Cell>(c0_3,
+                                        new Cons<Cell>(c0_4,
+                                                new Cons<Cell>(c1_0, iL4))))));
 
-
+        
+        // array list cell
         aL0.clear();
         aL0.add(c0_0);
         aL0.add(c0_1);
@@ -538,6 +572,45 @@ class ExamplesIsland {
         aLAll.add(aL2);
         aLAll.add(aL3);
         aLAll.add(aL4);
+        
+        
+        // array list double
+        aI0.clear();
+        aI0.add(1.0);
+        aI0.add(1.0);
+        aI0.add(1.0);
+        aI0.add(1.0);
+        aI0.add(1.0);
+        aI1.clear();
+        aI1.add(1.0);
+        aI1.add(1.0);
+        aI1.add(1.0);
+        aI1.add(1.0);
+        aI1.add(1.0);
+        aI2.clear();
+        aI2.add(1.0);
+        aI2.add(1.0);
+        aI2.add(1.0);
+        aI2.add(1.0);
+        aI2.add(1.0);
+        aI3.clear();
+        aI3.add(1.0);
+        aI3.add(1.0);
+        aI3.add(1.0);
+        aI3.add(1.0);
+        aI3.add(1.0);
+        aI4.clear();
+        aI4.add(0.0);
+        aI4.add(0.0);
+        aI4.add(0.0);
+        aI4.add(0.0);
+        aI4.add(0.0);
+        aIAll.clear();
+        aIAll.add(aI0);
+        aIAll.add(aI1);
+        aIAll.add(aI2);
+        aIAll.add(aI3);
+        aIAll.add(aI4);
 
         arrayListD1.clear();
         arrayListD10.clear();
@@ -558,6 +631,10 @@ class ExamplesIsland {
             this.arrayListD64.add(64.0);
         }
     }
+    // initializes the neighbors of the cells
+    void initialize2() {
+        aDLC.assignAllNeighbors(this.aLAll);
+    }
     // tests updateFlood for the class ForbiddenIslandWorld
     boolean testUpdateFlood(Tester t) {
         return t.checkExpect(this.list1.map(this.upFld), this.list1_2);
@@ -576,7 +653,24 @@ class ExamplesIsland {
         t.checkExpect(aDLC.height2Cell(-5, 20, 40), new OceanCell(20, 40));
         t.checkExpect(aDLC.height2Cell(0, 20, 45), new OceanCell(20, 45));
     }
+    //tests arrDoubleToCell for the class ForbiddenIslandWorld
+    void testArrDoubleToCell(Tester t) {
+        this.initialize();
+        ArrayList<Double> a1 = new ArrayList<Double>();
+        ArrayList<Cell> c1 = new ArrayList<Cell>();
 
+        a1.add(1.0);
+        c1.add(new Cell(1.0, 0, 0));
+        t.checkExpect(aDLC.doubleArr2CellArr(a1, 0), c1);
+
+        a1.add(2.0);
+        c1.add(new Cell(2.0, 0, 1));
+        t.checkExpect(aDLC.doubleArr2CellArr(a1, 0), c1);
+
+        a1.add(-5.0);
+        c1.add(new OceanCell(0, 2));
+        t.checkExpect(aDLC.doubleArr2CellArr(a1, 0), c1);
+    }
     //tests dubArrArr2CellArrArr for the class ForbiddenIslandWorld
     void testhelp(Tester t) {
         this.initialize();
@@ -589,7 +683,7 @@ class ExamplesIsland {
         // empty list check
         t.checkExpect(aDub, aCell);
         t.checkExpect(aDLC.dubArrArr2CellArrArr(aDub), aCell);
-
+        
         // one list with one item
         aDub.add(a1);
         aCell.add(c1);
@@ -597,13 +691,13 @@ class ExamplesIsland {
         a1.add(1.0);
         c1.add(new Cell(1.0, 0, 0));
         t.checkExpect(aDLC.dubArrArr2CellArrArr(aDub), aCell);
-
+        
         a1.add(3.0);
         a1.add(2.0);
         c1.add(new Cell(3.0, 0, 1));
         c1.add(new Cell(2.0, 0, 2));
         t.checkExpect(aDLC.dubArrArr2CellArrArr(aDub), aCell);
-
+        
         // two lists plus ocean
         a2.add(5.0);
         //ocean cell
@@ -611,6 +705,9 @@ class ExamplesIsland {
         c2.add(new Cell(5.0, 1, 0));
         c2.add(new OceanCell(1, 1));
         t.checkExpect(aDLC.dubArrArr2CellArrArr(aDub), aCell);
+        
+        // the big list
+        t.checkExpect(aDLC.dubArrArr2CellArrArr(aIAll), aLAll);
 
     }
     // tests assignNeighbors for the class ArrDouble2ListCell
@@ -692,41 +789,41 @@ class ExamplesIsland {
         t.checkExpect(c4_0.right, null);
         t.checkExpect(c4_0.top, null);
         t.checkExpect(c4_0.bottom, null);
-
+        
         // bottom left corner (0, 4)
         t.checkExpect(c0_4.left, null);
         t.checkExpect(c0_4.right, null);
         t.checkExpect(c0_4.top, null);
         t.checkExpect(c0_4.bottom, null);
-
+        
         // bottom right corner (4, 4)
         t.checkExpect(c4_4.left, null);
         t.checkExpect(c4_4.right, null);
         t.checkExpect(c4_4.top, null);
         t.checkExpect(c4_4.bottom, null);
-
+          
         // all neighbors (2, 2)
         t.checkExpect(c2_2.left, null);
         t.checkExpect(c2_2.right, null);
         t.checkExpect(c2_2.top, null);
         t.checkExpect(c2_2.bottom, null);
-
+        
         this.aDLC.assignAllNeighbors(aLAll);
         t.checkExpect(c0_0.top, c0_0);
         t.checkExpect(c0_0.left, c0_0);
         t.checkExpect(c0_0.right, c1_0);
         t.checkExpect(c0_0.bottom, c0_1);
-
+        
         t.checkExpect(c4_0.top, c4_0);
         t.checkExpect(c4_0.left, c3_0);
         t.checkExpect(c4_0.right, c4_0);
         t.checkExpect(c4_0.bottom, c4_1);
-
+        
         t.checkExpect(c0_4.top, c0_3);
         t.checkExpect(c0_4.left, c0_4);
         t.checkExpect(c0_4.right, c1_4);
         t.checkExpect(c0_4.bottom, c0_4);
-
+    
         t.checkExpect(c4_4.top, c4_3);
         t.checkExpect(c4_4.left, c3_4);
         t.checkExpect(c4_4.right, c4_4);
@@ -737,32 +834,15 @@ class ExamplesIsland {
         t.checkExpect(c2_2.right, c3_2);
         t.checkExpect(c2_2.bottom, c2_3);
     }
-    //tests arrDoubleToCell for the class ForbiddenIslandWorld
-    void testArrDoubleToCell(Tester t) {
-        this.initialize();
-        ArrayList<Double> a1 = new ArrayList<Double>();
-        ArrayList<Cell> c1 = new ArrayList<Cell>();
-
-        a1.add(1.0);
-        c1.add(new Cell(1.0, 0, 0));
-        t.checkExpect(aDLC.doubleArr2CellArr(a1, 0), c1);
-
-        a1.add(2.0);
-        c1.add(new Cell(2.0, 0, 1));
-        t.checkExpect(aDLC.doubleArr2CellArr(a1, 0), c1);
-
-        a1.add(-5.0);
-        c1.add(new OceanCell(0, 2));
-        t.checkExpect(aDLC.doubleArr2CellArr(a1, 0), c1);
-    }
-
     //tests cellArrArr2cellList for the class ForbiddenIslandWorld
     void testCellArrArr2cellList(Tester t) {
+        this.initialize();
+        this.initialize2();
         ArrayList<ArrayList<Cell>> arr1 = new ArrayList<ArrayList<Cell>>();
         Cell cell1 = new Cell(6, 0, 0);
         Cell cell2 = new Cell(5, 0, 1);
         Cell cell3 = new Cell(5, 1, 0);
-        Cell cell4 = new Cell(3, 1, 1); 
+        Cell cell4 = new OceanCell(1, 1); 
         cell1.left = cell1;
         cell1.right = cell3;
         cell1.top = cell1;
@@ -785,14 +865,17 @@ class ExamplesIsland {
         aCell1.add(new Cell(6, 0, 0));
         aCell1.add(new Cell(5, 0, 1));
         aCell2.add(new Cell(5, 1, 0));
-        aCell2.add(new Cell(3, 1, 1));
+        aCell2.add(new OceanCell(1, 1));
         arr1.add(aCell1);
         arr1.add(aCell2);
         t.checkExpect(aDLC.cellArrArr2cellList(arr1), iCell1);
+        // TODO t.checkExpect(aDLC.cellArrArr2cellList(aLAll), iLAll);
     }
     //tests apply for the class ForbiddenIslandWorld
     void testApply(Tester t) {
-        ArrayList<ArrayList<Cell>> arr1 = new ArrayList<ArrayList<Cell>>();
+        this.initialize();
+        this.initialize2();
+        ArrayList<ArrayList<Double>> arr1 = new ArrayList<ArrayList<Double>>();
         Cell cell1 = new Cell(6, 0, 0);
         Cell cell2 = new Cell(5, 0, 1);
         Cell cell3 = new Cell(5, 1, 0);
@@ -814,22 +897,26 @@ class ExamplesIsland {
         cell4.top = cell3;
         cell4.bottom = cell4;
         IList<Cell> iCell1 = new Cons<Cell>(cell4, new Cons<Cell>(cell3, new Cons<Cell>(cell2, new Cons<Cell>(cell1, new Mt<Cell>()))));
-        ArrayList<Cell> aCell1 = new ArrayList<Cell>();
-        ArrayList<Cell> aCell2 = new ArrayList<Cell>();
-        aCell1.add(new Cell(6, 0, 0));
-        aCell1.add(new Cell(5, 0, 1));
-        aCell2.add(new Cell(5, 1, 0));
-        aCell2.add(new Cell(3, 1, 1));
-        arr1.add(aCell1);
-        arr1.add(aCell2);
-        t.checkExpect(aDLC.cellArrArr2cellList(arr1), iCell1);
+        ArrayList<Double> aDoub1 = new ArrayList<Double>();
+        ArrayList<Double> aDoub2 = new ArrayList<Double>();
+        aDoub1.add(6.0);
+        aDoub1.add(5.0);
+        aDoub2.add(5.0);
+        aDoub2.add(3.0);
+        arr1.add(aDoub1);
+        arr1.add(aDoub2);
+        t.checkExpect(aDLC.apply(arr1), iCell1);
+        // TODO t.checkExpect(aDLC.apply(this.aIAll), this.iLAll);
+        
     }
-
+    
 
     //{this.nullWorld.board = iList2;}
-
+    
     //boolean runAnimation = this.mountain.bigBang(640, 640); 
 }
+
+
 
 
 
