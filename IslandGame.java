@@ -67,6 +67,7 @@ class Mt<T> implements IList<T> {
 
 }   
 
+// represents a function that converts ArrayListArrayList<Double>> to IList<Cell> 
 class ArrDub2ListCell {
 
     int islandSize;
@@ -103,7 +104,7 @@ class ArrDub2ListCell {
         }
         return result;
     }
-
+    // assigns the given cell its neighbors
     void assignNeighbors(Cell tempCell, int index1, int index2, ArrayList<ArrayList<Cell>> result) {
         if (index1 == 0) {
             tempCell.left = tempCell;
@@ -131,7 +132,27 @@ class ArrDub2ListCell {
             tempCell.bottom = result.get(index1).get(index2 + 1);
         }
     }
-
+    // assigns neighbors to all the cells in an ArrayList<ArrayList<Cell>>
+    void assignAllNeighbors(ArrayList<ArrayList<Cell>> cellArr) {
+        for (int i = 0; i < cellArr.size(); i += 1) {
+            for (int i2 = 0; i2 < cellArr.get(i).size(); i2 += 1) {
+                this.assignNeighbors(cellArr.get(i).get(i2), i, i2, cellArr);
+            }
+        }
+    }
+    // converts an ArrayList<ArrayList<Cell>> to a new IList<Cell> and assigns their neighbors
+    IList<Cell> cellArrArr2cellList(ArrayList<ArrayList<Cell>> cellArr) {
+        ArrayList<ArrayList<Cell>> temp = cellArr;
+        this.assignAllNeighbors(temp);
+        IList<Cell> result = new Mt<Cell>();
+        for (int i = 0; i < temp.size(); i += 1) {
+            for (int i2 = 0; i2 < temp.get(i).size(); i2 += 1) {
+                result = new Cons<Cell>(temp.get(i).get(i2), result);
+            }
+        }
+        return result;
+    }
+    
 }
 
 // represents a visitor object
@@ -357,6 +378,7 @@ class ForbiddenIslandWorld extends World {
     }
 } 
 
+// represents examples and tests for the ForbiddenIslandWorld class
 class ExamplesIsland {
     ForbiddenIslandWorld nullWorld = new ForbiddenIslandWorld("not a world");
 
@@ -624,7 +646,44 @@ class ExamplesIsland {
         c1.add(new OceanCell(0, 2));
         t.checkExpect(aDLC3.doubleArr2CellArr(a1, 0), c1);
     }
-
+    
+    //tests cellArrArr2cellList for the class ForbiddenIslandWorld
+    void testCellArrArr2cellList(Tester t) {
+        ArrDub2ListCell aDLC1 = new ArrDub2ListCell(1, 0);
+        ArrDub2ListCell aDLC2 = new ArrDub2ListCell(2, 0);
+        ArrayList<ArrayList<Cell>> arr1 = new ArrayList<ArrayList<Cell>>();
+        Cell cell1 = new Cell(6, 0, 0);
+        Cell cell2 = new Cell(5, 0, 1);
+        Cell cell3 = new Cell(5, 1, 0);
+        Cell cell4 = new Cell(3, 1, 1);
+        // TODO FIX 
+        cell1.left = cell1;
+        cell1.right = cell3;
+        cell1.top = cell1;
+        cell1.bottom = cell2;
+        cell2.left = cell2;
+        cell2.right = cell4;
+        cell2.top = cell1;
+        cell2.bottom = cell2;
+        cell3.left = cell1;
+        cell3.right = cell3;
+        cell3.top = cell3;
+        cell3.bottom = cell4;
+        cell4.left = cell2;
+        cell4.right = cell4;
+        cell4.top = cell3;
+        cell4.bottom = cell4;
+        IList<Cell> iCell1 = new Cons<Cell>(cell4, new Cons<Cell>(cell3, new Cons<Cell>(cell2, new Cons<Cell>(cell1, new Mt<Cell>()))));
+        ArrayList<Cell> aCell1 = new ArrayList<Cell>();
+        ArrayList<Cell> aCell2 = new ArrayList<Cell>();
+        aCell1.add(new Cell(6, 0, 0));
+        aCell1.add(new Cell(5, 0, 1));
+        aCell2.add(new Cell(5, 1, 0));
+        aCell2.add(new Cell(3, 1, 1));
+        arr1.add(aCell1);
+        arr1.add(aCell2);
+        t.checkExpect(aDLC2.cellArrArr2cellList(arr1), iCell1);
+    }
     // tests assignNeighbors for the class ArrDouble2ListCell
     void testAssignNeighbors(Tester t) {
         this.initialize();
