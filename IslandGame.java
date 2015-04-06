@@ -644,10 +644,9 @@ class ExamplesIsland {
         }
     }
     
+    // tests updateFlood for the class ForbiddenIslandWorld
     boolean testUpdateFlood(Tester t) {
-        
         return t.checkExpect(this.list1.map(this.upFld), this.list1_2);
-        
     } 
 
     /*tests arrDoubleToCell for the class ForbiddenIslandWorld
