@@ -293,7 +293,7 @@ class OceanCell extends Cell {
 
 class ForbiddenIslandWorld extends World {
     // Defines an int constant
-    static final int ISLAND_SIZE = 58;
+    static final int ISLAND_SIZE = 57;
     // All the cells of the game, including the ocean
     IList<Cell> board;
     // the current height of the ocean
@@ -385,74 +385,7 @@ class ForbiddenIslandWorld extends World {
         return new OverlayImages(new RectangleImage(new Posn(0, 0), 1280, 1280, new Color(255, 255, /* Real Value: 0, 0, 120 */ 255)), 
                 this.board.accept(new DisplayCellsVisitor(this.waterHeight)));
     }
-}
-
-// represent the player's avatar: the pilot
-class Player {
-    
-    // Keeps track of position, appearance, and collected parts
-    int x;
-    int y;
-    WorldImage picture;
-    IList<Target> inventory;
-    
-    Player(int x, int y, IList<Target> inventory) {
-        this.x = x;
-        this.y = y;
-        this.inventory = inventory;
-        this.picture = new FromFileImage(new Posn(this.x, this.y), "pilot-icon.png");
-    }
-    
-}
-
-// represents objects the player needs to obtain
-class Target {
-    
-    // Keeps track of position
-    int x;
-    int y;
-    
-    Target(int x, int y) {
-        this.x = x;
-        this.y = y;
-    }
-    
-    // Is the other object's position the same as this one's?
-    boolean touching(int x, int y) {
-        
-        return this.x == x && this.y == y;
-        
-    }
-    
-}
-
-// represents the actual helicopter. This can only be picked up
-// after all the other targets have been obtained.
-class HelicopterTarget extends Target {
-    
-    // A list of all other pieces
-    IList<Target> pieces;
-    // A picture to represent the chopper
-    WorldImage picture;
-    
-    HelicopterTarget(int x, int y, IList<Target> pieces) {
-        super(x, y);
-        this.pieces = pieces;
-        this.picture = new FromFileImage(new Posn(this.x, this.y), "helicopter.png");
-    }
-    
-    // Does the player have all the other pieces?
-    boolean canBeRepaired() {
-        return true; //TODO
-    }
-    
-}
-
-/*class TargetListVisitor implements IVisitor<Target, IList<Target>> {
-    
-    //TODO
-    
-}*/
+} 
 
 // represents examples and tests for the ForbiddenIslandWorld class
 class ExamplesIsland {
@@ -973,8 +906,8 @@ class ExamplesIsland {
         t.checkExpect(i2.append(mTS), i2);
     }
     void testRunGame(Tester t) {
-        this.nullWorld.board = nullWorld.makeMountain(false);
-        this.nullWorld.bigBang(640, 640);
+        this.initializeWorlds();
+        this.random.bigBang(640, 640);
     }
 }
 
