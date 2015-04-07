@@ -332,7 +332,7 @@ class ForbiddenIslandWorld extends World {
     // Creates a standard map
     IList<Cell> makeMountain(boolean isRandom) {
 
-        Random randy = new Random(666);
+        Random randy = new Random();
 
         double MAX_HEIGHT = ISLAND_SIZE / 2;
 
@@ -465,7 +465,52 @@ class HelicopterTarget extends Target {
     
     // Does the player have all the other pieces?
     boolean canBeRepaired(Player p) {
-        return true; //TODO
+        if (this.pieces.length() != p.inventory.length()) {
+            return false;
+        }
+        else {
+            return this.pieces.accept(new TargetListVisitor(p.inventory));
+        }
+    }
+    
+}
+
+// Goes through a list of Targets, seeing if each one is in the given 2nd list
+class TargetListVisitor implements IVisitor<Target, Boolean> {
+    
+    IList<Target> src;
+    
+    TargetListVisitor(IList<Target> src) {
+        this.src = src;
+    }
+    
+    public Boolean visit(Cons<Target> c) {
+        return src.accept(new TargetVisitor(c.first)) &&
+                c.rest.accept(this);
+    }
+    
+    public Boolean visit(Mt<Target> m) {
+        return false;
+    }
+    
+}
+
+// Is the given Target in a list of Targets?
+class TargetVisitor implements IVisitor<Target, Boolean> {
+    
+    Target toFind;
+    
+    TargetVisitor(Target toFind) {
+        this.toFind = toFind;
+    }
+    
+    public Boolean visit(Cons<Target> c) {
+        return c.first.sameTarget(toFind) ||
+                c.rest.accept(this);
+    }
+    
+    public Boolean visit(Mt<Target> m) {
+        return false;
     }
     
 }
