@@ -242,7 +242,7 @@ class Cell {
     WorldImage displayCell(int waterLevel) {
         int sideLength = 20;
         int posnShift = sideLength / 2;
-        return new RectangleImage(new Posn((this.x * posnShift) + posnShift, (this.y * posnShift) + posnShift), sideLength, sideLength, this.cellColor(waterLevel));
+        return new RectangleImage(new Posn((this.x * sideLength) + posnShift, (this.y * sideLength) + posnShift), sideLength, sideLength, this.cellColor(waterLevel));
     }
     // Computes this cell's color
     Color cellColor(int waterLevel) {
@@ -493,7 +493,7 @@ class ExamplesIsland {
                             new Cons<Cell>(color_test9, new Cons<Cell>(color_test10,
                                     new Cons<Cell>(color_test11, new Cons<Cell>(color_test12,
                                             new Cons<Cell>(color_test13, new Cons<Cell>(color_test14,
-                                                    new Cons<Cell>(color_test15, new Cons<Cell>(color_test6,
+                                                    new Cons<Cell>(color_test15, new Cons<Cell>(color_test16,
                                                             new Cons<Cell>(color_test17, new Cons<Cell>(color_test18,
                                                                     new Cons<Cell>(color_test19, new Mt<Cell>())))))))))))))))))));
 
@@ -958,8 +958,8 @@ class ExamplesIsland {
         t.checkExpect(mTS.append(i1), i1);
         t.checkExpect(i2.append(mTS), i2);
     }
-    
-    {this.mountain.board = this.TEH_LIST;}
+    //{this.initialize();}
+    {this.mountain.board = this.iList3;}
     
     boolean runAnimation = this.mountain.bigBang(640, 640); 
 }
