@@ -973,8 +973,8 @@ class ExamplesIsland {
         t.checkExpect(i2.append(mTS), i2);
     }
     void testRunGame(Tester t) {
-        this.nullWorld.board = nullWorld.makeMountain(false);
-        this.nullWorld.bigBang(640, 640);
+        this.initializeWorlds();
+        this.random.bigBang(640, 640);
     }
 }
 
