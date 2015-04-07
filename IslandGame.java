@@ -12,83 +12,169 @@ import javalib.impworld.*;
 //import javalib.funworld.bigbang;
 import javalib.worldimages.*;
 
+import java.util.Random;
+
+
+
 
 //represents a list of T
 interface IList<T> {
-  // Adds the given item to the front of this list
-  IList<T> add(T t);
-  // Draws the list according to its visitor
-  <R> R accept(IVisitor<T, R> visitor);
-  // Maps the given IFunc object through this list
-  <R> IList<R> map(IFunc<T, R> func);
-  // Appends this list to the given list
-  IList<T> append(IList<T> other);
-  // Length of this list
-  int length_t(int acc);
-  int length();
+    // Adds the given item to the front of this list
+    IList<T> add(T t);
+    // Draws the list according to its visitor
+    <R> R accept(IVisitor<T, R> visitor);
+    // Maps the given IFunc object through this list
+    <R> IList<R> map(IFunc<T, R> func);
+    // Appends this list to the given list
+    IList<T> append(IList<T> other);
+    // creates a new Tree from this IList
+    IBST<T> list2Tree(IComp<T> comp);
 }
 
 //To represent a non-empty list of T
 class Cons<T> implements IList<T> {
-  T first;
-  IList<T> rest;    
-  Cons(T first, IList<T> rest) {
-      this.first = first;
-      this.rest = rest;
-  }
-  // Adds the given item to the front of this list
-  public IList<T> add(T item) {
-      return new Cons<T>(item, this);
-  }
-  // accepts a visitor object
-  public <R> R accept(IVisitor<T, R> visitor) {
-      return visitor.visit(this);
-  }
-  // Maps the given IFunc object through this list
-  public <R> IList<R> map(IFunc<T, R> func) {
+    T first;
+    IList<T> rest;    
+    Cons(T first, IList<T> rest) {
+        this.first = first;
+        this.rest = rest;
+    }
+    // Adds the given item to the front of this list
+    public IList<T> add(T item) {
+        return new Cons<T>(item, this);
+    }
+    // accepts a visitor object
+    public <R> R accept(IVisitor<T, R> visitor) {
+        return visitor.visit(this);
+    }
+    // Maps the given IFunc object through this list
+    public <R> IList<R> map(IFunc<T, R> func) {
 
-      return new Cons<R>(func.apply(this.first), this.rest.map(func));
+        return new Cons<R>(func.apply(this.first), this.rest.map(func));
 
-  }
-  // appends this list to the given list
-  public IList<T> append(IList<T> other) {
-      return new Cons<T>(this.first, this.rest.append(other));
-  }
-  
-  public int length_t(int acc) {
-      return this.rest.length_t(1 + acc);
-  }
-  
-  public int length() {
-      return this.length_t(0);
-  }
+    }
+    // appends this list to the given list
+    public IList<T> append(IList<T> other) {
+        return new Cons<T>(this.first, this.rest.append(other));
+    }
+    // creates a new Tree from this IList
+    public IBST<T> list2Tree(IComp<T> comp) {
+        return this.rest.list2Tree(comp).insert(comp, this.first);
+    }
 }
 
 //To represent an empty list of T
 class Mt<T> implements IList<T> {
-  // Adds the given item to the front of this empty list
-  public IList<T> add(T t) {
-      return new Cons<T>(t, this); 
-  }
-  // accepts a visitor object
-  public <R> R accept(IVisitor<T, R> visitor) {
-      return visitor.visit(this);
-  } 
-  // Maps the given IFunc object through this list
-  public <R> IList<R> map(IFunc<T, R> func) {
+    // Adds the given item to the front of this empty list
+    public IList<T> add(T t) {
+        return new Cons<T>(t, this); 
+    }
+    // accepts a visitor object
+    public <R> R accept(IVisitor<T, R> visitor) {
+        return visitor.visit(this);
+    } 
+    // Maps the given IFunc object through this list
+    public <R> IList<R> map(IFunc<T, R> func) {
 
-      return new Mt<R>();
+        return new Mt<R>();
 
-  }
-  // appends this list to the given list
-  public IList<T> append(IList<T> other) {
-      return other;
-  }
-  
-  public int length_t(int acc) { return acc; }
-  
-  public int length() { return 0; }
-} 
+    }
+    // appends this list to the given list
+    public IList<T> append(IList<T> other) {
+        return other;
+    }
+    // creates a new Tree from this IList
+    public IBST<T> list2Tree(IComp<T> comp) {
+        return new Leaf<T>();
+    }
+}   
+
+
+//represents a Cell Binary Tree
+interface IBST<T> {
+    // inserts the given item into this tree
+    IBST<T> insert(IComp<T> comp, T t);
+    // determines whether this is a leaf
+    boolean isLeaf();
+}
+
+//represents a known Cell Binary Tree
+class Node<T> implements IBST<T> {
+    T data;
+    IBST<T> left;
+    IBST<T> right;
+    Node(T data, IBST<T> left, IBST<T> right) {
+        this.data = data;
+        this.left = left;
+        this.right = right;
+    }
+    // inserts an item into this tree according to the given comparator
+    public IBST<T> insert(IComp<T> comp, T t) {
+        if (comp.compare(this.data, t) >= 0) {
+            return new Node<T>(this.data, this.left.insert(comp, t), this.right);
+        }
+        else {
+            return new Node<T>(this.data, this.left, this.right.insert(comp, t));
+        }
+    }
+    // determines whether this is a leaf
+    public boolean isLeaf() {
+        return false;
+    }
+}
+
+//represents an empty Binary Tree
+class Leaf<T> implements IBST<T> {
+    // inserts an item into this tree according to the given comparator
+    public IBST<T> insert(IComp<T> comp, T t) {
+        return new Node<T>(t, this, this);        
+    }
+    // determines whether this is a leaf
+    public boolean isLeaf() {
+        return true;
+    }
+}
+
+
+//this represents a comparator
+interface IComp<T> {
+    // == 0 : t1 == t2
+    // < 0: t1 < t2
+    // > 0: t1 > t2
+    int compare(T t1, T t2);
+}
+
+//this represents a comparator of Cells
+class CompCell implements IComp<Cell> {
+    // compares based on x and y (e.g. (0, 1) < (1, 1) < (1, 2) < (2,0))
+    public int compare(Cell t1, Cell t2) {
+        if (t1.x > t2.x || (t1.x == t2.x && t1.y > t2.y)) {
+            return 1;
+        }
+        else if (t1.x == t2.x && t1.y == t2.y) {
+            return 0; 
+        }
+        else {
+            return -1;
+        }
+    }
+}
+
+
+class RandCellComp implements IComp<Cell> {
+    // randomly assigns number to land
+    public int compare(Cell t1, Cell t2) {
+        Random r = new Random();
+        if (t2.isOcean()) {
+            return r.nextInt() - 500;
+        }
+        else {
+            return r.nextInt();
+        }
+    }
+}
+
+
 // represents a function that converts ArrayListArrayList<Double>> to IList<Cell> 
 class ArrDub2ListCell implements IFunc<ArrayList<ArrayList<Double>>, IList<Cell>> {
 
@@ -154,7 +240,7 @@ class ArrDub2ListCell implements IFunc<ArrayList<ArrayList<Double>>, IList<Cell>
             }
         }
     }
- // converts an ArrayList<ArrayList<Cell>> to a new IList<Cell> and assigns their neighbors
+    // converts an ArrayList<ArrayList<Cell>> to a new IList<Cell> and assigns their neighbors
     IList<Cell> cellArrArr2cellList(ArrayList<ArrayList<Cell>> cellArr) {
         ArrayList<ArrayList<Cell>> temp = cellArr;
         this.assignAllNeighbors(temp);
@@ -173,6 +259,9 @@ class ArrDub2ListCell implements IFunc<ArrayList<ArrayList<Double>>, IList<Cell>
         return result;
     }
 }
+
+
+
 
 //represents a visitor object
 interface IVisitor<T, R> {
@@ -332,7 +421,7 @@ class ForbiddenIslandWorld extends World {
     // Creates a standard map
     IList<Cell> makeMountain(boolean isRandom) {
 
-        Random randy = new Random(666);
+        Random randy = new Random();
 
         double MAX_HEIGHT = ISLAND_SIZE / 2;
 
@@ -345,10 +434,10 @@ class ForbiddenIslandWorld extends World {
 
         for (int index1 = 0; index1 < newBoard.size(); index1 += 1) {
             for(int index2 = 0; index2 < ISLAND_SIZE; index2 += 1) {
-                    newBoard.get(index1).add(MAX_HEIGHT - (Math.abs(MAX_HEIGHT - index1) + (Math.abs(MAX_HEIGHT - index2))));
+                newBoard.get(index1).add(MAX_HEIGHT - (Math.abs(MAX_HEIGHT - index1) + (Math.abs(MAX_HEIGHT - index2))));
             }
         }
-        
+
         if (isRandom) {
             for (int index1 = 0; index1 < newBoard.size(); index1 += 1) {
                 for (int index2 = 0; index2 < newBoard.get(index1).size(); index2 += 1) {
@@ -404,73 +493,72 @@ class ForbiddenIslandWorld extends World {
 
 // represent the player's avatar: the pilot
 class Player {
-    
+
     // Keeps track of position, appearance, and collected parts
     int x;
     int y;
     WorldImage picture;
     IList<Target> inventory;
-    
+
     Player(int x, int y, IList<Target> inventory) {
         this.x = x;
         this.y = y;
         this.inventory = inventory;
         this.picture = new FromFileImage(new Posn(this.x, this.y), "pilot-icon.png");
     }
-    
+
 }
 
 // represents objects the player needs to obtain
 class Target {
-    
+
     // Keeps track of position
     int x;
     int y;
-    
+
     Target(int x, int y) {
         this.x = x;
         this.y = y;
     }
-    
+
     // Is the other object's position the same as this one's?
     boolean touching(int x, int y) {
-        
+
         return this.x == x && this.y == y;
-        
+
     }
-    
-    // Is this target the same as the given one?
-    boolean sameTarget(Target other) {
-        
-        return this.touching(other.x, other.y);
-        
-    }
-    
+
 }
 
 // represents the actual helicopter. This can only be picked up
 // after all the other targets have been obtained.
 class HelicopterTarget extends Target {
-    
+
     // A list of all other pieces
     IList<Target> pieces;
     // A picture to represent the chopper
     WorldImage picture;
-    
+
     HelicopterTarget(int x, int y, IList<Target> pieces) {
         super(x, y);
         this.pieces = pieces;
         this.picture = new FromFileImage(new Posn(this.x, this.y), "helicopter.png");
     }
-    
+
     // Does the player have all the other pieces?
-    boolean canBeRepaired(Player p) {
+    boolean canBeRepaired() {
         return true; //TODO
     }
-    
+
 }
 
-// represents examples and tests for the ForbiddenIslandWorld class
+/*class TargetListVisitor implements IVisitor<Target, IList<Target>> {
+
+    //TODO
+
+}*/
+
+//represents examples and tests for the ForbiddenIslandWorld class
 class ExamplesIsland {
     ForbiddenIslandWorld nullWorld = new ForbiddenIslandWorld("not a world");
 
@@ -554,7 +642,7 @@ class ExamplesIsland {
     IList<Cell> iLAll = new Mt<Cell>();
     Cell s = new OceanCell(0, 1);
 
-    
+
     Cell color_test1 = new OceanCell(0, 0);
     Cell color_test2 = new Cell(10, 1, 0, false);
     Cell color_test3 = new OceanCell(2, 0);
@@ -601,6 +689,8 @@ class ExamplesIsland {
 
     IFunc<Cell, Cell> upFld = new UpdateFlood(64);
     ArrDub2ListCell aDLC = new ArrDub2ListCell();
+    IComp<Cell> compCell = new CompCell();
+    IComp<Cell> compRand = new RandCellComp();
 
     // initializes the examples class
     void initialize() {
@@ -630,7 +720,7 @@ class ExamplesIsland {
         this.c4_2 = new OceanCell(4, 2);
         this.c4_3 = new OceanCell(4, 3);
         this.c4_4 = new OceanCell(4, 4);
-        
+
         // IList cell
         IList<Cell> iL1 = new Cons<Cell>(c4_1,
                 new Cons<Cell>(c4_2,
@@ -658,7 +748,7 @@ class ExamplesIsland {
                                         new Cons<Cell>(c0_4,
                                                 new Cons<Cell>(c1_0, iL4))))));
 
-        
+
         // array list cell
         aL0.clear();
         aL0.add(c0_0);
@@ -696,8 +786,8 @@ class ExamplesIsland {
         aLAll.add(aL2);
         aLAll.add(aL3);
         aLAll.add(aL4);
-        
-        
+
+
         // array list double
         aI0.clear();
         aI0.add(1.0);
@@ -813,7 +903,7 @@ class ExamplesIsland {
         // empty list check
         t.checkExpect(aDub, aCell);
         t.checkExpect(aDLC.dubArrArr2CellArrArr(aDub), aCell);
-        
+
         // one list with one item
         aDub.add(a1);
         aCell.add(c1);
@@ -821,13 +911,13 @@ class ExamplesIsland {
         a1.add(1.0);
         c1.add(new Cell(1.0, 0, 0));
         t.checkExpect(aDLC.dubArrArr2CellArrArr(aDub), aCell);
-        
+
         a1.add(3.0);
         a1.add(2.0);
         c1.add(new Cell(3.0, 0, 1));
         c1.add(new Cell(2.0, 0, 2));
         t.checkExpect(aDLC.dubArrArr2CellArrArr(aDub), aCell);
-        
+
         // two lists plus ocean
         a2.add(5.0);
         //ocean cell
@@ -835,7 +925,7 @@ class ExamplesIsland {
         c2.add(new Cell(5.0, 1, 0));
         c2.add(new OceanCell(1, 1));
         t.checkExpect(aDLC.dubArrArr2CellArrArr(aDub), aCell);
-        
+
         // the big list
         t.checkExpect(aDLC.dubArrArr2CellArrArr(aIAll), aLAll);
 
@@ -919,41 +1009,41 @@ class ExamplesIsland {
         t.checkExpect(c4_0.right, null);
         t.checkExpect(c4_0.top, null);
         t.checkExpect(c4_0.bottom, null);
-        
+
         // bottom left corner (0, 4)
         t.checkExpect(c0_4.left, null);
         t.checkExpect(c0_4.right, null);
         t.checkExpect(c0_4.top, null);
         t.checkExpect(c0_4.bottom, null);
-        
+
         // bottom right corner (4, 4)
         t.checkExpect(c4_4.left, null);
         t.checkExpect(c4_4.right, null);
         t.checkExpect(c4_4.top, null);
         t.checkExpect(c4_4.bottom, null);
-          
+
         // all neighbors (2, 2)
         t.checkExpect(c2_2.left, null);
         t.checkExpect(c2_2.right, null);
         t.checkExpect(c2_2.top, null);
         t.checkExpect(c2_2.bottom, null);
-        
+
         this.aDLC.assignAllNeighbors(aLAll);
         t.checkExpect(c0_0.top, c0_0);
         t.checkExpect(c0_0.left, c0_0);
         t.checkExpect(c0_0.right, c1_0);
         t.checkExpect(c0_0.bottom, c0_1);
-        
+
         t.checkExpect(c4_0.top, c4_0);
         t.checkExpect(c4_0.left, c3_0);
         t.checkExpect(c4_0.right, c4_0);
         t.checkExpect(c4_0.bottom, c4_1);
-        
+
         t.checkExpect(c0_4.top, c0_3);
         t.checkExpect(c0_4.left, c0_4);
         t.checkExpect(c0_4.right, c1_4);
         t.checkExpect(c0_4.bottom, c0_4);
-    
+
         t.checkExpect(c4_4.top, c4_3);
         t.checkExpect(c4_4.left, c3_4);
         t.checkExpect(c4_4.right, c4_4);
@@ -975,7 +1065,7 @@ class ExamplesIsland {
         this.initialize();
         this.initializeNeighbors();
         t.checkExpect(aDLC.apply(this.aIAll), this.iLAll);
-        
+
     }
     // tests append for the IList interface
     void testAppend(Tester t) {
@@ -988,11 +1078,65 @@ class ExamplesIsland {
         t.checkExpect(mTS.append(i1), i1);
         t.checkExpect(i2.append(mTS), i2);
     }
+    
+    // tests compare in the CompCell class
+    void testCompCell(Tester t) {
+        IComp<Cell> comp = new CompCell();
+        Cell c1 = new Cell(4, 5, 4);
+        Cell c2 = new Cell(4, 4, 3);
+        Cell c3 = new Cell(9, 4, 4);
+        Cell c4 = new Cell(8, 4, 5);
+        Cell c5 = new Cell(9, 4, 4);
+        Cell c6 = new OceanCell(3, 4);
+        t.checkExpect(comp.compare(c3, c1), -1);
+        t.checkExpect(comp.compare(c3, c2), 1);
+        t.checkExpect(comp.compare(c3, c4), -1);
+        t.checkExpect(comp.compare(c3, c6), 1);
+        t.checkExpect(comp.compare(c3, c5), 0);
+        t.checkExpect(comp.compare(c2, c2), 0);
+    }
+    
+    // tests isLeaf in the IBST interface
+    void testIsLeaf(Tester t) {
+        IBST<String> sL = new Leaf<String>();
+        IBST<String> n1 = new Node<String>("hi", sL, sL);
+        IBST<String> n2 = new Node<String>("bye", n1, sL);
+        IBST<String> n3 = new Node<String>("so", n1, sL);
+        t.checkExpect(sL.isLeaf(), true);
+        t.checkExpect(n1.isLeaf(), false);
+        t.checkExpect(n2.isLeaf(), false);
+        t.checkExpect(n3.isLeaf(), false);
+    }
+    
+    // tests insert in the IBST interface
+    void testInsert(Tester t) {
+        IComp<Cell> comp = new CompCell();
+        Cell c1 = new Cell(9, 0, 0);
+        Cell c2 = new Cell(4, 0, 1);
+        Cell c3 = new Cell(3, 1, 0);
+        Cell c4 = new OceanCell(1, 1);
+        IBST<Cell> sC = new Leaf<Cell>();
+        IBST<Cell> n0 = new Node<Cell>(c4, sC, sC);
+        IBST<Cell> n1 = new Node<Cell>(c2, sC, sC);
+        IBST<Cell> n2 = new Node<Cell>(c3, sC, sC);
+        IBST<Cell> n3 = new Node<Cell>(c1, n1, n2);
+        IBST<Cell> n2a = new Node<Cell>(c3, sC, n0);
+        IBST<Cell> n3a = new Node<Cell>(c1, n1, n2a);
+        t.checkExpect(n3.insert(comp, c4), n3a);
+    }
+        
+    // runs big bang
     void testRunGame(Tester t) {
         this.initializeWorlds();
-        this.random.bigBang(640, 640);
+        //this.random.bigBang(640, 640);
     }
+
 }
+
+
+
+
+
 
 
 
