@@ -493,7 +493,7 @@ class ExamplesIsland {
                             new Cons<Cell>(color_test9, new Cons<Cell>(color_test10,
                                     new Cons<Cell>(color_test11, new Cons<Cell>(color_test12,
                                             new Cons<Cell>(color_test13, new Cons<Cell>(color_test14,
-                                                    new Cons<Cell>(color_test15, new Cons<Cell>(color_test16,
+                                                    new Cons<Cell>(color_test15, new Cons<Cell>(color_test6,
                                                             new Cons<Cell>(color_test17, new Cons<Cell>(color_test18,
                                                                     new Cons<Cell>(color_test19, new Mt<Cell>())))))))))))))))))));
 
