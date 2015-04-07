@@ -9,6 +9,7 @@ import java.util.*;
 
 import tester.*;
 import javalib.impworld.*;
+//import javalib.funworld.bigbang;
 import javalib.worldimages.*;
 
 
@@ -226,7 +227,7 @@ class Cell {
         this.right = null;
         this.bottom = null;
 
-        this.isFlooded = true;  
+        this.isFlooded = false;  
     }
     // constructor for testing
     Cell(double height, int x, int y, boolean isFlooded) {
@@ -278,7 +279,7 @@ class Cell {
 
 class OceanCell extends Cell {
     OceanCell(int x, int y) {
-        super(0, x, y);
+        super(0, x, y, true);
     }
     // Determines whether this is an OceanCell
     boolean isOcean() {
@@ -390,9 +391,9 @@ class ForbiddenIslandWorld extends World {
 class ExamplesIsland {
     ForbiddenIslandWorld nullWorld = new ForbiddenIslandWorld("not a world");
 
-    ForbiddenIslandWorld mountain = new ForbiddenIslandWorld("m"); 
-    //ForbiddenIslandWorld random = new ForbiddenIslandWorld("r");
-    //ForbiddenIslandWorld terrain = new ForbiddenIslandWorld("t");
+    ForbiddenIslandWorld mountain = new ForbiddenIslandWorld("not a mountain yet"); 
+    ForbiddenIslandWorld random = new ForbiddenIslandWorld("not a random yet");
+    ForbiddenIslandWorld terrain = new ForbiddenIslandWorld("not a terrain yet");
 
     ArrayList<Double> arrayListD1 = new ArrayList<Double>();
     ArrayList<Double> arrayListD10 = new ArrayList<Double>();
@@ -672,8 +673,14 @@ class ExamplesIsland {
         }
     }
     // initializes the neighbors of the cells
-    void initialize2() {
+    void initializeNeighbors() {
         aDLC.assignAllNeighbors(this.aLAll);
+    }
+    // initializes the Worlds
+    void initializeWorlds() {
+        this.mountain.board = this.nullWorld.makeMountain(false);
+        this.random.board = this.nullWorld.makeMountain(true);
+        this.terrain.board = this.nullWorld.makeTerrain();
     }
     // tests updateFlood for the class ForbiddenIslandWorld
     boolean testUpdateFlood(Tester t) {
@@ -700,7 +707,7 @@ class ExamplesIsland {
         ArrayList<Cell> c1 = new ArrayList<Cell>();
 
         a1.add(1.0);
-        c1.add(new Cell(1.0, 0, 0));
+        c1.add(new Cell(1.0, 0, 0, false));
         t.checkExpect(aDLC.doubleArr2CellArr(a1, 0), c1);
 
         a1.add(2.0);
@@ -877,80 +884,16 @@ class ExamplesIsland {
     //tests cellArrArr2cellList for the class ForbiddenIslandWorld
     void testCellArrArr2cellList(Tester t) {
         this.initialize();
-        this.initialize2();
-        ArrayList<ArrayList<Cell>> arr1 = new ArrayList<ArrayList<Cell>>();
-        Cell cell1 = new Cell(6, 0, 0);
-        Cell cell2 = new Cell(5, 0, 1);
-        Cell cell3 = new Cell(5, 1, 0);
-        Cell cell4 = new OceanCell(1, 1); 
-        cell1.left = cell1;
-        cell1.right = cell3;
-        cell1.top = cell1;
-        cell1.bottom = cell2;
-        cell2.left = cell2;
-        cell2.right = cell4;
-        cell2.top = cell1;
-        cell2.bottom = cell2;
-        cell3.left = cell1;
-        cell3.right = cell3;
-        cell3.top = cell3;
-        cell3.bottom = cell4;
-        cell4.left = cell2;
-        cell4.right = cell4;
-        cell4.top = cell3;
-        cell4.bottom = cell4;
-        IList<Cell> iCell1 = new Cons<Cell>(cell4, new Cons<Cell>(cell3, new Cons<Cell>(cell2, new Cons<Cell>(cell1, new Mt<Cell>()))));
-        ArrayList<Cell> aCell1 = new ArrayList<Cell>();
-        ArrayList<Cell> aCell2 = new ArrayList<Cell>();
-        aCell2.add(new OceanCell(1, 1));
-        aCell1.add(new Cell(5, 1, 0));
-        aCell1.add(new Cell(5, 0, 1));
-        aCell2.add(new Cell(6, 0, 0));
-        arr1.add(aCell2);
-        arr1.add(aCell1);
-        
-     // TODO   t.checkExpect(aDLC.cellArrArr2cellList(arr1), iCell1);
+        this.initializeNeighbors();
         t.checkExpect(aDLC.cellArrArr2cellList(aLAll), iLAll);
     }
     //tests apply for the class ForbiddenIslandWorld
     void testApply(Tester t) {
         this.initialize();
-        this.initialize2();
-        ArrayList<ArrayList<Double>> arr1 = new ArrayList<ArrayList<Double>>();
-        Cell cell1 = new Cell(6, 0, 0);
-        Cell cell2 = new Cell(5, 0, 1);
-        Cell cell3 = new Cell(5, 1, 0);
-        Cell cell4 = new Cell(3, 1, 1); 
-        cell1.left = cell1;
-        cell1.right = cell3;
-        cell1.top = cell1;
-        cell1.bottom = cell2;
-        cell2.left = cell2;
-        cell2.right = cell4;
-        cell2.top = cell1;
-        cell2.bottom = cell2;
-        cell3.left = cell1;
-        cell3.right = cell3;
-        cell3.top = cell3;
-        cell3.bottom = cell4;
-        cell4.left = cell2;
-        cell4.right = cell4;
-        cell4.top = cell3;
-        cell4.bottom = cell4;
-        IList<Cell> iCell1 = new Cons<Cell>(cell4, new Cons<Cell>(cell3, new Cons<Cell>(cell2, new Cons<Cell>(cell1, new Mt<Cell>()))));
-        ArrayList<Double> aDoub1 = new ArrayList<Double>();
-        ArrayList<Double> aDoub2 = new ArrayList<Double>();
-        aDoub1.add(6.0);
-        aDoub1.add(5.0);
-        aDoub2.add(5.0);
-        aDoub2.add(3.0);
-        arr1.add(aDoub1);
-        arr1.add(aDoub2);
-       // TODO t.checkExpect(aDLC.apply(arr1), iCell1);
+        this.initializeNeighbors();
         t.checkExpect(aDLC.apply(this.aIAll), this.iLAll);
         
     }
-    
     // tests append for the IList interface
     void testAppend(Tester t) {
         IList<String> mTS = new Mt<String>();
@@ -962,10 +905,10 @@ class ExamplesIsland {
         t.checkExpect(mTS.append(i1), i1);
         t.checkExpect(i2.append(mTS), i2);
     }
-    //{this.initialize();}
-    //{this.mountain.board = this.iList3;}
-    
-    //void runAnimation = this.random.bigBang(640, 640); 
+    void testRunGame(Tester t) {
+        this.nullWorld.board = nullWorld.makeMountain(false);
+        this.nullWorld.bigBang(640, 640);
+    }
 }
 
 
