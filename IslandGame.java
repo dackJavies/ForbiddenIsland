@@ -83,7 +83,7 @@ class ArrDub2ListCell implements IFunc<ArrayList<ArrayList<Double>>, IList<Cell>
             return new OceanCell(x, y);
         }
         else {
-            return new Cell(height, x, y);
+            return new Cell(height, x, y, false);
         }
     }
     // converts an ArrayList<Double> to a new ArrayList<Cell> 
@@ -240,30 +240,31 @@ class Cell {
     }
     // Displays this cell 
     WorldImage displayCell(int waterLevel) {
-        int sideLength = 20;
+        int sideLength = 10;
         int posnShift = sideLength / 2;
         return new RectangleImage(new Posn((this.x * sideLength) + posnShift, (this.y * sideLength) + posnShift), sideLength, sideLength, this.cellColor(waterLevel));
     }
     // Computes this cell's color
     Color cellColor(int waterLevel) {
+        int bound = 100;
         // Flooded cells range from blue to black
         if (this.isFlooded) {
-            int b = Math.max((int)this.height - waterLevel, -120);
-            return new Color(0, 0, 120 + b);
+            int b = Math.max((int)this.height - waterLevel, -bound);
+            return new Color(0, 0, bound + b);
         }
         // cells in danger of flooding range from green to red
         else if (this.floodDanger(waterLevel)) {
-            int red = Math.max(waterLevel - (int)this.height, -120);
-            int green = Math.max((int)this.height - waterLevel, -120);
-            return new Color(red, 120 + green, 0);
+            int red = Math.max(waterLevel - (int)this.height, -bound);
+            int green = Math.max((int)this.height - waterLevel, -bound);
+            return new Color(red, bound + green, 0);
         }
         else {
             if ((int)this.height - waterLevel >= 12) {
-                int other = Math.min(Math.max(0, ((((int)this.height - waterLevel) - 11) * (255 / 20))), 255);
+                int other = Math.min(Math.max(0, ((((int)this.height - waterLevel) - 9) * (255 / 20))), 255);
                 return new Color(other, 255, other);
             }
             else {
-                int other = Math.min(Math.max(120, (((int)this.height - waterLevel) * (255 / 12))), 255);
+                int other = Math.min(Math.max(bound, (((int)this.height - waterLevel) * (255 / 12))), 255);
                 return new Color(0, other, 0);
             }
         }
@@ -292,7 +293,7 @@ class OceanCell extends Cell {
 
 class ForbiddenIslandWorld extends World {
     // Defines an int constant
-    static final int ISLAND_SIZE = 64;
+    static final int ISLAND_SIZE = 58;
     // All the cells of the game, including the ocean
     IList<Cell> board;
     // the current height of the ocean
@@ -325,18 +326,17 @@ class ForbiddenIslandWorld extends World {
         for (int index1 = 0; index1 < ISLAND_SIZE; index1 += 1) {
 
             newBoard.add(new ArrayList<Double>());
+        }
 
-            for (int index2 = 0; index2 < ISLAND_SIZE; index2 += 1) {
-
+        for (int index1 = 0; index1 < newBoard.size(); index1 += 1) {
+            for(int index2 = 0; index2 < ISLAND_SIZE; index2 += 1) {
                 if (!isRandom) {
                     newBoard.get(index1).add(MAX_HEIGHT - (Math.abs(MAX_HEIGHT - index1) + (Math.abs(MAX_HEIGHT - index2))));
                 }
                 else {
                     newBoard.get(index1).add((double)randy.nextInt(32) + 1);
                 }
-
             }
-
         }
 
         return new ArrDub2ListCell().apply(newBoard);
@@ -353,6 +353,7 @@ class ForbiddenIslandWorld extends World {
 
             for (int index2 = 0; index2 < ISLAND_SIZE + 1; index2 += 1) {
 
+                // TODO add formula
                 newBoard.get(index1).add(0.0);
 
             }
@@ -386,8 +387,8 @@ class ForbiddenIslandWorld extends World {
 class ExamplesIsland {
     ForbiddenIslandWorld nullWorld = new ForbiddenIslandWorld("not a world");
 
-    ForbiddenIslandWorld mountain = new ForbiddenIslandWorld("m"); 
-    //ForbiddenIslandWorld random = new ForbiddenIslandWorld("r");
+    //ForbiddenIslandWorld mountain = new ForbiddenIslandWorld("m"); 
+    ForbiddenIslandWorld random = new ForbiddenIslandWorld("r");
     //ForbiddenIslandWorld terrain = new ForbiddenIslandWorld("t");
 
     ArrayList<Double> arrayListD1 = new ArrayList<Double>();
@@ -493,7 +494,7 @@ class ExamplesIsland {
                             new Cons<Cell>(color_test9, new Cons<Cell>(color_test10,
                                     new Cons<Cell>(color_test11, new Cons<Cell>(color_test12,
                                             new Cons<Cell>(color_test13, new Cons<Cell>(color_test14,
-                                                    new Cons<Cell>(color_test15, new Cons<Cell>(color_test6,
+                                                    new Cons<Cell>(color_test15, new Cons<Cell>(color_test16,
                                                             new Cons<Cell>(color_test17, new Cons<Cell>(color_test18,
                                                                     new Cons<Cell>(color_test19, new Mt<Cell>())))))))))))))))))));
 
@@ -959,9 +960,9 @@ class ExamplesIsland {
         t.checkExpect(i2.append(mTS), i2);
     }
     //{this.initialize();}
-    {this.mountain.board = this.iList3;}
+    //{this.mountain.board = this.iList3;}
     
-    boolean runAnimation = this.mountain.bigBang(640, 640); 
+    boolean runAnimation = this.random.bigBang(640, 640); 
 }
 
 
