@@ -512,8 +512,14 @@ class ForbiddenIslandWorld extends World {
     // Handling key presses
     public void onKeyEvent(String ke) {
         
-        if (ke.equals("m") || ke.equals("r") || ke.equals("t")) {
-            new ForbiddenIslandWorld(ke).bigBang(640, 640);
+        if (ke.equals("m")) {
+            this.board = this.makeMountain(false);
+        }
+        else if (ke.equals("r")) {
+            this.board = this.makeMountain(true);
+        }
+        else if (ke.equals("t")) {
+            this.board = this.makeTerrain();
         }
         else {
             //need to add functionality for player
@@ -1245,7 +1251,7 @@ class ExamplesIsland {
     // runs big bang
     void testRunGame(Tester t) {
         this.initializeWorlds();
-        //this.random.bigBang(640, 640);
+        this.random.bigBang(640, 640);
     }
 
 }
