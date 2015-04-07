@@ -240,9 +240,9 @@ class Cell {
     }
     // Displays this cell 
     WorldImage displayCell(int waterLevel) {
-        int sideLength = 30;
+        int sideLength = 20;
         int posnShift = sideLength / 2;
-        return new RectangleImage(new Posn(this.x + posnShift, this.y + posnShift), sideLength, sideLength, this.cellColor(waterLevel));
+        return new RectangleImage(new Posn((this.x * posnShift) + posnShift, (this.y * posnShift) + posnShift), sideLength, sideLength, this.cellColor(waterLevel));
     }
     // Computes this cell's color
     Color cellColor(int waterLevel) {
@@ -292,7 +292,7 @@ class OceanCell extends Cell {
 
 class ForbiddenIslandWorld extends World {
     // Defines an int constant
-    static final int ISLAND_SIZE = 20;
+    static final int ISLAND_SIZE = 64;
     // All the cells of the game, including the ocean
     IList<Cell> board;
     // the current height of the ocean
@@ -473,7 +473,7 @@ class ExamplesIsland {
     Cell fml_5 = new OceanCell(4, 0);
     Cell fml_6 = new Cell(22, 5, 0);
     Cell fml_7 = new Cell(20, 6, 0);
-    Cell fml_8 = new Cell(7, 7, 0);
+    Cell fml_8 = new Cell(7, 7, 3);
     Cell fml_9 = new Cell(16, 8, 0);
     Cell fml_10 = new Cell(9, 9, 0);
     Cell fml_11 = new OceanCell(10, 0);
