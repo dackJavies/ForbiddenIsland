@@ -23,6 +23,9 @@ interface IList<T> {
   <R> IList<R> map(IFunc<T, R> func);
   // Appends this list to the given list
   IList<T> append(IList<T> other);
+  // Length of this list
+  int length_t(int acc);
+  int length();
 }
 
 //To represent a non-empty list of T
@@ -51,6 +54,14 @@ class Cons<T> implements IList<T> {
   public IList<T> append(IList<T> other) {
       return new Cons<T>(this.first, this.rest.append(other));
   }
+  
+  public int length_t(int acc) {
+      return this.rest.length_t(1 + acc);
+  }
+  
+  public int length() {
+      return this.length_t(0);
+  }
 }
 
 //To represent an empty list of T
@@ -73,6 +84,10 @@ class Mt<T> implements IList<T> {
   public IList<T> append(IList<T> other) {
       return other;
   }
+  
+  public int length_t(int acc) { return acc; }
+  
+  public int length() { return 0; }
 } 
 // represents a function that converts ArrayListArrayList<Double>> to IList<Cell> 
 class ArrDub2ListCell implements IFunc<ArrayList<ArrayList<Double>>, IList<Cell>> {
@@ -424,6 +439,13 @@ class Target {
         
     }
     
+    // Is this target the same as the given one?
+    boolean sameTarget(Target other) {
+        
+        return this.touching(other.x, other.y);
+        
+    }
+    
 }
 
 // represents the actual helicopter. This can only be picked up
@@ -442,17 +464,11 @@ class HelicopterTarget extends Target {
     }
     
     // Does the player have all the other pieces?
-    boolean canBeRepaired() {
+    boolean canBeRepaired(Player p) {
         return true; //TODO
     }
     
 }
-
-/*class TargetListVisitor implements IVisitor<Target, IList<Target>> {
-    
-    //TODO
-    
-}*/
 
 // represents examples and tests for the ForbiddenIslandWorld class
 class ExamplesIsland {
