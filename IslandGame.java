@@ -248,7 +248,7 @@ class Cell {
     Color cellColor(int waterLevel) {
         // Flooded cells range from blue to black
         if (this.isFlooded) {
-            int b = Math.max((int)this.height - waterLevel, -120); // TODO
+            int b = Math.max((int)this.height - waterLevel, -120);
             return new Color(0, 0, 120 + b);
         }
         // cells in danger of flooding range from green to red
@@ -292,7 +292,7 @@ class OceanCell extends Cell {
 
 class ForbiddenIslandWorld extends World {
     // Defines an int constant
-    static final int ISLAND_SIZE = 32;
+    static final int ISLAND_SIZE = 20;
     // All the cells of the game, including the ocean
     IList<Cell> board;
     // the current height of the ocean
@@ -466,8 +466,35 @@ class ExamplesIsland {
     IList<Cell> iLAll = new Mt<Cell>();
     Cell s = new OceanCell(0, 1);
 
-
-
+    Cell fml_1 = new OceanCell(0, 0);
+    Cell fml_2 = new Cell(2, 1, 0);
+    Cell fml_3 = new OceanCell(2, 0);
+    Cell fml_4 = new Cell(3, 3, 0);
+    Cell fml_5 = new OceanCell(4, 0);
+    Cell fml_6 = new Cell(22, 5, 0);
+    Cell fml_7 = new Cell(20, 6, 0);
+    Cell fml_8 = new Cell(7, 7, 0);
+    Cell fml_9 = new Cell(16, 8, 0);
+    Cell fml_10 = new Cell(9, 9, 0);
+    Cell fml_11 = new OceanCell(10, 0);
+    Cell fml_12 = new Cell(9, 11, 0);
+    Cell fml_13 = new Cell(19, 12, 0);
+    Cell fml_14 = new Cell(13, 13, 0);
+    Cell fml_15 = new Cell(1, 14, 0);
+    Cell fml_16 = new Cell(10, 15, 0);
+    Cell fml_17 = new OceanCell(16, 0);
+    Cell fml_18 = new Cell(16, 17, 0);
+    Cell fml_19 = new Cell(31, 18, 0);
+    Cell fml_20 = new Cell(18, 19, 0);
+    IList<Cell> TEH_LIST = new Cons<Cell>(fml_1, new Cons<Cell>(fml_2,
+            new Cons<Cell>(fml_3, new Cons<Cell>(fml_4, new Cons<Cell>(fml_5,
+                    new Cons<Cell>(fml_6, new Cons<Cell>(fml_7, new Cons<Cell>(fml_8,
+                            new Cons<Cell>(fml_9, new Cons<Cell>(fml_10,
+                                    new Cons<Cell>(fml_11, new Cons<Cell>(fml_12,
+                                            new Cons<Cell>(fml_13, new Cons<Cell>(fml_14,
+                                                    new Cons<Cell>(fml_15, new Cons<Cell>(fml_16,
+                                                            new Cons<Cell>(fml_17, new Cons<Cell>(fml_18,
+                                                                    new Cons<Cell>(fml_19, new Mt<Cell>())))))))))))))))))));
     Cell land7 = new Cell(0, 10, 10);
     Cell land8 = new Cell(-1, 10, 11);
     Cell land9 = new Cell(70, 10, 12);
@@ -929,6 +956,8 @@ class ExamplesIsland {
         t.checkExpect(mTS.append(i1), i1);
         t.checkExpect(i2.append(mTS), i2);
     }
+    
+    {this.mountain.board = this.TEH_LIST;}
     
     boolean runAnimation = this.mountain.bigBang(640, 640); 
 }
