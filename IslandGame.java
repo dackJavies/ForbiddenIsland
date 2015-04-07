@@ -29,6 +29,9 @@ interface IList<T> {
     IList<T> append(IList<T> other);
     // creates a new Tree from this IList
     IBST<T> list2Tree(IComp<T> comp);
+    // Length of this list
+    int length_t(int acc);
+    int length();
 }
 
 //To represent a non-empty list of T
@@ -57,6 +60,14 @@ class Cons<T> implements IList<T> {
     public IList<T> append(IList<T> other) {
         return new Cons<T>(this.first, this.rest.append(other));
     }
+    // Length of this list helper
+    public int length_t(int acc) {
+        return this.rest.length_t(1 + acc);
+    }
+    // Length of this list
+    public int length() {
+        return this.length_t(0);
+    }
     // creates a new Tree from this IList
     public IBST<T> list2Tree(IComp<T> comp) {
         return this.rest.list2Tree(comp).insert(comp, this.first);
@@ -82,6 +93,14 @@ class Mt<T> implements IList<T> {
     // appends this list to the given list
     public IList<T> append(IList<T> other) {
         return other;
+    }
+    // Length of this list helper
+    public int length_t(int acc) { 
+        return acc; 
+    }
+    // Length of this list
+    public int length() { 
+        return 0; 
     }
     // creates a new Tree from this IList
     public IBST<T> list2Tree(IComp<T> comp) {
@@ -489,6 +508,25 @@ class ForbiddenIslandWorld extends World {
         return new OverlayImages(new RectangleImage(new Posn(0, 0), 1280, 1280, new Color(255, 255, /* Real Value: 0, 0, 120 */ 255)), 
                 this.board.accept(new DisplayCellsVisitor(this.waterHeight)));
     }
+    
+    // Handling key presses
+    public void onKeyEvent(String ke) {
+        
+        if (ke.equals("m") || ke.equals("r") || ke.equals("t")) {
+            new ForbiddenIslandWorld(ke).bigBang(640, 640);
+        }
+        else {
+            //need to add functionality for player
+        }
+        
+    }
+    
+    // Handling time passage and subsequent flooding
+    public void onTick() {
+        
+        this.board = this.board.map(new UpdateFlood(this.waterHeight));
+        
+    }
 }
 
 // represent the player's avatar: the pilot
@@ -506,7 +544,39 @@ class Player {
         this.inventory = inventory;
         this.picture = new FromFileImage(new Posn(this.x, this.y), "pilot-icon.png");
     }
-
+    
+    // Move the player left, right, up, or down with the arrow keys
+    Player movePlayer(String ke) {
+        
+        if (this.safe(ke)) {
+            if (ke.equals("left")) {
+                return new Player(this.x - 1, this.y, this.inventory);
+            }
+            else if (ke.equals("down")) {
+                return new Player(this.x, this.y - 1, this.inventory);
+            }
+            else if (ke.equals("right")) {
+                return new Player(this.x + 1, this.y, this.inventory);
+            }
+            else if (ke.equals("up")) {
+                return new Player(this.x, this.y + 1, this.inventory);
+            }
+            else {
+                return this;
+            }
+        }
+        else {
+            return this;
+        }
+        
+    }
+    
+    // Can the player move in the given direction?
+    boolean safe(String dir) {
+        
+        return true; //TODO
+        
+    }
 }
 
 // represents objects the player needs to obtain
@@ -527,7 +597,12 @@ class Target {
         return this.x == x && this.y == y;
 
     }
-
+    // Is this target the same as the given one?
+    boolean sameTarget(Target other) {
+        
+        return this.touching(other.x, other.y);
+        
+    }
 }
 
 // represents the actual helicopter. This can only be picked up
@@ -547,16 +622,58 @@ class HelicopterTarget extends Target {
 
     // Does the player have all the other pieces?
     boolean canBeRepaired() {
-        return true; //TODO
+        return true; // TODO
+    }
+    boolean canBeRepaired(Player p) {
+        if (this.pieces.length() != p.inventory.length()) {
+            return false;
+        }
+        else {
+            return this.pieces.accept(new TargetListVisitor(p.inventory));
+        }
+    }
+    
+}
+
+// Goes through a list of Targets, seeing if each one is in the given 2nd list
+class TargetListVisitor implements IVisitor<Target, Boolean> {
+    
+    IList<Target> src;
+    
+    TargetListVisitor(IList<Target> src) {
+        this.src = src;
+    }
+    
+    public Boolean visit(Cons<Target> c) {
+        return src.accept(new TargetVisitor(c.first)) &&
+                c.rest.accept(this);
+    }
+    
+    public Boolean visit(Mt<Target> m) {
+        return false;
+    }
+    
+}
+
+// Is the given Target in a list of Targets?
+class TargetVisitor implements IVisitor<Target, Boolean> {
+    
+    Target toFind;
+    
+    TargetVisitor(Target toFind) {
+        this.toFind = toFind;
+    }
+    
+    public Boolean visit(Cons<Target> c) {
+        return c.first.sameTarget(toFind) ||
+                c.rest.accept(this);
+    }
+    
+    public Boolean visit(Mt<Target> m) {
+        return false;
     }
 
 }
-
-/*class TargetListVisitor implements IVisitor<Target, IList<Target>> {
-
-    //TODO
-
-}*/
 
 //represents examples and tests for the ForbiddenIslandWorld class
 class ExamplesIsland {
