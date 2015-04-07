@@ -330,15 +330,19 @@ class ForbiddenIslandWorld extends World {
 
         for (int index1 = 0; index1 < newBoard.size(); index1 += 1) {
             for(int index2 = 0; index2 < ISLAND_SIZE; index2 += 1) {
-                if (!isRandom) {
                     newBoard.get(index1).add(MAX_HEIGHT - (Math.abs(MAX_HEIGHT - index1) + (Math.abs(MAX_HEIGHT - index2))));
-                }
-                else {
-                    newBoard.get(index1).add((double)randy.nextInt(32) + 1);
+            }
+        }
+        
+        if (isRandom) {
+            for (int index1 = 0; index1 < newBoard.size(); index1 += 1) {
+                for (int index2 = 0; index2 < newBoard.get(index1).size(); index2 += 1) {
+                    if (newBoard.get(index1).get(index2) > 0.0) {
+                        newBoard.get(index1).set(index2, (double)randy.nextInt(32) + 1);
+                    }
                 }
             }
         }
-
         return new ArrDub2ListCell().apply(newBoard);
 
     }
