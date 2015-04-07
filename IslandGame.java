@@ -284,23 +284,40 @@ class ArrDub2ListCell implements IFunc<ArrayList<ArrayList<Double>>, IList<Cell>
 
 //represents a visitor object
 interface IVisitor<T, R> {
-    R visit(Cons<T> c);
-    R visit(Mt<T> m);
+  R visit(Cons<T> c);
+  R visit(Mt<T> m);
+  R visit(Node<T> n);
+  R visit(Leaf<T> n);
 }
 
 //represents a visitor that displays the cells in a list
 class DisplayCellsVisitor implements IVisitor<Cell, WorldImage> {
-    int waterLevel;
-    DisplayCellsVisitor(int w) {
-        this.waterLevel = w;
-    }
-    public WorldImage visit(Cons<Cell> c) {
-        return new OverlayImages(c.first.displayCell(waterLevel), c.rest.accept(this));
-    }
-    public WorldImage visit(Mt<Cell> m) {
-        return new LineImage(new Posn(-1, -1), new Posn(-1, -1), new Color(255, 255, 255));
-    }    
+  IBST<Cell> board;
+  int waterLevel;
+  DisplayCellsVisitor(IList<Cell> board, int w) {
+      this.board = board.list2Tree(new RandCellComp());
+      this.waterLevel = w;
+  }
+  //
+  public WorldImage visit(Mt<Cell> m) {
+      throw new IllegalArgumentException("IList is not a valid argument");
+  }
+  //
+  public WorldImage visit(Cons<Cell> c) {
+      throw new IllegalArgumentException("IList is not a valid argument");
+  }
+  //
+  public WorldImage visit(Node<Cell> n) {
+      // TODO Auto-generated method stub
+      return null;
+  }
+  //
+  public WorldImage visit(Leaf<Cell> n) {
+      // TODO Auto-generated method stub
+      return null;
+  }    
 }
+
 
 //represents a function
 interface IFunc<T, R> {
@@ -506,7 +523,7 @@ class ForbiddenIslandWorld extends World {
     // Draws the World
     public WorldImage makeImage() {
         return new OverlayImages(new RectangleImage(new Posn(0, 0), 1280, 1280, new Color(255, 255, /* Real Value: 0, 0, 120 */ 255)), 
-                this.board.accept(new DisplayCellsVisitor(this.waterHeight)));
+                this.board.accept(new DisplayCellsVisitor(this.board, this.waterHeight)));
     }
     
     // Handling key presses
@@ -641,43 +658,61 @@ class HelicopterTarget extends Target {
     
 }
 
-// Goes through a list of Targets, seeing if each one is in the given 2nd list
+//Goes through a list of Targets, seeing if each one is in the given 2nd list
 class TargetListVisitor implements IVisitor<Target, Boolean> {
-    
-    IList<Target> src;
-    
-    TargetListVisitor(IList<Target> src) {
-        this.src = src;
-    }
-    
-    public Boolean visit(Cons<Target> c) {
-        return src.accept(new TargetVisitor(c.first)) &&
-                c.rest.accept(this);
-    }
-    
-    public Boolean visit(Mt<Target> m) {
-        return false;
-    }
-    
+
+  IList<Target> src;
+
+  TargetListVisitor(IList<Target> src) {
+      this.src = src;
+  }
+
+  public Boolean visit(Cons<Target> c) {
+      return src.accept(new TargetVisitor(c.first)) &&
+              c.rest.accept(this);
+  }
+
+  public Boolean visit(Mt<Target> m) {
+      return false;
+  }
+  // TODO
+  public Boolean visit(Node<Target> n) {
+      throw new IllegalArgumentException("IBST is not a valid argument");
+  }
+
+  // TODO
+  public Boolean visit(Leaf<Target> n) {
+      throw new IllegalArgumentException("IBST is not a valid argument");
+  }
 }
 
-// Is the given Target in a list of Targets?
+//Is the given Target in a list of Targets?
 class TargetVisitor implements IVisitor<Target, Boolean> {
-    
-    Target toFind;
-    
-    TargetVisitor(Target toFind) {
-        this.toFind = toFind;
-    }
-    
-    public Boolean visit(Cons<Target> c) {
-        return c.first.sameTarget(toFind) ||
-                c.rest.accept(this);
-    }
-    
-    public Boolean visit(Mt<Target> m) {
-        return false;
-    }
+
+  Target toFind;
+
+  TargetVisitor(Target toFind) {
+      this.toFind = toFind;
+  }
+  // TODO
+  public Boolean visit(Cons<Target> c) {
+      return c.first.sameTarget(toFind) ||
+              c.rest.accept(this);
+  }
+  // TODO
+  public Boolean visit(Mt<Target> m) {
+      return false;
+  }
+
+  // TODO
+  public Boolean visit(Node<Target> n) {
+      throw new IllegalArgumentException("IBST is not a valid argument");
+  }
+
+  // TODO
+  public Boolean visit(Leaf<Target> n) {
+      throw new IllegalArgumentException("IBST is not a valid argument");
+  }
 
 }
 
