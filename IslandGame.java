@@ -292,7 +292,7 @@ class OceanCell extends Cell {
 
 class ForbiddenIslandWorld extends World {
     // Defines an int constant
-    static final int ISLAND_SIZE = 64;
+    static final int ISLAND_SIZE = 32;
     // All the cells of the game, including the ocean
     IList<Cell> board;
     // the current height of the ocean
@@ -386,7 +386,7 @@ class ForbiddenIslandWorld extends World {
 class ExamplesIsland {
     ForbiddenIslandWorld nullWorld = new ForbiddenIslandWorld("not a world");
 
-    //ForbiddenIslandWorld mountain = new ForbiddenIslandWorld("m"); 
+    ForbiddenIslandWorld mountain = new ForbiddenIslandWorld("m"); 
     //ForbiddenIslandWorld random = new ForbiddenIslandWorld("r");
     //ForbiddenIslandWorld terrain = new ForbiddenIslandWorld("t");
 
@@ -628,12 +628,12 @@ class ExamplesIsland {
             this.arrayListD1.add(1.0);
         } 
 
-        // arrayList with 1 element
+        // arrayList with 10 elements
         for (int index = 0; index < 10; index += 1) {
             this.arrayListD10.add(10.0);
         }
 
-        // arrayList with 1 element
+        // arrayList with 64 elements
         for (int index = 0; index < 64; index += 1) {
             this.arrayListD64.add(64.0);
         }
@@ -929,10 +929,8 @@ class ExamplesIsland {
         t.checkExpect(mTS.append(i1), i1);
         t.checkExpect(i2.append(mTS), i2);
     }
-
-    //{this.nullWorld.board = iList2;}
     
-    //boolean runAnimation = this.mountain.bigBang(640, 640); 
+    boolean runAnimation = this.mountain.bigBang(640, 640); 
 }
 
 
