@@ -19,149 +19,149 @@ import java.util.Random;
 
 //represents a list of T
 interface IList<T> {
-  // Adds the given item to the front of this list
-  IList<T> add(T t);
-  // Draws the list according to its visitor
-  <R> R accept(IVisitor<T, R> visitor);
-  // Maps the given IFunc object through this list
-  <R> IList<R> map(IFunc<T, R> func);
-  // Appends this list to the given list
-  IList<T> append(IList<T> other);
-  // creates a new Tree from this IList
-  IBST<T> list2Tree(IComp<T> comp);
-  // Length of this list
-  int length_t(int acc);
-  int length();
+    // Adds the given item to the front of this list
+    IList<T> add(T t);
+    // Draws the list according to its visitor
+    <R> R accept(IVisitor<T, R> visitor);
+    // Maps the given IFunc object through this list
+    <R> IList<R> map(IFunc<T, R> func);
+    // Appends this list to the given list
+    IList<T> append(IList<T> other);
+    // creates a new Tree from this IList
+    IBST<T> list2Tree(IComp<T> comp);
+    // Length of this list
+    int length_t(int acc);
+    int length();
 }
 
 //To represent a non-empty list of T
 class Cons<T> implements IList<T> {
-  T first;
-  IList<T> rest;    
-  Cons(T first, IList<T> rest) {
-      this.first = first;
-      this.rest = rest;
-  }
-  // Adds the given item to the front of this list
-  public IList<T> add(T item) {
-      return new Cons<T>(item, this);
-  }
-  // accepts a visitor object
-  public <R> R accept(IVisitor<T, R> visitor) {
-      return visitor.visit(this);
-  }
-  // Maps the given IFunc object through this list
-  public <R> IList<R> map(IFunc<T, R> func) {
+    T first;
+    IList<T> rest;    
+    Cons(T first, IList<T> rest) {
+        this.first = first;
+        this.rest = rest;
+    }
+    // Adds the given item to the front of this list
+    public IList<T> add(T item) {
+        return new Cons<T>(item, this);
+    }
+    // accepts a visitor object
+    public <R> R accept(IVisitor<T, R> visitor) {
+        return visitor.visit(this);
+    }
+    // Maps the given IFunc object through this list
+    public <R> IList<R> map(IFunc<T, R> func) {
 
-      return new Cons<R>(func.apply(this.first), this.rest.map(func));
+        return new Cons<R>(func.apply(this.first), this.rest.map(func));
 
-  }
-  // appends this list to the given list
-  public IList<T> append(IList<T> other) {
-      return new Cons<T>(this.first, this.rest.append(other));
-  }
-  // Length of this list helper
-  public int length_t(int acc) {
-      return this.rest.length_t(1 + acc);
-  }
-  // Length of this list
-  public int length() {
-      return this.length_t(0);
-  }
-  // creates a new Tree from this IList
-  public IBST<T> list2Tree(IComp<T> comp) {
-      return this.rest.list2Tree(comp).insert(comp, this.first);
-  }
+    }
+    // appends this list to the given list
+    public IList<T> append(IList<T> other) {
+        return new Cons<T>(this.first, this.rest.append(other));
+    }
+    // Length of this list helper
+    public int length_t(int acc) {
+        return this.rest.length_t(1 + acc);
+    }
+    // Length of this list
+    public int length() {
+        return this.length_t(0);
+    }
+    // creates a new Tree from this IList
+    public IBST<T> list2Tree(IComp<T> comp) {
+        return this.rest.list2Tree(comp).insert(comp, this.first);
+    }
 }
 
 //To represent an empty list of T
 class Mt<T> implements IList<T> {
-  // Adds the given item to the front of this empty list
-  public IList<T> add(T t) {
-      return new Cons<T>(t, this); 
-  }
-  // accepts a visitor object
-  public <R> R accept(IVisitor<T, R> visitor) {
-      return visitor.visit(this);
-  } 
-  // Maps the given IFunc object through this list
-  public <R> IList<R> map(IFunc<T, R> func) {
+    // Adds the given item to the front of this empty list
+    public IList<T> add(T t) {
+        return new Cons<T>(t, this); 
+    }
+    // accepts a visitor object
+    public <R> R accept(IVisitor<T, R> visitor) {
+        return visitor.visit(this);
+    } 
+    // Maps the given IFunc object through this list
+    public <R> IList<R> map(IFunc<T, R> func) {
 
-      return new Mt<R>();
+        return new Mt<R>();
 
-  }
-  // appends this list to the given list
-  public IList<T> append(IList<T> other) {
-      return other;
-  }
-  // Length of this list helper
-  public int length_t(int acc) { 
-      return acc; 
-  }
-  // Length of this list
-  public int length() { 
-      return 0; 
-  }
-  // creates a new Tree from this IList
-  public IBST<T> list2Tree(IComp<T> comp) {
-      return new Leaf<T>();
-  }
+    }
+    // appends this list to the given list
+    public IList<T> append(IList<T> other) {
+        return other;
+    }
+    // Length of this list helper
+    public int length_t(int acc) { 
+        return acc; 
+    }
+    // Length of this list
+    public int length() { 
+        return 0; 
+    }
+    // creates a new Tree from this IList
+    public IBST<T> list2Tree(IComp<T> comp) {
+        return new Leaf<T>();
+    }
 }    
 
 
 //represents a Cell Binary Tree
 interface IBST<T> {
- // inserts the given item into this tree
- IBST<T> insert(IComp<T> comp, T t);
- // determines whether this is a leaf
- boolean isLeaf();
- // accepts a visitor 
- <R> R accept(IVisitor<T, R> v);
+    // inserts the given item into this tree
+    IBST<T> insert(IComp<T> comp, T t);
+    // determines whether this is a leaf
+    boolean isLeaf();
+    // accepts a visitor 
+    <R> R accept(IVisitor<T, R> v);
 }
 
 //represents a known Cell Binary Tree
 class Node<T> implements IBST<T> {
- T data;
- IBST<T> left;
- IBST<T> right;
- Node(T data, IBST<T> left, IBST<T> right) {
-     this.data = data;
-     this.left = left;
-     this.right = right;
- }
- // inserts an item into this tree according to the given comparator
- public IBST<T> insert(IComp<T> comp, T t) {
-     if (comp.compare(this.data, t) >= 0) {
-         return new Node<T>(this.data, this.left.insert(comp, t), this.right);
-     }
-     else {
-         return new Node<T>(this.data, this.left, this.right.insert(comp, t));
-     }
- }
- // determines whether this is a leaf
- public boolean isLeaf() {
-     return false;
- }
- // accepts the given visitor
- public <R> R accept(IVisitor<T, R> v) {
-     return v.visit(this);
- }
+    T data;
+    IBST<T> left;
+    IBST<T> right;
+    Node(T data, IBST<T> left, IBST<T> right) {
+        this.data = data;
+        this.left = left;
+        this.right = right;
+    }
+    // inserts an item into this tree according to the given comparator
+    public IBST<T> insert(IComp<T> comp, T t) {
+        if (comp.compare(this.data, t) >= 0) {
+            return new Node<T>(this.data, this.left.insert(comp, t), this.right);
+        }
+        else {
+            return new Node<T>(this.data, this.left, this.right.insert(comp, t));
+        }
+    }
+    // determines whether this is a leaf
+    public boolean isLeaf() {
+        return false;
+    }
+    // accepts the given visitor
+    public <R> R accept(IVisitor<T, R> v) {
+        return v.visit(this);
+    }
 }
 
 //represents an empty Binary Tree
 class Leaf<T> implements IBST<T> {
- // inserts an item into this tree according to the given comparator
- public IBST<T> insert(IComp<T> comp, T t) {
-     return new Node<T>(t, this, this);        
- }
- // determines whether this is a leaf
- public boolean isLeaf() {
-     return true;
- }
- // accepts the given visitor
- public <R> R accept(IVisitor<T, R> v) {
-     return v.visit(this);
- }
+    // inserts an item into this tree according to the given comparator
+    public IBST<T> insert(IComp<T> comp, T t) {
+        return new Node<T>(t, this, this);        
+    }
+    // determines whether this is a leaf
+    public boolean isLeaf() {
+        return true;
+    }
+    // accepts the given visitor
+    public <R> R accept(IVisitor<T, R> v) {
+        return v.visit(this);
+    }
 }
 
 
@@ -294,365 +294,272 @@ class ArrDub2ListCell implements IFunc<ArrayList<ArrayList<Double>>, IList<Cell>
 
 //represents a visitor object
 interface IVisitor<T, R> {
-  R visit(Cons<T> c);
-  R visit(Mt<T> m);
-  R visit(Node<T> n);
-  R visit(Leaf<T> n);
+    R visit(Cons<T> c);
+    R visit(Mt<T> m);
+    R visit(Node<T> n);
+    R visit(Leaf<T> n);
 }
 
 //represents a visitor that displays the cells in a list
 class DisplayCellsVisitor implements IVisitor<Cell, WorldImage> {
-  IBST<Cell> board;
-  int waterLevel;
-  DisplayCellsVisitor(IList<Cell> board, int w) {
-      this.board = board.list2Tree(new RandCellComp());
-      this.waterLevel = w;
-  }
-  //
-  public WorldImage visit(Mt<Cell> m) {
-      throw new IllegalArgumentException("IList is not a valid argument");
-  }
-  //
-  public WorldImage visit(Cons<Cell> c) {
-      throw new IllegalArgumentException("IList is not a valid argument");
-  }
-  //
-  public WorldImage visit(Node<Cell> n) {
-      return new OverlayImages(n.data.displayCell(waterLevel), new OverlayImages(n.left.accept(this), n.right.accept(this)));
-  }
-  //
-  public WorldImage visit(Leaf<Cell> n) {
-      return new LineImage(new Posn(-1, -1), new Posn(-1, -1), new Color(255, 255, 255));
-  }    
+    IBST<Cell> board;
+    int waterLevel;
+    DisplayCellsVisitor(IList<Cell> board, int w) {
+        this.board = board.list2Tree(new RandCellComp());
+        this.waterLevel = w;
+    }
+    //
+    public WorldImage visit(Mt<Cell> m) {
+        throw new IllegalArgumentException("IList is not a valid argument");
+    }
+    //
+    public WorldImage visit(Cons<Cell> c) {
+        throw new IllegalArgumentException("IList is not a valid argument");
+    }
+    //
+    public WorldImage visit(Node<Cell> n) {
+        return new OverlayImages(n.data.displayCell(waterLevel), new OverlayImages(n.left.accept(this), n.right.accept(this)));
+    }
+    //
+    public WorldImage visit(Leaf<Cell> n) {
+        return new LineImage(new Posn(-1, -1), new Posn(-1, -1), new Color(255, 255, 255));
+    }    
 }
 
 //represents a function
 interface IFunc<T, R> {
 
-  R apply(T t);
+    R apply(T t);
 
 }
 
 class UpdateFlood implements IFunc<Cell, Cell> {
 
-  int waterLevel;
+    int waterLevel;
 
-  UpdateFlood(int waterLevel) { this.waterLevel = waterLevel; }
+    UpdateFlood(int waterLevel) { this.waterLevel = waterLevel; }
 
-  public Cell apply(Cell t) {
+    public Cell apply(Cell t) {
 
-      if (t.isOcean()) {
-          return t;
-      }
-      else {
-          return new Cell(t.height, t.x, t.y, t.updateFloodHelp(waterLevel));
-      }
+        if (t.isOcean()) {
+            return t;
+        }
+        else {
+            return new Cell(t.height, t.x, t.y, t.updateFloodHelp(waterLevel));
+        }
 
-  }
+    }
 
 }
 
 //Represents a single square of the game area
 class Cell {
-  // represents absolute height of this cell, in feet
-  double height;
-  // In logical coordinates, with the origin at the top-left corner of the scren
-  int x, y;
-  // the four adjacent cells to this one
-  Cell left, top, right, bottom;
-  // reports whether this cell is flooded or not
-  boolean isFlooded;
+    // represents absolute height of this cell, in feet
+    double height;
+    // In logical coordinates, with the origin at the top-left corner of the scren
+    int x, y;
+    // the four adjacent cells to this one
+    Cell left, top, right, bottom;
+    // reports whether this cell is flooded or not
+    boolean isFlooded;
 
-  Cell(double height, int x, int y) {
+    Cell(double height, int x, int y) {
 
-      this.height = height;
-      this.x = x;
-      this.y = y;
+        this.height = height;
+        this.x = x;
+        this.y = y;
 
-      this.top = null;
-      this.left = null;
-      this.right = null;
-      this.bottom = null;
+        this.top = null;
+        this.left = null;
+        this.right = null;
+        this.bottom = null;
 
-      this.isFlooded = false;  
-  }
-  // constructor for testing
-  Cell(double height, int x, int y, boolean isFlooded) {
-      this(height, x, y);
-      this.isFlooded = isFlooded;
-  }
-  // Determines whether this is an OceanCell
-  boolean updateFloodHelp(int waterLevel) {
-      return (this.height - waterLevel) <= 0;
-  }
-  // Displays this cell 
-  WorldImage displayCell(int waterLevel) {
-      int sideLength = 10;
-      int posnShift = sideLength / 2;
-      return new RectangleImage(new Posn((this.x * sideLength) + posnShift, (this.y * sideLength) + posnShift), sideLength, sideLength, this.cellColor(waterLevel));
-  }
-  // Computes this cell's color
-  Color cellColor(int waterLevel) {
-      int bound = 100;
-      // Flooded cells range from blue to black
-      if (this.isFlooded) {
-          int b = Math.max((int)this.height - waterLevel, -bound);
-          return new Color(0, 0, bound + b);
-      }
-      // cells in danger of flooding range from green to red
-      else if (this.floodDanger(waterLevel)) {
-          int red = Math.max(waterLevel - (int)this.height, -bound);
-          int green = Math.max((int)this.height - waterLevel, -bound);
-          return new Color(red, bound + green, 0);
-      }
-      // above water cells not in danger
-      else {
-          // blue and red from 255 - 0
-          if ((int)this.height - waterLevel >= 15) {
-              int other = Math.min(Math.max(0, ((((int)this.height - waterLevel) - 15) * (255 / 18))), 255);
-              return new Color(other, 255, other);
-          }
-          // green from 255 - 120
-          else {
-              int other = Math.min(Math.max(bound, (((int)this.height - waterLevel) * (255 / 15))), 255);
-              return new Color(0, other, 0);
-          }
-      }
-  }
-  // Determines whether this cell is in danger of flooding or flooded
-  boolean floodDanger(int waterLevel) {
-      return this.height <= waterLevel || this.isFlooded;
-  }
-  // Determines whether this is an OceanCell 
-  boolean isOcean() { return false; }
+        this.isFlooded = false;  
+    }
+    // constructor for testing
+    Cell(double height, int x, int y, boolean isFlooded) {
+        this(height, x, y);
+        this.isFlooded = isFlooded;
+    }
+    // Determines whether this is an OceanCell
+    boolean updateFloodHelp(int waterLevel) {
+        return (this.height - waterLevel) <= 0;
+    }
+    // Displays this cell 
+    WorldImage displayCell(int waterLevel) {
+        int sideLength = 10;
+        int posnShift = sideLength / 2;
+        return new RectangleImage(new Posn((this.x * sideLength) + posnShift, (this.y * sideLength) + posnShift), sideLength, sideLength, this.cellColor(waterLevel));
+    }
+    // Computes this cell's color
+    Color cellColor(int waterLevel) {
+        int bound = 100;
+        // Flooded cells range from blue to black
+        if (this.isFlooded) {
+            int b = Math.max((int)this.height - waterLevel, -bound);
+            return new Color(0, 0, bound + b);
+        }
+        // cells in danger of flooding range from green to red
+        else if (this.floodDanger(waterLevel)) {
+            int red = Math.max(waterLevel - (int)this.height, -bound);
+            int green = Math.max((int)this.height - waterLevel, -bound);
+            return new Color(red, bound + green, 0);
+        }
+        // above water cells not in danger
+        else {
+            // blue and red from 255 - 0
+            if ((int)this.height - waterLevel >= 15) {
+                int other = Math.min(Math.max(0, ((((int)this.height - waterLevel) - 15) * (255 / 18))), 255);
+                return new Color(other, 255, other);
+            }
+            // green from 255 - 120
+            else {
+                int other = Math.min(Math.max(bound, (((int)this.height - waterLevel) * (255 / 15))), 255);
+                return new Color(0, other, 0);
+            }
+        }
+    }
+    // Determines whether this cell is in danger of flooding or flooded
+    boolean floodDanger(int waterLevel) {
+        return this.height <= waterLevel || this.isFlooded;
+    }
+    // Determines whether this is an OceanCell 
+    boolean isOcean() { return false; }
 }
 
 class OceanCell extends Cell {
-  OceanCell(int x, int y) {
-      super(0, x, y, true);
-  }
-  // Determines whether this is an OceanCell
-  boolean isOcean() {
-      return true;
-  }
-  // Computes this cell's color
-  Color cellColor(int waterLevel) {
-      return new Color(0, 0, 120);
-  }
+    OceanCell(int x, int y) {
+        super(0, x, y, true);
+    }
+    // Determines whether this is an OceanCell
+    boolean isOcean() {
+        return true;
+    }
+    // Computes this cell's color
+    Color cellColor(int waterLevel) {
+        return new Color(0, 0, 120);
+    }
 }
 
 class ForbiddenIslandWorld extends World {
-  // Defines an int constant
-  static final int ISLAND_SIZE = 64;
-  // All the cells of the game, including the ocean
-  IList<Cell> board;
-  // the current height of the ocean
-  int waterHeight;
-  ForbiddenIslandWorld(String gameMode) {
+    // Defines an int constant
+    static final int ISLAND_SIZE = 64;
+    // All the cells of the game, including the ocean
+    IList<Cell> board;
+    // the current height of the ocean
+    int waterHeight;
+    ForbiddenIslandWorld(String gameMode) {
 
-      this.waterHeight = 0;
-      this.board = null;
+        this.waterHeight = 0;
+        this.board = null;
 
-      if (gameMode.equals("m")) {
-          this.board = this.makeMountain(false);
-      }
-      else if (gameMode.equals("r")) {
-          this.board = this.makeMountain(true);
-      }
-      else  if(gameMode.equals("t")) {
-          this.board = this.makeTerrain();
-      }
+        if (gameMode.equals("m")) {
+            this.board = this.makeMountain(false);
+        }
+        else if (gameMode.equals("r")) {
+            this.board = this.makeMountain(true);
+        }
+        else  if(gameMode.equals("t")) {
+            this.board = this.makeTerrain();
+        }
 
-  }
-  // Creates a standard map
-  IList<Cell> makeMountain(boolean isRandom) {
+    }
+    // Creates a standard map
+    IList<Cell> makeMountain(boolean isRandom) {
 
-      Random randy = new Random();
+        Random randy = new Random();
 
-      double MAX_HEIGHT = ISLAND_SIZE / 2;
+        double MAX_HEIGHT = ISLAND_SIZE / 2;
 
-      ArrayList<ArrayList<Double>> newBoard = new ArrayList<ArrayList<Double>>();
+        ArrayList<ArrayList<Double>> newBoard = new ArrayList<ArrayList<Double>>();
 
-      for (int index1 = 0; index1 < ISLAND_SIZE; index1 += 1) {
+        for (int index1 = 0; index1 < ISLAND_SIZE; index1 += 1) {
 
-          newBoard.add(new ArrayList<Double>());
-      }
+            newBoard.add(new ArrayList<Double>());
+        }
 
-      for (int index1 = 0; index1 < newBoard.size(); index1 += 1) {
-          for(int index2 = 0; index2 < ISLAND_SIZE; index2 += 1) {
-              newBoard.get(index1).add(MAX_HEIGHT - (Math.abs(MAX_HEIGHT - index1) + (Math.abs(MAX_HEIGHT - index2))));
-          }
-      }
+        for (int index1 = 0; index1 < newBoard.size(); index1 += 1) {
+            for(int index2 = 0; index2 < ISLAND_SIZE; index2 += 1) {
+                newBoard.get(index1).add(MAX_HEIGHT - (Math.abs(MAX_HEIGHT - index1) + (Math.abs(MAX_HEIGHT - index2))));
+            }
+        }
 
-      if (isRandom) {
-          for (int index1 = 0; index1 < newBoard.size(); index1 += 1) {
-              for (int index2 = 0; index2 < newBoard.get(index1).size(); index2 += 1) {
-                  if (newBoard.get(index1).get(index2) > 0.0) {
-                      newBoard.get(index1).set(index2, (double)randy.nextInt(32) + 1);
-                  }
-              }
-          }
-      }
-      return new ArrDub2ListCell().apply(newBoard);
+        if (isRandom) {
+            for (int index1 = 0; index1 < newBoard.size(); index1 += 1) {
+                for (int index2 = 0; index2 < newBoard.get(index1).size(); index2 += 1) {
+                    if (newBoard.get(index1).get(index2) > 0.0) {
+                        newBoard.get(index1).set(index2, (double)randy.nextInt(32) + 1);
+                    }
+                }
+            }
+        }
+        return new ArrDub2ListCell().apply(newBoard);
 
-  }
-  // Makes a standard island with random heights
-  IList<Cell> makeTerrain() {
+    }
+    // Makes a standard island with random heights
+    IList<Cell> makeTerrain() {
 
-      ArrayList<ArrayList<Double>> newBoard = new ArrayList<ArrayList<Double>>();
+        ArrayList<ArrayList<Double>> newBoard = new ArrayList<ArrayList<Double>>();
 
-      for (int index1 = 0; index1 < ISLAND_SIZE; index1 += 1) {
+        for (int index1 = 0; index1 < ISLAND_SIZE + 1; index1 += 1) {
 
-          newBoard.add(new ArrayList<Double>());
+            newBoard.add(new ArrayList<Double>());
 
-          for (int index2 = 0; index2 < ISLAND_SIZE; index2 += 1) {
+            for (int index2 = 0; index2 < ISLAND_SIZE + 1; index2 += 1) {
 
-              if (this.atCorner(index1, index2, ISLAND_SIZE)) {
-                  newBoard.get(index1).add(0.0);
-              }
-              else if (this.atEdge(index1, index2, (ISLAND_SIZE) / 2)) {
-                  newBoard.get(index1).add(1.0);
-              }
-              else if (this.atMiddle(index1, index2, (ISLAND_SIZE) / 2)) {
-                  newBoard.get(index1).add((double)(ISLAND_SIZE) / 2);
-              }
-              else {
-                  newBoard.get(index1).add(0.0);
-              }
+                // TODO add formula
+                newBoard.get(index1).add(0.0);
 
-          }
+            }
 
-      }
-      
-      this.calculateHeights(newBoard.get(0).get(0), newBoard.get(0).get(ISLAND_SIZE - 1),
-              newBoard.get(ISLAND_SIZE - 1).get(0), newBoard.get(ISLAND_SIZE - 1).get(ISLAND_SIZE - 1),
-                  newBoard, new Posn(0, 0), new Posn(ISLAND_SIZE - 1, ISLAND_SIZE - 1));
+        }
 
-      return new ArrDub2ListCell().apply(newBoard);
+        return new ArrDub2ListCell().apply(newBoard);
 
-  }
+    }
 
-  void calculateHeights(Double tl, Double tr, Double br, Double bl, ArrayList<ArrayList<Double>> src, Posn topLeft, Posn botRight) {
-     
-      Double t;
-      Double b;
-      Double l;
-      Double r;
-      Double m;
-      
-      // Useful calculations that would otherwise be repeated several times over
-      Posn t_pos = new Posn(((botRight.x - topLeft.x) / 2), topLeft.y);
-      Posn b_pos = new Posn(((botRight.x - topLeft.x) / 2), botRight.y);
-      Posn l_pos = new Posn(topLeft.x, ((botRight.y - topLeft.y) / 2));
-      Posn r_pos = new Posn(botRight.x, ((botRight.y - topLeft.y) / 2));
-      
-      Posn m_pos = new Posn(((botRight.x - topLeft.x) / 2), ((botRight.y - topLeft.y) / 2));
-      
-      if (!minQuad(tl, tr, br, bl)) {
-          // Application of algorithm
-          t = (Math.random() * (Math.abs(tl - tr) / 4)) + ((tl + tr) / 2);
-          b = (Math.random() * (Math.abs(bl - br) / 4)) + ((tl + tr) / 2);
-          l = (Math.random() * (Math.abs(tl - bl) / 4)) + ((tl + tr) / 2);
-          r = (Math.random() * (Math.abs(tr - br) / 4)) + ((tl + tr) / 2);
-          
-          m = (Math.random() * (Math.abs(t - b) / 4)) + ((tl + br + tl + bl) / 4);
-          
-          // Assigning actual values
-          src.get(t_pos.x).set(t_pos.y, t);
-          src.get(b_pos.x).set(b_pos.y, b);
-          src.get(l_pos.x).set(l_pos.y, l);
-          src.get(r_pos.x).set(r_pos.y, r);
-          
-          src.get(m_pos.x).set(m_pos.y, m);
-          
-          // Recursive calls on all four quadrants
-          calculateHeights(src.get(topLeft.x).get(topLeft.y), src.get(t_pos.x).get(t_pos.y),
-                  src.get(m_pos.x).get(m_pos.y), src.get(l_pos.x).get(l_pos.y), src, topLeft,
-                      m_pos);
-          calculateHeights(src.get(t_pos.x).get(t_pos.y), src.get(botRight.x).get(topLeft.y),
-                  src.get(r_pos.x).get(r_pos.y), src.get(m_pos.x).get(m_pos.y), src, t_pos,
-                      r_pos);
-          calculateHeights(src.get(m_pos.x).get(m_pos.y), src.get(r_pos.x).get(r_pos.y),
-                  src.get(botRight.x).get(botRight.y), src.get(b_pos.x).get(b_pos.y), src, 
-                      m_pos, botRight);
-          calculateHeights(src.get(l_pos.x).get(l_pos.y), src.get(m_pos.x).get(m_pos.y),
-                  src.get(b_pos.x).get(b_pos.y), src.get(topLeft.x).get(botRight.y), src, l_pos,
-                      b_pos);
-          
-      }
-      
-  }
-  
-  // Has the method calculateHeights reached its termination case?
-  boolean minQuad(double tl, double tr, double br, double bl) {
-      
-      return (tl == tr) ||
-              (tr == br)||
-                  (br == bl) ||
-                      (tl == bl);
-              
-  }
-  
-  // Based on the x, y, and maximum possible index, is this a 
-  // corner index?
-  boolean atCorner(int x, int y, int maxIndex) {
-      
-      return (x == 0 && y == 0) ||
-              (x == 0 && y == maxIndex) ||
-                  (x == maxIndex && y == 0) ||
-                      (x == maxIndex && y == maxIndex);
-      
-  }
-  
-  // Based on the x, y, and middle index, is this an edge
-  // index?
-  boolean atEdge(int x, int y, int midIndex) {
-      
-      return (x == midIndex && y == 0) ||
-              (x == midIndex && y == midIndex * 2) ||
-                  (x == 0 && y == midIndex) ||
-                      (x == midIndex * 2 && y == midIndex);
-      
-  }
-  
-  //Based on the x, y, and middle index, is this the middle
-  // index?
-  boolean atMiddle(int x, int y, int midIndex) {
-     
-      return x == midIndex && y == midIndex;
-     
-  }
-  
-  // Draws the World
-  public WorldImage makeImage() {
-      DisplayCellsVisitor dCVisitor = new DisplayCellsVisitor(this.board, this.waterHeight);
-      return dCVisitor.board.accept(dCVisitor);
-  }
+    double calculateMiddle(double tl, double tr, double br, double bl) {
 
-  // Handling key presses
-  public void onKeyEvent(String ke) {
+        double t = Math.random() * Math.abs(tl - tr) + (tl + tr) / 2;
+        double r = Math.random() * Math.abs(tr - br) + (tr + br) / 2;
+        double b = Math.random() * Math.abs(br - bl) + (br + bl) / 2;
+        double l = Math.random() * Math.abs(tl - bl) + (tl + bl) / 2;
 
-      if (ke.equals("m")) {
-          this.board = this.makeMountain(false);
-      }
-      else if (ke.equals("r")) {
-          this.board = this.makeMountain(true);
-      }
-      else if (ke.equals("t")) {
-          this.board = this.makeTerrain();
-      }
-      else {
-          //need to add functionality for player
-      }
+        double m = Math.random() * Math.abs(tl - br) + (tl + tr + br + bl) / 4;
 
-  }
+        return m;
 
-  // Handling time passage and subsequent flooding
-  public void onTick() {
+    }
+    // Draws the World
+    public WorldImage makeImage() {
+        DisplayCellsVisitor dCVisitor = new DisplayCellsVisitor(this.board, this.waterHeight);
+        return dCVisitor.board.accept(dCVisitor);
+    }
 
-      this.board = this.board.map(new UpdateFlood(this.waterHeight));
+    // Handling key presses
+    public void onKeyEvent(String ke) {
 
-  }
+        if (ke.equals("m")) {
+            this.board = this.makeMountain(false);
+        }
+        else if (ke.equals("r")) {
+            this.board = this.makeMountain(true);
+        }
+        else if (ke.equals("t")) {
+            this.board = this.makeTerrain();
+        }
+        else {
+            //need to add functionality for player
+        }
+
+    }
+
+    // Handling time passage and subsequent flooding
+    public void onTick() {
+
+        this.board = this.board.map(new UpdateFlood(this.waterHeight));
+
+    }
 }
 
 // represent the player's avatar: the pilot
@@ -670,10 +577,10 @@ class Player {
         this.inventory = inventory;
         this.picture = new FromFileImage(new Posn(this.x, this.y), "pilot-icon.png");
     }
-    
+
     // Move the player left, right, up, or down with the arrow keys
     Player movePlayer(String ke) {
-        
+
         if (this.safe(ke)) {
             if (ke.equals("left")) {
                 return new Player(this.x - 1, this.y, this.inventory);
@@ -694,14 +601,14 @@ class Player {
         else {
             return this;
         }
-        
+
     }
-    
+
     // Can the player move in the given direction?
     boolean safe(String dir) {
-        
+
         return true; //TODO
-        
+
     }
 }
 
@@ -725,9 +632,9 @@ class Target {
     }
     // Is this target the same as the given one?
     boolean sameTarget(Target other) {
-        
+
         return this.touching(other.x, other.y);
-        
+
     }
 }
 
@@ -758,64 +665,64 @@ class HelicopterTarget extends Target {
             return this.pieces.accept(new TargetListVisitor(p.inventory));
         }
     }
-    
+
 }
 
 //Goes through a list of Targets, seeing if each one is in the given 2nd list
 class TargetListVisitor implements IVisitor<Target, Boolean> {
 
-  IList<Target> src;
+    IList<Target> src;
 
-  TargetListVisitor(IList<Target> src) {
-      this.src = src;
-  }
+    TargetListVisitor(IList<Target> src) {
+        this.src = src;
+    }
 
-  public Boolean visit(Cons<Target> c) {
-      return src.accept(new TargetVisitor(c.first)) &&
-              c.rest.accept(this);
-  }
+    public Boolean visit(Cons<Target> c) {
+        return src.accept(new TargetVisitor(c.first)) &&
+                c.rest.accept(this);
+    }
 
-  public Boolean visit(Mt<Target> m) {
-      return false;
-  }
-  // TODO
-  public Boolean visit(Node<Target> n) {
-      throw new IllegalArgumentException("IBST is not a valid argument");
-  }
+    public Boolean visit(Mt<Target> m) {
+        return false;
+    }
+    // TODO
+    public Boolean visit(Node<Target> n) {
+        throw new IllegalArgumentException("IBST is not a valid argument");
+    }
 
-  // TODO
-  public Boolean visit(Leaf<Target> n) {
-      throw new IllegalArgumentException("IBST is not a valid argument");
-  }
+    // TODO
+    public Boolean visit(Leaf<Target> n) {
+        throw new IllegalArgumentException("IBST is not a valid argument");
+    }
 }
 
 //Is the given Target in a list of Targets?
 class TargetVisitor implements IVisitor<Target, Boolean> {
 
-  Target toFind;
+    Target toFind;
 
-  TargetVisitor(Target toFind) {
-      this.toFind = toFind;
-  }
-  // TODO
-  public Boolean visit(Cons<Target> c) {
-      return c.first.sameTarget(toFind) ||
-              c.rest.accept(this);
-  }
-  // TODO
-  public Boolean visit(Mt<Target> m) {
-      return false;
-  }
+    TargetVisitor(Target toFind) {
+        this.toFind = toFind;
+    }
+    // TODO
+    public Boolean visit(Cons<Target> c) {
+        return c.first.sameTarget(toFind) ||
+                c.rest.accept(this);
+    }
+    // TODO
+    public Boolean visit(Mt<Target> m) {
+        return false;
+    }
 
-  // TODO
-  public Boolean visit(Node<Target> n) {
-      throw new IllegalArgumentException("IBST is not a valid argument");
-  }
+    // TODO
+    public Boolean visit(Node<Target> n) {
+        throw new IllegalArgumentException("IBST is not a valid argument");
+    }
 
-  // TODO
-  public Boolean visit(Leaf<Target> n) {
-      throw new IllegalArgumentException("IBST is not a valid argument");
-  }
+    // TODO
+    public Boolean visit(Leaf<Target> n) {
+        throw new IllegalArgumentException("IBST is not a valid argument");
+    }
 
 }
 
@@ -1339,7 +1246,7 @@ class ExamplesIsland {
         t.checkExpect(mTS.append(i1), i1);
         t.checkExpect(i2.append(mTS), i2);
     }
-    
+
     // tests compare in the CompCell class
     void testCompCell(Tester t) {
         IComp<Cell> comp = new CompCell();
@@ -1356,7 +1263,7 @@ class ExamplesIsland {
         t.checkExpect(comp.compare(c3, c5), 0);
         t.checkExpect(comp.compare(c2, c2), 0);
     }
-    
+
     // tests isLeaf in the IBST interface
     void testIsLeaf(Tester t) {
         IBST<String> sL = new Leaf<String>();
@@ -1368,7 +1275,7 @@ class ExamplesIsland {
         t.checkExpect(n2.isLeaf(), false);
         t.checkExpect(n3.isLeaf(), false);
     }
-    
+
     // tests insert in the IBST interface
     void testInsert(Tester t) {
         IComp<Cell> comp = new CompCell();
@@ -1385,7 +1292,7 @@ class ExamplesIsland {
         IBST<Cell> n3a = new Node<Cell>(c1, n1, n2a);
         t.checkExpect(n3.insert(comp, c4), n3a);
     }
-        
+
     // runs big bang
     void testRunGame(Tester t) {
         this.initializeWorlds();
