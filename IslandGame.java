@@ -443,7 +443,7 @@ class OceanCell extends Cell {
 
 class ForbiddenIslandWorld extends World {
   // Defines an int constant
-  static final int ISLAND_SIZE = 110;
+  static final int ISLAND_SIZE = 64;
   // All the cells of the game, including the ocean
   IList<Cell> board;
   // the current height of the ocean
