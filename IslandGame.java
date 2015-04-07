@@ -8,8 +8,7 @@ import java.awt.Color;
 import java.util.*;
 
 import tester.*;
-import javalib.funworld.*;
-import javalib.worldcanvas.CanvasPanel;
+import javalib.impworld.*;
 import javalib.worldimages.*;
 
 
@@ -391,8 +390,8 @@ class ForbiddenIslandWorld extends World {
 class ExamplesIsland {
     ForbiddenIslandWorld nullWorld = new ForbiddenIslandWorld("not a world");
 
-    //ForbiddenIslandWorld mountain = new ForbiddenIslandWorld("m"); 
-    ForbiddenIslandWorld random = new ForbiddenIslandWorld("r");
+    ForbiddenIslandWorld mountain = new ForbiddenIslandWorld("m"); 
+    //ForbiddenIslandWorld random = new ForbiddenIslandWorld("r");
     //ForbiddenIslandWorld terrain = new ForbiddenIslandWorld("t");
 
     ArrayList<Double> arrayListD1 = new ArrayList<Double>();
@@ -966,7 +965,7 @@ class ExamplesIsland {
     //{this.initialize();}
     //{this.mountain.board = this.iList3;}
     
-    boolean runAnimation = this.random.bigBang(640, 640); 
+    //void runAnimation = this.random.bigBang(640, 640); 
 }
 
 
