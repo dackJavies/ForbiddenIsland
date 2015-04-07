@@ -407,6 +407,16 @@ class ForbiddenIslandWorld extends World {
         if (ke.equals("m") || ke.equals("r") || ke.equals("t")) {
             new ForbiddenIslandWorld(ke).bigBang(640, 640);
         }
+        else {
+            //need to add functionality for player
+        }
+        
+    }
+    
+    // Handling time passage and subsequent flooding
+    public void onTick() {
+        
+        this.board = this.board.map(new UpdateFlood(this.waterHeight));
         
     }
 }
@@ -425,6 +435,39 @@ class Player {
         this.y = y;
         this.inventory = inventory;
         this.picture = new FromFileImage(new Posn(this.x, this.y), "pilot-icon.png");
+    }
+    
+    // Move the player left, right, up, or down with the arrow keys
+    Player movePlayer(String ke) {
+        
+        if (this.safe(ke)) {
+            if (ke.equals("left")) {
+                return new Player(this.x - 1, this.y, this.inventory);
+            }
+            else if (ke.equals("down")) {
+                return new Player(this.x, this.y - 1, this.inventory);
+            }
+            else if (ke.equals("right")) {
+                return new Player(this.x + 1, this.y, this.inventory);
+            }
+            else if (ke.equals("up")) {
+                return new Player(this.x, this.y + 1, this.inventory);
+            }
+            else {
+                return this;
+            }
+        }
+        else {
+            return this;
+        }
+        
+    }
+    
+    // Can the player move in the given direction?
+    boolean safe(String dir) {
+        
+        return true; //TODO
+        
     }
     
 }
