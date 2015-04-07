@@ -400,6 +400,15 @@ class ForbiddenIslandWorld extends World {
         return new OverlayImages(new RectangleImage(new Posn(0, 0), 1280, 1280, new Color(255, 255, /* Real Value: 0, 0, 120 */ 255)), 
                 this.board.accept(new DisplayCellsVisitor(this.waterHeight)));
     }
+    
+    // Handling key presses
+    public void onKeyEvent(String ke) {
+        
+        if (ke.equals("m") || ke.equals("r") || ke.equals("t")) {
+            new ForbiddenIslandWorld(ke).bigBang(640, 640);
+        }
+        
+    }
 }
 
 // represent the player's avatar: the pilot
