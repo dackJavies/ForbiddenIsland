@@ -501,35 +501,128 @@ class ForbiddenIslandWorld extends World {
 
       ArrayList<ArrayList<Double>> newBoard = new ArrayList<ArrayList<Double>>();
 
-      for (int index1 = 0; index1 < ISLAND_SIZE + 1; index1 += 1) {
+      for (int index1 = 0; index1 < ISLAND_SIZE; index1 += 1) {
 
           newBoard.add(new ArrayList<Double>());
 
-          for (int index2 = 0; index2 < ISLAND_SIZE + 1; index2 += 1) {
+          for (int index2 = 0; index2 < ISLAND_SIZE; index2 += 1) {
 
-              // TODO add formula
-              newBoard.get(index1).add(0.0);
+              if (this.atCorner(index1, index2, ISLAND_SIZE)) {
+                  newBoard.get(index1).add(0.0);
+              }
+              else if (this.atEdge(index1, index2, (ISLAND_SIZE) / 2)) {
+                  newBoard.get(index1).add(1.0);
+              }
+              else if (this.atMiddle(index1, index2, (ISLAND_SIZE) / 2)) {
+                  newBoard.get(index1).add((double)(ISLAND_SIZE) / 2);
+              }
+              else {
+                  newBoard.get(index1).add(0.0);
+              }
 
           }
 
       }
+      
+      this.calculateHeights(newBoard.get(0).get(0), newBoard.get(0).get(ISLAND_SIZE - 1),
+              newBoard.get(ISLAND_SIZE - 1).get(0), newBoard.get(ISLAND_SIZE - 1).get(ISLAND_SIZE - 1),
+                  newBoard, new Posn(0, 0), new Posn(ISLAND_SIZE - 1, ISLAND_SIZE - 1));
 
       return new ArrDub2ListCell().apply(newBoard);
 
   }
 
-  double calculateMiddle(double tl, double tr, double br, double bl) {
-
-      double t = Math.random() * Math.abs(tl - tr) + (tl + tr) / 2;
-      double r = Math.random() * Math.abs(tr - br) + (tr + br) / 2;
-      double b = Math.random() * Math.abs(br - bl) + (br + bl) / 2;
-      double l = Math.random() * Math.abs(tl - bl) + (tl + bl) / 2;
-
-      double m = Math.random() * Math.abs(tl - br) + (tl + tr + br + bl) / 4;
-
-      return m;
-
+  void calculateHeights(Double tl, Double tr, Double br, Double bl, ArrayList<ArrayList<Double>> src, Posn topLeft, Posn botRight) {
+     
+      Double t;
+      Double b;
+      Double l;
+      Double r;
+      Double m;
+      
+      // Useful calculations that would otherwise be repeated several times over
+      Posn t_pos = new Posn(((botRight.x - topLeft.x) / 2), topLeft.y);
+      Posn b_pos = new Posn(((botRight.x - topLeft.x) / 2), botRight.y);
+      Posn l_pos = new Posn(topLeft.x, ((botRight.y - topLeft.y) / 2));
+      Posn r_pos = new Posn(botRight.x, ((botRight.y - topLeft.y) / 2));
+      
+      Posn m_pos = new Posn(((botRight.x - topLeft.x) / 2), ((botRight.y - topLeft.y) / 2));
+      
+      if (!minQuad(tl, tr, br, bl)) {
+          // Application of algorithm
+          t = (Math.random() * (Math.abs(tl - tr) / 4)) + ((tl + tr) / 2);
+          b = (Math.random() * (Math.abs(bl - br) / 4)) + ((tl + tr) / 2);
+          l = (Math.random() * (Math.abs(tl - bl) / 4)) + ((tl + tr) / 2);
+          r = (Math.random() * (Math.abs(tr - br) / 4)) + ((tl + tr) / 2);
+          
+          m = (Math.random() * (Math.abs(t - b) / 4)) + ((tl + br + tl + bl) / 4);
+          
+          // Assigning actual values
+          src.get(t_pos.x).set(t_pos.y, t);
+          src.get(b_pos.x).set(b_pos.y, b);
+          src.get(l_pos.x).set(l_pos.y, l);
+          src.get(r_pos.x).set(r_pos.y, r);
+          
+          src.get(m_pos.x).set(m_pos.y, m);
+          
+          // Recursive calls on all four quadrants
+          calculateHeights(src.get(topLeft.x).get(topLeft.y), src.get(t_pos.x).get(t_pos.y),
+                  src.get(m_pos.x).get(m_pos.y), src.get(l_pos.x).get(l_pos.y), src, topLeft,
+                      m_pos);
+          calculateHeights(src.get(t_pos.x).get(t_pos.y), src.get(botRight.x).get(topLeft.y),
+                  src.get(r_pos.x).get(r_pos.y), src.get(m_pos.x).get(m_pos.y), src, t_pos,
+                      r_pos);
+          calculateHeights(src.get(m_pos.x).get(m_pos.y), src.get(r_pos.x).get(r_pos.y),
+                  src.get(botRight.x).get(botRight.y), src.get(b_pos.x).get(b_pos.y), src, 
+                      m_pos, botRight);
+          calculateHeights(src.get(l_pos.x).get(l_pos.y), src.get(m_pos.x).get(m_pos.y),
+                  src.get(b_pos.x).get(b_pos.y), src.get(topLeft.x).get(botRight.y), src, l_pos,
+                      b_pos);
+          
+      }
+      
   }
+  
+  // Has the method calculateHeights reached its termination case?
+  boolean minQuad(double tl, double tr, double br, double bl) {
+      
+      return (tl == tr) ||
+              (tr == br)||
+                  (br == bl) ||
+                      (tl == bl);
+              
+  }
+  
+  // Based on the x, y, and maximum possible index, is this a 
+  // corner index?
+  boolean atCorner(int x, int y, int maxIndex) {
+      
+      return (x == 0 && y == 0) ||
+              (x == 0 && y == maxIndex) ||
+                  (x == maxIndex && y == 0) ||
+                      (x == maxIndex && y == maxIndex);
+      
+  }
+  
+  // Based on the x, y, and middle index, is this an edge
+  // index?
+  boolean atEdge(int x, int y, int midIndex) {
+      
+      return (x == midIndex && y == 0) ||
+              (x == midIndex && y == midIndex * 2) ||
+                  (x == 0 && y == midIndex) ||
+                      (x == midIndex * 2 && y == midIndex);
+      
+  }
+  
+  //Based on the x, y, and middle index, is this the middle
+  // index?
+  boolean atMiddle(int x, int y, int midIndex) {
+     
+      return x == midIndex && y == midIndex;
+     
+  }
+  
   // Draws the World
   public WorldImage makeImage() {
       DisplayCellsVisitor dCVisitor = new DisplayCellsVisitor(this.board, this.waterHeight);
