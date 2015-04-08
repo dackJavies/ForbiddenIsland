@@ -524,9 +524,25 @@ class ForbiddenIslandWorld extends World {
 
       }
       
-      this.calculateHeights(newBoard.get(0).get(0), newBoard.get(0).get(ISLAND_SIZE - 1),
-              newBoard.get(ISLAND_SIZE - 1).get(0), newBoard.get(ISLAND_SIZE - 1).get(ISLAND_SIZE - 1),
-                  newBoard, new Posn(0, 0), new Posn(ISLAND_SIZE - 1, ISLAND_SIZE - 1));
+      int halfIndex = (ISLAND_SIZE - 1) / 2;
+      int maxIndex = ISLAND_SIZE - 1;
+      
+      // top left quadrant
+      this.calculateHeights(newBoard.get(0).get(0), newBoard.get(0).get(halfIndex),
+              newBoard.get(halfIndex).get(0), newBoard.get(halfIndex).get(halfIndex),
+                  newBoard, new Posn(0, 0), new Posn(halfIndex, halfIndex));
+      // top right quadrant
+      this.calculateHeights(newBoard.get(halfIndex).get(0), newBoard.get(maxIndex).get(0),
+              newBoard.get(maxIndex).get(halfIndex), newBoard.get(halfIndex).get(halfIndex),
+                  newBoard, new Posn(halfIndex, 0), new Posn(maxIndex, halfIndex));
+      // bottom right quadrant
+      this.calculateHeights(newBoard.get(halfIndex).get(halfIndex), newBoard.get(maxIndex).get(halfIndex),
+              newBoard.get(maxIndex).get(maxIndex), newBoard.get(halfIndex).get(maxIndex),
+                  newBoard, new Posn(halfIndex, halfIndex), new Posn(maxIndex, maxIndex));
+      // bottom left quadrant
+      this.calculateHeights(newBoard.get(0).get(halfIndex), newBoard.get(halfIndex).get(halfIndex),
+              newBoard.get(halfIndex).get(maxIndex), newBoard.get(0).get(maxIndex),
+                  newBoard, new Posn(0, halfIndex), new Posn(halfIndex, maxIndex));
 
       return new ArrDub2ListCell().apply(newBoard);
 
@@ -609,9 +625,9 @@ class ForbiddenIslandWorld extends World {
   boolean atEdge(int x, int y, int midIndex) {
       
       return (x == midIndex && y == 0) ||
-              (x == midIndex && y == midIndex * 2) ||
+              (x == midIndex && y == ((midIndex * 2) - 1)) ||
                   (x == 0 && y == midIndex) ||
-                      (x == midIndex * 2 && y == midIndex);
+                      (x == ((midIndex * 2) - 1) && y == midIndex);
       
   }
   
