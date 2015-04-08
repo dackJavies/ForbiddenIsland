@@ -448,10 +448,12 @@ class ForbiddenIslandWorld extends World {
   IList<Cell> board;
   // the current height of the ocean
   int waterHeight;
+  boolean isPaused;
   ForbiddenIslandWorld(String gameMode) {
 
       this.waterHeight = 0;
       this.board = null;
+      this.isPaused = false;
 
       if (gameMode.equals("m")) {
           this.board = this.makeMountain(false);
@@ -496,7 +498,7 @@ class ForbiddenIslandWorld extends World {
       return new ArrDub2ListCell().apply(newBoard);
 
   }
-  // Makes a standard island with random heights
+  // Makes a realistic randomly generated world
   IList<Cell> makeTerrain() {
 
       ArrayList<ArrayList<Double>> newBoard = new ArrayList<ArrayList<Double>>();
@@ -577,13 +579,28 @@ class ForbiddenIslandWorld extends World {
       board.get(topX).set(leftY, m);
       
       // recursion
-      
-      
+      /*if () {
+      this.terrainProcedure(size, board, tLx, tLy, tRx, tRy, bLx, bLy, bRx, bRy);
+      }*/
+  }
+  
+  // pauses the game
+  void pauseGame() {
+      this.isPaused = true;
+  }
+  
+  // draws the help screen
+  WorldImage drawPause() {
+      return new RectangleImage(new Posn(0, 0), 1280, 1280, new Color(255, 0, 0));
+      // TODO draw real help screen with instructions on how to unpause, make mountain, move etc
   }
   
   // Draws the World
   public WorldImage makeImage() {
       DisplayCellsVisitor dCVisitor = new DisplayCellsVisitor(this.board, this.waterHeight);
+      if (this.isPaused) {
+          return this.drawPause();
+      }
       return dCVisitor.board.accept(dCVisitor);
   }
 
@@ -599,8 +616,17 @@ class ForbiddenIslandWorld extends World {
       else if (ke.equals("t")) {
           this.board = this.makeTerrain();
       }
-      else {
+      else if (ke.equals("p") && !this.isPaused) {
+          this.isPaused = true;
+      }
+      else if (ke.equals("p")) {
+          this.isPaused = false;
+      }
+      else if (!this.isPaused){
           //need to add functionality for player
+      }
+      else {
+          
       }
 
   }
