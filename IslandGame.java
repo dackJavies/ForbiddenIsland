@@ -929,7 +929,7 @@ class ExamplesIsland {
     ArrDub2ListCell aDLC = new ArrDub2ListCell();
     IComp<Cell> compCell = new CompCell();
     IComp<Cell> compRand = new RandCellComp();
-
+    
     // initializes the examples class
     void initialize() {
 
@@ -1100,9 +1100,17 @@ class ExamplesIsland {
         t.checkExpect(iS.add("two"), new Cons<String>("two", new Cons<String>("one", new Mt<String>())));
     }
     
-    // tests accept for the class IList<T> TODO
+    // tests accept for the interfaces IList<T> and IBST<T> TODO
     void testAccept(Tester t) {
-        
+        Mt<Cell> mT = new Mt<Cell>();
+        Cons<Cell> cons = new Cons<Cell>(new Cell(5, 5, 7), mT);
+        Leaf<Cell> leaf = new Leaf<Cell>();
+        Node<Cell> node = new Node<Cell>(new Cell(5, 5, 7), leaf, leaf);
+        DisplayCellsVisitor dCV = new DisplayCellsVisitor(cons, 0);
+        t.checkExpect(leaf.accept(dCV), dCV.visit(leaf));
+        t.checkExpect(node.accept(dCV), dCV.visit(node));
+        t.checkException(new IllegalArgumentException("IList is not a valid argument"), cons, "accept", dCV);
+        t.checkException(new IllegalArgumentException("IList is not a valid argument"), mT, "accept", dCV);
     }
     // tests map for the class IList<T> TODO
     void testMap(Tester t) {
