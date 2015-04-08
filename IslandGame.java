@@ -369,6 +369,10 @@ class Cell {
     Cell left, top, right, bottom;
     // reports whether this cell is flooded or not
     boolean isFlooded;
+    // determines whether this Cell has a target
+    boolean hasTarget;
+    // determines whether this Cell has a Player
+    boolean hasPlayer;
 
     Cell(double height, int x, int y) {
 
@@ -382,6 +386,7 @@ class Cell {
         this.bottom = null;
 
         this.isFlooded = false;  
+        this.hasTarget = false;
     }
     // constructor for testing
     Cell(double height, int x, int y, boolean isFlooded) {
@@ -447,20 +452,6 @@ class Cell {
         else { return true; }
 
     }
-
-    // Is the given Player standing on this Cell?
-    boolean hasPlayer(Player p) {
-
-        return p.location == this;
-
-    }
-    
-    // Is the given Target on this Cell?
-    boolean hasTarget(Target t) {
-        
-        return t.location == this;
-        
-    }
 }
 
 class OceanCell extends Cell {
@@ -496,9 +487,9 @@ class ForbiddenIslandWorld extends World {
         this.waterHeight = 0;
         this.board = null;
         this.isPaused = false;
-        //this.thePlayer = new Player(null, null);
-        //this.pieces = new Mt<Target>();
-        //this.chopper = new HelicopterTarget(null, null);
+        this.thePlayer = null;
+        this.pieces = null;
+        this.chopper = null;
         
         if (gameMode.equals("m")) {
             this.board = this.makeMountain(false);
@@ -697,6 +688,7 @@ class Player {
         this.location = location;
         this.inventory = inventory;
         this.picture = new FromFileImage(new Posn(this.location.x, this.location.y), "pilot-icon.png");
+        this.location.hasPlayer = true;
     }
 
     // Move the player left, right, up, or down with the arrow keys
@@ -704,15 +696,19 @@ class Player {
 
         if (this.safe(ke)) {
             if (ke.equals("left")) {
+                this.location.hasPlayer = false;
                 return new Player(this.location.left, this.inventory);
             }
             else if (ke.equals("down")) {
+                this.location.hasPlayer = false;
                 return new Player(this.location.bottom, this.inventory);
             }
             else if (ke.equals("right")) {
+                this.location.hasPlayer = false;
                 return new Player(this.location.right, this.inventory);
             }
             else if (ke.equals("up")) {
+                this.location.hasPlayer = false;
                 return new Player(this.location.top, this.inventory);
             }
             else {
@@ -767,7 +763,7 @@ class Target {
     
     // Add this Target to the Player's inventory
     IList<Target> pickedUp(Player p) {
-        
+        this.location.hasTarget = false;
         return p.inventory.add(this);
         
     }
