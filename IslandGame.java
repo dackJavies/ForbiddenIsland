@@ -1093,25 +1093,75 @@ class ExamplesIsland {
         this.random.board = this.nullWorld.makeMountain(true);
         this.terrain.board = this.nullWorld.makeTerrain();
     }
-    // tests updateFlood for the class ForbiddenIslandWorld
-    boolean testUpdateFlood(Tester t) {
-        return t.checkExpect(this.list1.map(this.upFld), this.list1_2);
-    } 
-
+    
     // tests add for the class IList<T>
     void testAdd(Tester t) {
         IList<String> iS = new Cons<String>("one", new Mt<String>());
         t.checkExpect(iS.add("two"), new Cons<String>("two", new Cons<String>("one", new Mt<String>())));
     }
+    
+    // tests accept for the class IList<T> TODO
+    void testAccept(Tester t) {
+        
+    }
+    // tests map for the class IList<T> TODO
+    void testMap(Tester t) {
 
-    // tests height2Cell for the class ArrDub2ListCell
+    }
+    // tests append for the IList interface
+    void testAppend(Tester t) {
+        IList<String> mTS = new Mt<String>();
+        IList<String> i1 = new Cons<String>("happy", new Cons<String>("birthday", mTS));
+        IList<String> i2 = new Cons<String>("Mr", new Cons<String>("Jones", mTS));
+        IList<String> i3 = new Cons<String>("happy", new Cons<String>("birthday", 
+                new Cons<String>("Mr", new Cons<String>("Jones", mTS))));
+        t.checkExpect(i1.append(i2), i3);
+        t.checkExpect(mTS.append(i1), i1);
+        t.checkExpect(i2.append(mTS), i2);
+    }
+    
+    // tests list2Tree for the IList<T> class TODO
+void testList2Tree(Tester t) {
+        
+    }
+    // tests length_t for the IList<T> class TODO
+void testLengthT(Tester t) {
+    
+}
+    // tests length for the IList<T> class TODO
+void testLength(Tester t) {
+    
+}
+    
+    // tests compare in the CompCell class 
+    void testCompCell(Tester t) {
+        IComp<Cell> comp = new CompCell();
+        Cell c1 = new Cell(4, 5, 4);
+        Cell c2 = new Cell(4, 4, 3);
+        Cell c3 = new Cell(9, 4, 4);
+        Cell c4 = new Cell(8, 4, 5);
+        Cell c5 = new Cell(9, 4, 4);
+        Cell c6 = new OceanCell(3, 4);
+        t.checkExpect(comp.compare(c3, c1), -1);
+        t.checkExpect(comp.compare(c3, c2), 1);
+        t.checkExpect(comp.compare(c3, c4), -1);
+        t.checkExpect(comp.compare(c3, c6), 1);
+        t.checkExpect(comp.compare(c3, c5), 0);
+        t.checkExpect(comp.compare(c2, c2), 0);
+    }
+    // tests compare for the RandomCell TODO
+void testCompare(Tester t) {
+        
+    }
+    
+ // tests height2Cell for the class ArrDub2ListCell
     void testHeight2Cell(Tester t) {
         t.checkExpect(aDLC.height2Cell(2.0, 20, 40), new Cell(2, 20, 40));
         t.checkExpect(aDLC.height2Cell(10.0, 0, 40), new Cell(10, 0, 40));
         t.checkExpect(aDLC.height2Cell(-5, 20, 40), new OceanCell(20, 40));
         t.checkExpect(aDLC.height2Cell(0, 20, 45), new OceanCell(20, 45));
     }
-    //tests arrDoubleToCell for the class ForbiddenIslandWorld
+    //tests arrDoubleToCell for the class ArrDub2ListCell
     void testArrDoubleToCell(Tester t) {
         this.initialize();
         ArrayList<Double> a1 = new ArrayList<Double>();
@@ -1129,7 +1179,7 @@ class ExamplesIsland {
         c1.add(new OceanCell(0, 2));
         t.checkExpect(aDLC.doubleArr2CellArr(a1, 0), c1);
     }
-    //tests dubArrArr2CellArrArr for the class ForbiddenIslandWorld
+    //tests dubArrArr2CellArrArr for the class ArrDub2ListCell
     void testhelp(Tester t) {
         this.initialize();
         ArrayList<ArrayList<Double>> aDub = new ArrayList<ArrayList<Double>>();
@@ -1168,7 +1218,7 @@ class ExamplesIsland {
         t.checkExpect(aDLC.dubArrArr2CellArrArr(aIAll), aLAll);
 
     }
-    // tests assignNeighbors for the class ArrDouble2ListCell
+    // tests assignNeighbors for the class ArrDub2ListCell
     void testAssignNeighbors(Tester t) {
         this.initialize();
 
@@ -1232,7 +1282,7 @@ class ExamplesIsland {
         t.checkExpect(c2_2.right, c3_2);
         t.checkExpect(c2_2.bottom, c2_3);
     }
-    // tests assignAllNeighbors for the class ArrDouble2ListCell
+    // tests assignAllNeighbors for the class ArrDub2ListCell
     void testAssignAllNeighbors(Tester t) {
         this.initialize();
 
@@ -1292,47 +1342,156 @@ class ExamplesIsland {
         t.checkExpect(c2_2.right, c3_2);
         t.checkExpect(c2_2.bottom, c2_3);
     }
-    //tests cellArrArr2cellList for the class ForbiddenIslandWorld
+    //tests cellArrArr2cellList for the class ArrDub2ListCell
     void testCellArrArr2cellList(Tester t) {
         this.initialize();
         this.initializeNeighbors();
         t.checkExpect(aDLC.cellArrArr2cellList(aLAll), iLAll);
     }
-    //tests apply for the class ForbiddenIslandWorld
+    //tests apply for the class ArrDub2ListCell
     void testApply(Tester t) {
         this.initialize();
         this.initializeNeighbors();
         t.checkExpect(aDLC.apply(this.aIAll), this.iLAll);
 
+    }    
+    // tests visit(Cons) for the class DisplayVisitor TODO 
+void testDisplayVisitC(Tester t) {
+        
     }
-    // tests append for the IList interface
-    void testAppend(Tester t) {
-        IList<String> mTS = new Mt<String>();
-        IList<String> i1 = new Cons<String>("happy", new Cons<String>("birthday", mTS));
-        IList<String> i2 = new Cons<String>("Mr", new Cons<String>("Jones", mTS));
-        IList<String> i3 = new Cons<String>("happy", new Cons<String>("birthday", 
-                new Cons<String>("Mr", new Cons<String>("Jones", mTS))));
-        t.checkExpect(i1.append(i2), i3);
-        t.checkExpect(mTS.append(i1), i1);
-        t.checkExpect(i2.append(mTS), i2);
+    // tests visit(MT) for the class DisplayVisitor TODO
+void testDisplayVisitM(Tester t) {
+    
+}
+    // tests visit(Node) for the class DisplayVisitor TODO
+void testDisplayVisitN(Tester t) {
+    
+}
+    // tests visit(Leaf) for the class DisplayVisitor TODO
+void testDisplayVisitL(Tester t) {
+    
+}
+    
+    // tests displayCell for the class Cell TODO
+void testDisplayCell(Tester t) {
+    
+}
+    // tests cellColor for the class Cell and OceanCell TODO
+void testCellColor(Tester t) {
+    
+}
+    // tests floodDanger for the class Cell TODO
+void testFloodDanger(Tester t) {
+    
+}
+    // tests isOcean for the class Cell and OceanCell 
+    void testIsOcean(Tester t) {
+        t.checkExpect(new Cell(5, 2, 3).isOcean(), false);
+        t.checkExpect(new Cell(-1, 2, 3).isOcean(), false);
+        t.checkExpect(new Cell(0, 2, 3).isOcean(), false);
+        t.checkExpect(new OceanCell(2, 3).isOcean(), true);
     }
     
-    // tests compare in the CompCell class
-    void testCompCell(Tester t) {
-        IComp<Cell> comp = new CompCell();
-        Cell c1 = new Cell(4, 5, 4);
-        Cell c2 = new Cell(4, 4, 3);
-        Cell c3 = new Cell(9, 4, 4);
-        Cell c4 = new Cell(8, 4, 5);
-        Cell c5 = new Cell(9, 4, 4);
-        Cell c6 = new OceanCell(3, 4);
-        t.checkExpect(comp.compare(c3, c1), -1);
-        t.checkExpect(comp.compare(c3, c2), 1);
-        t.checkExpect(comp.compare(c3, c4), -1);
-        t.checkExpect(comp.compare(c3, c6), 1);
-        t.checkExpect(comp.compare(c3, c5), 0);
-        t.checkExpect(comp.compare(c2, c2), 0);
+    // tests updateFloodHelp  for the class Cell
+    
+    // tests apply for the class UpdateFlood
+    boolean testUpdateFlood(Tester t) {
+        return t.checkExpect(this.list1.map(this.upFld), this.list1_2);
+    } 
+    
+    // tests makeMountain for the class ForbiddenIslandWorld TODO
+void testMakeMountain(Tester t) {
+        
     }
+    // tests makeRandom for the class ForbiddenIslandWorld TODO
+void testMakeRandom(Tester t) {
+    
+}
+    // tests makeTerrain for the class ForbiddenIslandWorld TODO
+void testMakeTerrain(Tester t) {
+    
+}
+    // tests terrainProcedure for the class ForbiddenIslandWorld TODO
+void testTerrainProcedure(Tester t) {
+    
+}
+    // tests pauseGame for the class ForbiddenIslandWorld TODO
+void testPauseGame(Tester t) {
+    
+}
+    // tests makeImage for the class ForbiddenIslandWorld TODO
+void testMakeImage(Tester t) {
+    
+}
+    // tests onKeyEvent for the class ForbiddenIslandWorld TODO
+void testOnKeyEvent(Tester t) {
+    
+}
+    // tests onTick for the class ForbiddenIslandWorld TODO
+void testOnTick(Tester t) {
+    
+}
+    
+    // tests movePlayer for the class Player TODO
+void testMovePlayer(Tester t) {
+    
+}
+    // tests safe for the class Player TODO
+void testSafe(Tester t) {
+    
+}
+    
+    // tests touching for the class Target TODO
+void testTouching(Tester t) {
+    
+}
+    // tests smaeTarget for the class Target TODO
+void testSameTarget(Tester t) {
+    
+}
+    
+    // tests canBeRepaired for the class HelicopterTarget TODO
+void testCanBeRepaired(Tester t) {
+    
+}
+    // tests canBeRepaired(Player) for the class HelocopterTarget TODO
+void testCanBeRepairedP(Tester t) {
+    
+}
+    
+    // tests visit(Cons) for the class TargetListVisitor TODO
+void testTargetListVisitC(Tester t) {
+    
+}
+    // tests visit(Mt) for the class TargetListVisitor TODO
+void testTargetListVisitM(Tester t) {
+    
+}
+    // tests visit(Node) for the class TargetListVisitor TODO
+void testTargetListVisitN(Tester t) {
+    
+}
+    // tests visit(Leaf) for the class TargetListVisitor TODO
+void testTargetListVisitL(Tester t) {
+    
+}
+     
+    // tests visit(Cons) for the class TargetVisitor TODO
+void testTargetVisitC(Tester t) {
+    
+}
+    // tests visit(Mt) for the class TargetVisitor TODO
+void testTargetVisitM(Tester t) {
+    
+}
+    // tests visit(Node) for the class TargetVisitor TODO
+void testTargetVisitN(Tester t) {
+    
+}
+    // tests visit(Leaf) for the class TargetVisitor TODO
+void testTargetVisitL(Tester t) {
+    
+}
     
     // tests isLeaf in the IBST interface
     void testIsLeaf(Tester t) {
@@ -1366,7 +1525,7 @@ class ExamplesIsland {
     // runs big bang
     void testRunGame(Tester t) {
         this.initializeWorlds();
-        this.random.bigBang(640, 640);
+        //this.random.bigBang(640, 640);
     }
 
 }
