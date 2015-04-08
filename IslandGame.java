@@ -588,18 +588,11 @@ class ForbiddenIslandWorld extends World {
   void pauseGame() {
       this.isPaused = true;
   }
-  
-  // draws the help screen
-  WorldImage drawPause() {
-      return new RectangleImage(new Posn(0, 0), 1280, 1280, new Color(255, 0, 0));
-      // TODO draw real help screen with instructions on how to unpause, make mountain, move etc
-  }
-  
   // Draws the World
   public WorldImage makeImage() {
       DisplayCellsVisitor dCVisitor = new DisplayCellsVisitor(this.board, this.waterHeight);
       if (this.isPaused) {
-          return this.drawPause();
+          return new OverlayImages(dCVisitor.board.accept(dCVisitor), new RectangleImage(new Posn(0, 0), 1280, 1280, new Color(255, 0, 0, 150)));
       }
       return dCVisitor.board.accept(dCVisitor);
   }
@@ -1373,7 +1366,7 @@ class ExamplesIsland {
     // runs big bang
     void testRunGame(Tester t) {
         this.initializeWorlds();
-        this.terrain.bigBang(640, 640);
+        this.random.bigBang(640, 640);
     }
 
 }
