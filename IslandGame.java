@@ -501,142 +501,84 @@ class ForbiddenIslandWorld extends World {
 
       ArrayList<ArrayList<Double>> newBoard = new ArrayList<ArrayList<Double>>();
 
-      for (int index1 = 0; index1 < ISLAND_SIZE; index1 += 1) {
+      for (int index1 = 0; index1 <= ISLAND_SIZE; index1 += 1) {
 
           newBoard.add(new ArrayList<Double>());
 
-          for (int index2 = 0; index2 < ISLAND_SIZE; index2 += 1) {
-
-              if (this.atCorner(index1, index2, ISLAND_SIZE)) {
-                  newBoard.get(index1).add(0.0);
-              }
-              else if (this.atEdge(index1, index2, (ISLAND_SIZE) / 2)) {
-                  newBoard.get(index1).add(1.0);
-              }
-              else if (this.atMiddle(index1, index2, (ISLAND_SIZE) / 2)) {
-                  newBoard.get(index1).add((double)(ISLAND_SIZE) / 2);
-              }
-              else {
-                  newBoard.get(index1).add(0.0);
-              }
-
+          for (int index2 = 0; index2 <= ISLAND_SIZE; index2 += 1) {
+              newBoard.get(index1).add(0.0);
           }
 
       }
       
-      int halfIndex = (ISLAND_SIZE - 1) / 2;
-      int maxIndex = ISLAND_SIZE - 1;
+      // gives the board its heights
+      this.startTerrain(newBoard, ISLAND_SIZE);
       
       // top left quadrant
-      this.calculateHeights(newBoard.get(0).get(0), newBoard.get(0).get(halfIndex),
-              newBoard.get(halfIndex).get(0), newBoard.get(halfIndex).get(halfIndex),
-                  newBoard, new Posn(0, 0), new Posn(halfIndex, halfIndex));
+      this.terrainProcedure(ISLAND_SIZE, newBoard, 0, 0, ISLAND_SIZE / 2, 0, 0, ISLAND_SIZE / 2, 
+              ISLAND_SIZE / 2, ISLAND_SIZE / 2);
       // top right quadrant
-      this.calculateHeights(newBoard.get(halfIndex).get(0), newBoard.get(maxIndex).get(0),
-              newBoard.get(maxIndex).get(halfIndex), newBoard.get(halfIndex).get(halfIndex),
-                  newBoard, new Posn(halfIndex, 0), new Posn(maxIndex, halfIndex));
-      // bottom right quadrant
-      this.calculateHeights(newBoard.get(halfIndex).get(halfIndex), newBoard.get(maxIndex).get(halfIndex),
-              newBoard.get(maxIndex).get(maxIndex), newBoard.get(halfIndex).get(maxIndex),
-                  newBoard, new Posn(halfIndex, halfIndex), new Posn(maxIndex, maxIndex));
+      this.terrainProcedure(ISLAND_SIZE, newBoard, ISLAND_SIZE / 2, 0, ISLAND_SIZE, 0, ISLAND_SIZE / 2, 
+              ISLAND_SIZE / 2, ISLAND_SIZE, ISLAND_SIZE / 2);
       // bottom left quadrant
-      this.calculateHeights(newBoard.get(0).get(halfIndex), newBoard.get(halfIndex).get(halfIndex),
-              newBoard.get(halfIndex).get(maxIndex), newBoard.get(0).get(maxIndex),
-                  newBoard, new Posn(0, halfIndex), new Posn(halfIndex, maxIndex));
-
+      this.terrainProcedure(ISLAND_SIZE, newBoard, 0, ISLAND_SIZE / 2, ISLAND_SIZE /2, 
+              ISLAND_SIZE / 2, 0, ISLAND_SIZE, ISLAND_SIZE / 2, ISLAND_SIZE);
+      // bottom right quadrant
+      this.terrainProcedure(ISLAND_SIZE, newBoard, ISLAND_SIZE / 2, ISLAND_SIZE / 2, 
+              ISLAND_SIZE, ISLAND_SIZE / 2, ISLAND_SIZE / 2, ISLAND_SIZE, ISLAND_SIZE, 
+              ISLAND_SIZE);
+      
       return new ArrDub2ListCell().apply(newBoard);
-
-  }
-
-  void calculateHeights(Double tl, Double tr, Double br, Double bl, ArrayList<ArrayList<Double>> src, Posn topLeft, Posn botRight) {
-     
-      Double t;
-      Double b;
-      Double l;
-      Double r;
-      Double m;
-      
-      // Useful calculations that would otherwise be repeated several times over
-      Posn t_pos = new Posn(((botRight.x - topLeft.x) / 2), topLeft.y);
-      Posn b_pos = new Posn(((botRight.x - topLeft.x) / 2), botRight.y);
-      Posn l_pos = new Posn(topLeft.x, ((botRight.y - topLeft.y) / 2));
-      Posn r_pos = new Posn(botRight.x, ((botRight.y - topLeft.y) / 2));
-      
-      Posn m_pos = new Posn(((botRight.x - topLeft.x) / 2), ((botRight.y - topLeft.y) / 2));
-      
-      if (!minQuad(tl, tr, br, bl)) {
-          // Application of algorithm
-          t = (Math.random() * (Math.abs(tl - tr) / 4)) + ((tl + tr) / 2);
-          b = (Math.random() * (Math.abs(bl - br) / 4)) + ((tl + tr) / 2);
-          l = (Math.random() * (Math.abs(tl - bl) / 4)) + ((tl + tr) / 2);
-          r = (Math.random() * (Math.abs(tr - br) / 4)) + ((tl + tr) / 2);
-          
-          m = (Math.random() * (Math.abs(t - b) / 4)) + ((tl + br + tl + bl) / 4);
-          
-          // Assigning actual values
-          src.get(t_pos.x).set(t_pos.y, t);
-          src.get(b_pos.x).set(b_pos.y, b);
-          src.get(l_pos.x).set(l_pos.y, l);
-          src.get(r_pos.x).set(r_pos.y, r);
-          
-          src.get(m_pos.x).set(m_pos.y, m);
-          
-          // Recursive calls on all four quadrants
-          calculateHeights(src.get(topLeft.x).get(topLeft.y), src.get(t_pos.x).get(t_pos.y),
-                  src.get(m_pos.x).get(m_pos.y), src.get(l_pos.x).get(l_pos.y), src, topLeft,
-                      m_pos);
-          calculateHeights(src.get(t_pos.x).get(t_pos.y), src.get(botRight.x).get(topLeft.y),
-                  src.get(r_pos.x).get(r_pos.y), src.get(m_pos.x).get(m_pos.y), src, t_pos,
-                      r_pos);
-          calculateHeights(src.get(m_pos.x).get(m_pos.y), src.get(r_pos.x).get(r_pos.y),
-                  src.get(botRight.x).get(botRight.y), src.get(b_pos.x).get(b_pos.y), src, 
-                      m_pos, botRight);
-          calculateHeights(src.get(l_pos.x).get(l_pos.y), src.get(m_pos.x).get(m_pos.y),
-                  src.get(b_pos.x).get(b_pos.y), src.get(topLeft.x).get(botRight.y), src, l_pos,
-                      b_pos);
-          
-      }
-      
   }
   
-  // Has the method calculateHeights reached its termination case?
-  boolean minQuad(double tl, double tr, double br, double bl) {
+  void startTerrain(ArrayList<ArrayList<Double>> newBoard, int size) {
+      newBoard.get(0).set(0, 0.0);
+      newBoard.get(0).set(size, 0.0);
+      newBoard.get(size).set(0, 0.0);
+      newBoard.get(size).set(size, 0.0);
       
-      return (tl == tr) ||
-              (tr == br)||
-                  (br == bl) ||
-                      (tl == bl);
-              
+      newBoard.get(size / 2).set(size / 2, 1.0);
   }
   
-  // Based on the x, y, and maximum possible index, is this a 
-  // corner index?
-  boolean atCorner(int x, int y, int maxIndex) {
+  void terrainProcedure(int size, ArrayList<ArrayList<Double>> board, int tLx, int tLy, int tRx, 
+          int tRy, int bLx, int bLy, int bRx, int bRy) {
+      Random ran = new Random();
+      // corner heights
+      double tL = board.get(tLx).get(tLy);
+      double tR = board.get(tRx).get(tRy);
+      double bL = board.get(bLx).get(bLy);
+      double bR = board.get(bRx).get(bRy);
+      // new heights
+      double t = (ran.nextDouble() * size / 2) + ((tL + tR) / 2);
+      double b = (ran.nextDouble() * size / 2) + ((bL + bR) / 2);
+      double l = (ran.nextDouble() * size / 2) + ((tL + bL) / 2);
+      double r = (ran.nextDouble() * size / 2) + ((tR + bR) / 2);
+      double m = (ran.nextDouble() * size / 2) + ((tL + tR + bL + bR) / 4);
       
-      return (x == 0 && y == 0) ||
-              (x == 0 && y == maxIndex) ||
-                  (x == maxIndex && y == 0) ||
-                      (x == maxIndex && y == maxIndex);
+      // constants 
+      int topX = (tRx + tLx) / 2;
+      int bottomX = (bLx + bRx) / 2;
+      int leftX = (tLx + bLx) / 2;
+      int rightX = (tRx + bRx) / 2;
+      int topY = (tRy + tLy) / 2;
+      int bottomY = (bLy + bRy) / 2;
+      int leftY = (tLy + bLy) / 2;
+      int rightY = (tLy + bRy) / 2;
+             
+      // top
+      board.get(topX).set(topY, t);
+      // bottom
+      board.get(bottomX).set(bottomY, b);
+      // left
+      board.get(leftX).set(leftY, l);
+      // right
+      board.get(rightX).set(rightY, r);
+      // middle
+      board.get(topX).set(leftY, m);
       
-  }
-  
-  // Based on the x, y, and middle index, is this an edge
-  // index?
-  boolean atEdge(int x, int y, int midIndex) {
+      // recursion
       
-      return (x == midIndex && y == 0) ||
-              (x == midIndex && y == ((midIndex * 2) - 1)) ||
-                  (x == 0 && y == midIndex) ||
-                      (x == ((midIndex * 2) - 1) && y == midIndex);
       
-  }
-  
-  //Based on the x, y, and middle index, is this the middle
-  // index?
-  boolean atMiddle(int x, int y, int midIndex) {
-     
-      return x == midIndex && y == midIndex;
-     
   }
   
   // Draws the World
@@ -1405,7 +1347,7 @@ class ExamplesIsland {
     // runs big bang
     void testRunGame(Tester t) {
         this.initializeWorlds();
-        this.random.bigBang(640, 640);
+        this.terrain.bigBang(640, 640);
     }
 
 }
