@@ -425,6 +425,29 @@ class Cell {
   }
   // Determines whether this is an OceanCell 
   boolean isOcean() { return false; }
+  
+  // Is the cell in the given direction flooded?
+  boolean safeHelp(String dir) {
+      
+      if (dir.equals("up")) { return this.top.isFlooded; }
+      
+      else if (dir.equals("down")) { return this.bottom.isFlooded; }
+      
+      else if (dir.equals("left")) { return this.left.isFlooded; }
+      
+      else if (dir.equals("right")) { return this.right.isFlooded; }
+      
+      else { return true; }
+      
+  }
+  
+  // Is the given player standing on this cell?
+  boolean hasPlayer(Player p) {
+      
+      return p.location == this;
+      
+  }
+  
 }
 
 class OceanCell extends Cell {
@@ -442,6 +465,12 @@ class OceanCell extends Cell {
 }
 
 class ForbiddenIslandWorld extends World {
+  // The Player
+  Player thePlayer;
+  // Targets
+  IList<Target> pieces;
+  // Helicopter
+  HelicopterTarget chopper;
   // Defines an int constant
   static final int ISLAND_SIZE = 64;
   // All the cells of the game, including the ocean
@@ -636,16 +665,14 @@ class ForbiddenIslandWorld extends World {
 class Player {
 
     // Keeps track of position, appearance, and collected parts
-    int x;
-    int y;
+    Cell location;
     WorldImage picture;
     IList<Target> inventory;
 
-    Player(int x, int y, IList<Target> inventory) {
-        this.x = x;
-        this.y = y;
+    Player(Cell location, IList<Target> inventory) {
+        this.location = location;
         this.inventory = inventory;
-        this.picture = new FromFileImage(new Posn(this.x, this.y), "pilot-icon.png");
+        this.picture = new FromFileImage(new Posn(this.location.x, this.location.y), "pilot-icon.png");
     }
     
     // Move the player left, right, up, or down with the arrow keys
@@ -653,16 +680,16 @@ class Player {
         
         if (this.safe(ke)) {
             if (ke.equals("left")) {
-                return new Player(this.x - 1, this.y, this.inventory);
+                return new Player(this.location.left, this.inventory);
             }
             else if (ke.equals("down")) {
-                return new Player(this.x, this.y - 1, this.inventory);
+                return new Player(this.location.bottom, this.inventory);
             }
             else if (ke.equals("right")) {
-                return new Player(this.x + 1, this.y, this.inventory);
+                return new Player(this.location.right, this.inventory);
             }
             else if (ke.equals("up")) {
-                return new Player(this.x, this.y + 1, this.inventory);
+                return new Player(this.location.top, this.inventory);
             }
             else {
                 return this;
@@ -677,7 +704,7 @@ class Player {
     // Can the player move in the given direction?
     boolean safe(String dir) {
         
-        return true; //TODO
+        return this.location.safeHelp(dir);
         
     }
 }
@@ -686,24 +713,22 @@ class Player {
 class Target {
 
     // Keeps track of position
-    int x;
-    int y;
+    Cell location;
 
-    Target(int x, int y) {
-        this.x = x;
-        this.y = y;
+    Target(Cell location) {
+        this.location = location;
     }
 
     // Is the other object's position the same as this one's?
     boolean touching(int x, int y) {
 
-        return this.x == x && this.y == y;
+        return this.location.x == x && this.location.y == y;
 
     }
     // Is this target the same as the given one?
     boolean sameTarget(Target other) {
         
-        return this.touching(other.x, other.y);
+        return this.touching(other.location.x, other.location.y);
         
     }
 }
@@ -717,16 +742,13 @@ class HelicopterTarget extends Target {
     // A picture to represent the chopper
     WorldImage picture;
 
-    HelicopterTarget(int x, int y, IList<Target> pieces) {
-        super(x, y);
+    HelicopterTarget(Cell location, IList<Target> pieces) {
+        super(location);
         this.pieces = pieces;
-        this.picture = new FromFileImage(new Posn(this.x, this.y), "helicopter.png");
+        this.picture = new FromFileImage(new Posn(this.location.x, this.location.y), "helicopter.png");
     }
-
-    // Does the player have all the other pieces?
-    boolean canBeRepaired() {
-        return true; // TODO
-    }
+    
+    // Does the given player have all the pieces?
     boolean canBeRepaired(Player p) {
         if (this.pieces.length() != p.inventory.length()) {
             return false;
@@ -1525,7 +1547,7 @@ void testTargetVisitL(Tester t) {
     // runs big bang
     void testRunGame(Tester t) {
         this.initializeWorlds();
-        //this.random.bigBang(640, 640);
+        this.random.bigBang(640, 640);
     }
 
 }
