@@ -363,7 +363,7 @@ class UpdateFlood implements IFunc<Cell, Cell> {
 class Cell {
     // represents absolute height of this cell, in feet
     double height;
-    // In logical coordinates, with the origin at the top-left corner of the scren
+    // In logical coordinates, with the origin at the top-left corner of the screen
     int x, y;
     // the four adjacent cells to this one
     Cell left, top, right, bottom;
@@ -448,11 +448,18 @@ class Cell {
 
     }
 
-    // Is the given player standing on this cell?
+    // Is the given Player standing on this Cell?
     boolean hasPlayer(Player p) {
 
         return p.location == this;
 
+    }
+    
+    // Is the given Target on this Cell?
+    boolean hasTarget(Target t) {
+        
+        return t.location == this;
+        
     }
 }
 
@@ -661,10 +668,10 @@ class ForbiddenIslandWorld extends World {
             this.isPaused = false;
         }
         else if (!this.isPaused){
-            //need to add functionality for player
+            this.thePlayer.movePlayer(ke);
         }
         else {
-
+            // DO NOTHING
         }
 
     }
@@ -673,6 +680,7 @@ class ForbiddenIslandWorld extends World {
     public void onTick() {
 
         this.board = this.board.map(new UpdateFlood(this.waterHeight));
+        this.waterHeight += 1;
 
     }
 }
