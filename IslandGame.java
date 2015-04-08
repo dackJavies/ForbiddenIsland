@@ -489,7 +489,10 @@ class ForbiddenIslandWorld extends World {
         this.waterHeight = 0;
         this.board = null;
         this.isPaused = false;
-
+        this.thePlayer = new Player(null, null);
+        this.pieces = new Mt<Target>();
+        this.chopper = new HelicopterTarget(null, null);
+        
         if (gameMode.equals("m")) {
             this.board = this.makeMountain(false);
         }
@@ -499,7 +502,14 @@ class ForbiddenIslandWorld extends World {
         else  if(gameMode.equals("t")) {
             this.board = this.makeTerrain();
         }
-
+        
+        // this.thePlayer = new Player(this.findValidLoc(), new Mt<Target>());
+        // Target t1 = new Target(this.findValidLoc())
+        // Target t2 = new Target(this.findValidLoc())
+        // Target t2 = new Target(this.findValidLoc())
+        // Target t2 = new Target(this.findValidLoc())
+        // this.chopper = new HelicopterTarget(this.findValidLoc(), this.pieces) 
+        
     }
     // Creates a standard map
     IList<Cell> makeMountain(boolean isRandom) {
