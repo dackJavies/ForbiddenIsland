@@ -353,77 +353,99 @@ class UpdateFlood implements IFunc<Cell, Cell> {
 
 //Represents a single square of the game area
 class Cell {
-    // represents absolute height of this cell, in feet
-    double height;
-    // In logical coordinates, with the origin at the top-left corner of the scren
-    int x, y;
-    // the four adjacent cells to this one
-    Cell left, top, right, bottom;
-    // reports whether this cell is flooded or not
-    boolean isFlooded;
+  // represents absolute height of this cell, in feet
+  double height;
+  // In logical coordinates, with the origin at the top-left corner of the scren
+  int x, y;
+  // the four adjacent cells to this one
+  Cell left, top, right, bottom;
+  // reports whether this cell is flooded or not
+  boolean isFlooded;
 
-    Cell(double height, int x, int y) {
+  Cell(double height, int x, int y) {
 
-        this.height = height;
-        this.x = x;
-        this.y = y;
+      this.height = height;
+      this.x = x;
+      this.y = y;
 
-        this.top = null;
-        this.left = null;
-        this.right = null;
-        this.bottom = null;
+      this.top = null;
+      this.left = null;
+      this.right = null;
+      this.bottom = null;
 
-        this.isFlooded = false;  
-    }
-    // constructor for testing
-    Cell(double height, int x, int y, boolean isFlooded) {
-        this(height, x, y);
-        this.isFlooded = isFlooded;
-    }
-    // Determines whether this is an OceanCell
-    boolean updateFloodHelp(int waterLevel) {
-        return (this.height - waterLevel) <= 0;
-    }
-    // Displays this cell 
-    WorldImage displayCell(int waterLevel) {
-        int sideLength = 10;
-        int posnShift = sideLength / 2;
-        return new RectangleImage(new Posn((this.x * sideLength) + posnShift, (this.y * sideLength) + posnShift), sideLength, sideLength, this.cellColor(waterLevel));
-    }
-    // Computes this cell's color
-    Color cellColor(int waterLevel) {
-        int bound = 100;
-        // Flooded cells range from blue to black
-        if (this.isFlooded) {
-            int b = Math.max((int)this.height - waterLevel, -bound);
-            return new Color(0, 0, bound + b);
-        }
-        // cells in danger of flooding range from green to red
-        else if (this.floodDanger(waterLevel)) {
-            int red = Math.max(waterLevel - (int)this.height, -bound);
-            int green = Math.max((int)this.height - waterLevel, -bound);
-            return new Color(red, bound + green, 0);
-        }
-        // above water cells not in danger
-        else {
-            // blue and red from 255 - 0
-            if ((int)this.height - waterLevel >= 15) {
-                int other = Math.min(Math.max(0, ((((int)this.height - waterLevel) - 15) * (255 / 18))), 255);
-                return new Color(other, 255, other);
-            }
-            // green from 255 - 120
-            else {
-                int other = Math.min(Math.max(bound, (((int)this.height - waterLevel) * (255 / 15))), 255);
-                return new Color(0, other, 0);
-            }
-        }
-    }
-    // Determines whether this cell is in danger of flooding or flooded
-    boolean floodDanger(int waterLevel) {
-        return this.height <= waterLevel || this.isFlooded;
-    }
-    // Determines whether this is an OceanCell 
-    boolean isOcean() { return false; }
+      this.isFlooded = false;  
+  }
+  // constructor for testing
+  Cell(double height, int x, int y, boolean isFlooded) {
+      this(height, x, y);
+      this.isFlooded = isFlooded;
+  }
+  // Determines whether this is an OceanCell
+  boolean updateFloodHelp(int waterLevel) {
+      return (this.height - waterLevel) <= 0;
+  }
+  // Displays this cell 
+  WorldImage displayCell(int waterLevel) {
+      int sideLength = 10;
+      int posnShift = sideLength / 2;
+      return new RectangleImage(new Posn((this.x * sideLength) + posnShift, (this.y * sideLength) + posnShift), sideLength, sideLength, this.cellColor(waterLevel));
+  }
+  // Computes this cell's color
+  Color cellColor(int waterLevel) {
+      int bound = 100;
+      // Flooded cells range from blue to black
+      if (this.isFlooded) {
+          int b = Math.max((int)this.height - waterLevel, -bound);
+          return new Color(0, 0, bound + b);
+      }
+      // cells in danger of flooding range from green to red
+      else if (this.floodDanger(waterLevel)) {
+          int red = Math.max(waterLevel - (int)this.height, -bound);
+          int green = Math.max((int)this.height - waterLevel, -bound);
+          return new Color(red, bound + green, 0);
+      }
+      // above water cells not in danger
+      else {
+          // blue and red from 255 - 0
+          if ((int)this.height - waterLevel >= 15) {
+              int other = Math.min(Math.max(0, ((((int)this.height - waterLevel) - 15) * (255 / 18))), 255);
+              return new Color(other, 255, other);
+          }
+          // green from 255 - 120
+          else {
+              int other = Math.min(Math.max(bound, (((int)this.height - waterLevel) * (255 / 15))), 255);
+              return new Color(0, other, 0);
+          }
+      }
+  }
+  // Determines whether this cell is in danger of flooding or flooded
+  boolean floodDanger(int waterLevel) {
+      return this.height <= waterLevel || this.isFlooded;
+  }
+  // Determines whether this is an OceanCell 
+  boolean isOcean() { return false; }
+  
+  // Is the cell in the given direction flooded?
+  boolean safeHelp(String dir) {
+      
+      if (dir.equals("up")) { return this.top.isFlooded; }
+      
+      else if (dir.equals("down")) { return this.bottom.isFlooded; }
+      
+      else if (dir.equals("left")) { return this.left.isFlooded; }
+      
+      else if (dir.equals("right")) { return this.right.isFlooded; }
+      
+      else { return true; }
+      
+  }
+  
+  // Is the given player standing on this cell?
+  boolean hasPlayer(Player p) {
+      
+      return p.location == this;
+      
+  }
 }
 
 class OceanCell extends Cell {
@@ -441,144 +463,150 @@ class OceanCell extends Cell {
 }
 
 class ForbiddenIslandWorld extends World {
-    // Defines an int constant
-    static final int ISLAND_SIZE = 64;
-    // All the cells of the game, including the ocean
-    IList<Cell> board;
-    // the current height of the ocean
-    int waterHeight;
-    boolean isPaused;
-    ForbiddenIslandWorld(String gameMode) {
+  // The Player
+  Player thePlayer;
+  // Targets
+  IList<Target> pieces;
+  // Helicopter
+  HelicopterTarget chopper;
+  // Defines an int constant
+  static final int ISLAND_SIZE = 64;
+  // All the cells of the game, including the ocean
+  IList<Cell> board;
+  // the current height of the ocean
+  int waterHeight;
+  boolean isPaused;
+  ForbiddenIslandWorld(String gameMode) {
 
-        this.waterHeight = 0;
-        this.board = null;
-        this.isPaused = false;
+      this.waterHeight = 0;
+      this.board = null;
+      this.isPaused = false;
 
-        if (gameMode.equals("m")) {
-            this.board = this.makeMountain(false);
-        }
-        else if (gameMode.equals("r")) {
-            this.board = this.makeMountain(true);
-        }
-        else  if(gameMode.equals("t")) {
-            this.board = this.makeTerrain();
-        }
+      if (gameMode.equals("m")) {
+          this.board = this.makeMountain(false);
+      }
+      else if (gameMode.equals("r")) {
+          this.board = this.makeMountain(true);
+      }
+      else  if(gameMode.equals("t")) {
+          this.board = this.makeTerrain();
+      }
 
-    }
-    // Creates a standard map
-    IList<Cell> makeMountain(boolean isRandom) {
+  }
+  // Creates a standard map
+  IList<Cell> makeMountain(boolean isRandom) {
 
-        Random randy = new Random();
+      Random randy = new Random();
 
-        double MAX_HEIGHT = ISLAND_SIZE / 2;
+      double MAX_HEIGHT = ISLAND_SIZE / 2;
 
-        ArrayList<ArrayList<Double>> newBoard = new ArrayList<ArrayList<Double>>();
+      ArrayList<ArrayList<Double>> newBoard = new ArrayList<ArrayList<Double>>();
 
-        for (int index1 = 0; index1 < ISLAND_SIZE; index1 += 1) {
+      for (int index1 = 0; index1 < ISLAND_SIZE; index1 += 1) {
 
-            newBoard.add(new ArrayList<Double>());
-        }
+          newBoard.add(new ArrayList<Double>());
+      }
 
-        for (int index1 = 0; index1 < newBoard.size(); index1 += 1) {
-            for(int index2 = 0; index2 < ISLAND_SIZE; index2 += 1) {
-                newBoard.get(index1).add(MAX_HEIGHT - (Math.abs(MAX_HEIGHT - index1) + (Math.abs(MAX_HEIGHT - index2))));
-            }
-        }
+      for (int index1 = 0; index1 < newBoard.size(); index1 += 1) {
+          for(int index2 = 0; index2 < ISLAND_SIZE; index2 += 1) {
+              newBoard.get(index1).add(MAX_HEIGHT - (Math.abs(MAX_HEIGHT - index1) + (Math.abs(MAX_HEIGHT - index2))));
+          }
+      }
 
-        if (isRandom) {
-            for (int index1 = 0; index1 < newBoard.size(); index1 += 1) {
-                for (int index2 = 0; index2 < newBoard.get(index1).size(); index2 += 1) {
-                    if (newBoard.get(index1).get(index2) > 0.0) {
-                        newBoard.get(index1).set(index2, (double)randy.nextInt(32) + 1);
-                    }
-                }
-            }
-        }
-        return new ArrDub2ListCell().apply(newBoard);
+      if (isRandom) {
+          for (int index1 = 0; index1 < newBoard.size(); index1 += 1) {
+              for (int index2 = 0; index2 < newBoard.get(index1).size(); index2 += 1) {
+                  if (newBoard.get(index1).get(index2) > 0.0) {
+                      newBoard.get(index1).set(index2, (double)randy.nextInt(32) + 1);
+                  }
+              }
+          }
+      }
+      return new ArrDub2ListCell().apply(newBoard);
 
-    }
-    // Makes a realistic randomly generated world
-    IList<Cell> makeTerrain() {
+  }
+  // Makes a realistic randomly generated world
+  IList<Cell> makeTerrain() {
 
-        ArrayList<ArrayList<Double>> newBoard = new ArrayList<ArrayList<Double>>();
+      ArrayList<ArrayList<Double>> newBoard = new ArrayList<ArrayList<Double>>();
 
-        for (int index1 = 0; index1 <= ISLAND_SIZE; index1 += 1) {
+      for (int index1 = 0; index1 <= ISLAND_SIZE; index1 += 1) {
 
-            newBoard.add(new ArrayList<Double>());
+          newBoard.add(new ArrayList<Double>());
 
-            for (int index2 = 0; index2 <= ISLAND_SIZE; index2 += 1) {
-                newBoard.get(index1).add(0.0);
-            }
+          for (int index2 = 0; index2 <= ISLAND_SIZE; index2 += 1) {
+              newBoard.get(index1).add(0.0);
+          }
 
-        }
-
-        // gives the board its heights
-        this.startTerrain(newBoard, ISLAND_SIZE);
-
-        // top left quadrant
-        this.terrainProcedure(ISLAND_SIZE, newBoard, 0, 0, ISLAND_SIZE / 2, 0, 0, ISLAND_SIZE / 2, 
-                ISLAND_SIZE / 2, ISLAND_SIZE / 2);
-        // top right quadrant
-        this.terrainProcedure(ISLAND_SIZE, newBoard, ISLAND_SIZE / 2, 0, ISLAND_SIZE, 0, ISLAND_SIZE / 2, 
-                ISLAND_SIZE / 2, ISLAND_SIZE, ISLAND_SIZE / 2);
-        // bottom left quadrant
-        this.terrainProcedure(ISLAND_SIZE, newBoard, 0, ISLAND_SIZE / 2, ISLAND_SIZE /2, 
-                ISLAND_SIZE / 2, 0, ISLAND_SIZE, ISLAND_SIZE / 2, ISLAND_SIZE);
-        // bottom right quadrant
-        this.terrainProcedure(ISLAND_SIZE, newBoard, ISLAND_SIZE / 2, ISLAND_SIZE / 2, 
-                ISLAND_SIZE, ISLAND_SIZE / 2, ISLAND_SIZE / 2, ISLAND_SIZE, ISLAND_SIZE, 
-                ISLAND_SIZE);
-
-        return new ArrDub2ListCell().apply(newBoard);
-    }
-
-    void startTerrain(ArrayList<ArrayList<Double>> newBoard, int size) {
-        newBoard.get(0).set(0, 0.0);
-        newBoard.get(0).set(size, 0.0);
-        newBoard.get(size).set(0, 0.0);
-        newBoard.get(size).set(size, 0.0);
-
-        newBoard.get(size / 2).set(size / 2, 1.0);
-    }
-
-    void terrainProcedure(int size, ArrayList<ArrayList<Double>> board, int tLx, int tLy, int tRx, 
-            int tRy, int bLx, int bLy, int bRx, int bRy) {
-        Random ran = new Random();
-        // corner heights
-        double tL = board.get(tLx).get(tLy);
-        double tR = board.get(tRx).get(tRy);
-        double bL = board.get(bLx).get(bLy);
-        double bR = board.get(bRx).get(bRy);
-        // new heights
-        double t = (ran.nextDouble() * size / 2) + ((tL + tR) / 2);
-        double b = (ran.nextDouble() * size / 2) + ((bL + bR) / 2);
-        double l = (ran.nextDouble() * size / 2) + ((tL + bL) / 2);
-        double r = (ran.nextDouble() * size / 2) + ((tR + bR) / 2);
-        double m = (ran.nextDouble() * size / 2) + ((tL + tR + bL + bR) / 4);
-
-        // constants 
-        int topX = (tRx + tLx) / 2;
-        int bottomX = (bLx + bRx) / 2;
-        int leftX = (tLx + bLx) / 2;
-        int rightX = (tRx + bRx) / 2;
-        int topY = (tRy + tLy) / 2;
-        int bottomY = (bLy + bRy) / 2;
-        int leftY = (tLy + bLy) / 2;
-        int rightY = (tLy + bRy) / 2;
-
-        // top
-        board.get(topX).set(topY, t);
-        // bottom
-        board.get(bottomX).set(bottomY, b);
-        // left
-        board.get(leftX).set(leftY, l);
-        // right
-        board.get(rightX).set(rightY, r);
-        // middle
-        board.get(topX).set(leftY, m);
-
-        // recursion
-        /*if () {
+      }
+      
+      // gives the board its heights
+      this.startTerrain(newBoard, ISLAND_SIZE);
+      
+      // top left quadrant
+      this.terrainProcedure(ISLAND_SIZE, newBoard, 0, 0, ISLAND_SIZE / 2, 0, 0, ISLAND_SIZE / 2, 
+              ISLAND_SIZE / 2, ISLAND_SIZE / 2);
+      // top right quadrant
+      this.terrainProcedure(ISLAND_SIZE, newBoard, ISLAND_SIZE / 2, 0, ISLAND_SIZE, 0, ISLAND_SIZE / 2, 
+              ISLAND_SIZE / 2, ISLAND_SIZE, ISLAND_SIZE / 2);
+      // bottom left quadrant
+      this.terrainProcedure(ISLAND_SIZE, newBoard, 0, ISLAND_SIZE / 2, ISLAND_SIZE /2, 
+              ISLAND_SIZE / 2, 0, ISLAND_SIZE, ISLAND_SIZE / 2, ISLAND_SIZE);
+      // bottom right quadrant
+      this.terrainProcedure(ISLAND_SIZE, newBoard, ISLAND_SIZE / 2, ISLAND_SIZE / 2, 
+              ISLAND_SIZE, ISLAND_SIZE / 2, ISLAND_SIZE / 2, ISLAND_SIZE, ISLAND_SIZE, 
+              ISLAND_SIZE);
+      
+      return new ArrDub2ListCell().apply(newBoard);
+  }
+  
+  void startTerrain(ArrayList<ArrayList<Double>> newBoard, int size) {
+      newBoard.get(0).set(0, 0.0);
+      newBoard.get(0).set(size, 0.0);
+      newBoard.get(size).set(0, 0.0);
+      newBoard.get(size).set(size, 0.0);
+      
+      newBoard.get(size / 2).set(size / 2, 1.0);
+  }
+  
+  void terrainProcedure(int size, ArrayList<ArrayList<Double>> board, int tLx, int tLy, int tRx, 
+          int tRy, int bLx, int bLy, int bRx, int bRy) {
+      Random ran = new Random();
+      // corner heights
+      double tL = board.get(tLx).get(tLy);
+      double tR = board.get(tRx).get(tRy);
+      double bL = board.get(bLx).get(bLy);
+      double bR = board.get(bRx).get(bRy);
+      // new heights
+      double t = (ran.nextDouble() * size / 2) + ((tL + tR) / 2);
+      double b = (ran.nextDouble() * size / 2) + ((bL + bR) / 2);
+      double l = (ran.nextDouble() * size / 2) + ((tL + bL) / 2);
+      double r = (ran.nextDouble() * size / 2) + ((tR + bR) / 2);
+      double m = (ran.nextDouble() * size / 2) + ((tL + tR + bL + bR) / 4);
+      
+      // constants 
+      int topX = (tRx + tLx) / 2;
+      int bottomX = (bLx + bRx) / 2;
+      int leftX = (tLx + bLx) / 2;
+      int rightX = (tRx + bRx) / 2;
+      int topY = (tRy + tLy) / 2;
+      int bottomY = (bLy + bRy) / 2;
+      int leftY = (tLy + bLy) / 2;
+      int rightY = (tLy + bRy) / 2;
+             
+      // top
+      board.get(topX).set(topY, t);
+      // bottom
+      board.get(bottomX).set(bottomY, b);
+      // left
+      board.get(leftX).set(leftY, l);
+      // right
+      board.get(rightX).set(rightY, r);
+      // middle
+      board.get(topX).set(leftY, m);
+      
+      // recursion
+      /*if () {
       this.terrainProcedure(size, board, tLx, tLy, tRx, tRy, bLx, bLy, bRx, bRy);
       }*/
     }
@@ -635,16 +663,14 @@ class ForbiddenIslandWorld extends World {
 class Player {
 
     // Keeps track of position, appearance, and collected parts
-    int x;
-    int y;
+    Cell location;
     WorldImage picture;
     IList<Target> inventory;
 
-    Player(int x, int y, IList<Target> inventory) {
-        this.x = x;
-        this.y = y;
+    Player(Cell location, IList<Target> inventory) {
+        this.location = location;
         this.inventory = inventory;
-        this.picture = new FromFileImage(new Posn(this.x, this.y), "pilot-icon.png");
+        this.picture = new FromFileImage(new Posn(this.location.x, this.location.y), "pilot-icon.png");
     }
 
     // Move the player left, right, up, or down with the arrow keys
@@ -652,16 +678,16 @@ class Player {
 
         if (this.safe(ke)) {
             if (ke.equals("left")) {
-                return new Player(this.x - 1, this.y, this.inventory);
+                return new Player(this.location.left, this.inventory);
             }
             else if (ke.equals("down")) {
-                return new Player(this.x, this.y - 1, this.inventory);
+                return new Player(this.location.bottom, this.inventory);
             }
             else if (ke.equals("right")) {
-                return new Player(this.x + 1, this.y, this.inventory);
+                return new Player(this.location.right, this.inventory);
             }
             else if (ke.equals("up")) {
-                return new Player(this.x, this.y + 1, this.inventory);
+                return new Player(this.location.top, this.inventory);
             }
             else {
                 return this;
@@ -675,8 +701,9 @@ class Player {
 
     // Can the player move in the given direction?
     boolean safe(String dir) {
-
-        return true; //TODO
+        
+        return this.location.safeHelp(dir);
+        
 
     }
 }
@@ -685,24 +712,21 @@ class Player {
 class Target {
 
     // Keeps track of position
-    int x;
-    int y;
+    Cell location;
 
-    Target(int x, int y) {
-        this.x = x;
-        this.y = y;
+    Target(Cell location) {
+        this.location = location;
     }
 
     // Is the other object's position the same as this one's?
     boolean touching(int x, int y) {
 
-        return this.x == x && this.y == y;
+        return this.location.x == x && this.location.y == y;
 
     }
     // Is this target the same as the given one?
     boolean sameTarget(Target other) {
-
-        return this.touching(other.x, other.y);
+        return this.touching(other.location.x, other.location.y);
 
     }
 }
@@ -716,16 +740,13 @@ class HelicopterTarget extends Target {
     // A picture to represent the chopper
     WorldImage picture;
 
-    HelicopterTarget(int x, int y, IList<Target> pieces) {
-        super(x, y);
+    HelicopterTarget(Cell location, IList<Target> pieces) {
+        super(location);
         this.pieces = pieces;
-        this.picture = new FromFileImage(new Posn(this.x, this.y), "helicopter.png");
+        this.picture = new FromFileImage(new Posn(this.location.x, this.location.y), "helicopter.png");
     }
-
-    // Does the player have all the other pieces?
-    boolean canBeRepaired() {
-        return true; // TODO
-    }
+    
+    // Does the given player have all the pieces?
     boolean canBeRepaired(Player p) {
         if (this.pieces.length() != p.inventory.length()) {
             return false;
