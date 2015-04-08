@@ -696,7 +696,16 @@ class Player {
         else {
             return this;
         }
-
+    }
+    
+    // Pick up the given Target
+    IList<Target> pickUpTarget(Target t) {
+        return t.pickedUp(this);
+    }
+    
+    // Can this Player pick up the given Target?
+    boolean touchingTarget(Target t) {
+        return t.touching(this.location.x, this.location.y);
     }
 
     // Can the player move in the given direction?
@@ -729,6 +738,14 @@ class Target {
         return this.touching(other.location.x, other.location.y);
 
     }
+    
+    // Add this Target to the Player's inventory
+    IList<Target> pickedUp(Player p) {
+        
+        return p.inventory.add(this);
+        
+    }
+    
 }
 
 // represents the actual helicopter. This can only be picked up
