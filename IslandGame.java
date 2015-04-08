@@ -496,9 +496,9 @@ class ForbiddenIslandWorld extends World {
         this.waterHeight = 0;
         this.board = null;
         this.isPaused = false;
-        this.thePlayer = new Player(null, null);
-        this.pieces = new Mt<Target>();
-        this.chopper = new HelicopterTarget(null, null);
+        //this.thePlayer = new Player(null, null);
+        //this.pieces = new Mt<Target>();
+        //this.chopper = new HelicopterTarget(null, null);
         
         if (gameMode.equals("m")) {
             this.board = this.makeMountain(false);
@@ -1507,12 +1507,12 @@ class ExamplesIsland {
         Cell c4 = new Cell(1, 2, 3);
         Cell c5 = new Cell(30, 5, 4);
         Cell c6 = new OceanCell(0, 0);
-      /*  t.checkExpect(c1.displayCell(0), )
-        t.checkExpect(c1.displayCell(0), )
-        t.checkExpect(c1.displayCell(0), )
-        t.checkExpect(c1.displayCell(0), )
-        t.checkExpect(c1.displayCell(0), )
-        t.checkExpect(c1.displayCell(0), )*/
+        //t.checkExpect(c1.displayCell(0), new RectangleImage(new Posn(25, 35), 10, 5, c1.cellColor(0)));
+        //t.checkExpect(c2.displayCell(0), new RectangleImage(new Posn(25, 35), 10, 5, c2.cellColor(0)));
+        //t.checkExpect(c3.displayCell(0), new RectangleImage(new Posn(15, 25), 10, 5, c3.cellColor(0)));
+        //t.checkExpect(c4.displayCell(0), new RectangleImage(new Posn(25, 35), 10, 5, c4.cellColor(0)));
+        //t.checkExpect(c5.displayCell(0), new RectangleImage(new Posn(55, 45), 10, 5, c5.cellColor(0)));
+        //t.checkExpect(c6.displayCell(0), 2)
     }
     // tests floodDanger for the class Cell TODO
     void testFloodDanger(Tester t) {
