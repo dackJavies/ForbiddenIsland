@@ -190,14 +190,22 @@ class CompCell implements IComp<Cell> {
 
 
 class RandCellComp implements IComp<Cell> {
+    int seed;
+    RandCellComp(int num) {
+        this.seed = num;
+    }
+    RandCellComp() {
+        this.seed = new Random().nextInt();
+    }
     // randomly assigns number to land
     public int compare(Cell t1, Cell t2) {
-        Random r = new Random();
-        if (t2.isOcean()) {
-            return r.nextInt() - 500;
+        Random r = new Random(seed);
+        
+        if (t2.isOcean() ) {
+            return (r.nextInt() / 10000000) - 500;
         }
         else {
-            return r.nextInt();
+            return r.nextInt() / 1000000;
         }
     }
 }
@@ -1126,6 +1134,7 @@ class ExamplesIsland {
     }
     // initializes the Worlds
     void initializeWorlds() {
+        this.nullWorld.board = null;
         this.mountain.board = this.nullWorld.makeMountain(false);
         this.random.board = this.nullWorld.makeMountain(true);
         this.terrain.board = this.nullWorld.makeTerrain();
@@ -1207,7 +1216,7 @@ class ExamplesIsland {
         Cell c2 = new Cell(4, 4, 3);
         IComp<Cell> rand = new RandCellComp();
         // its random...
-        t.checkExpect(rand.compare(c1, c2) <= 0 || rand.compare(c1, c2) > 0);
+        t.checkExpect(rand.compare(c1, c2) <= 0 || rand.compare(c1, c2) >= 0, true);
     }
     // tests compare in the CompCell class 
     void testCompCell(Tester t) {
@@ -1253,7 +1262,7 @@ class ExamplesIsland {
         t.checkExpect(aDLC.doubleArr2CellArr(a1, 0), c1);
     }
     //tests dubArrArr2CellArrArr for the class ArrDub2ListCell
-    void testhelp(Tester t) {
+    void testHelp(Tester t) {
         this.initialize();
         ArrayList<ArrayList<Double>> aDub = new ArrayList<ArrayList<Double>>();
         ArrayList<ArrayList<Cell>> aCell = new ArrayList<ArrayList<Cell>>();
@@ -1463,16 +1472,6 @@ class ExamplesIsland {
         t.checkExpect(dCV.visit(leaf), new LineImage(new Posn(-1, -1), new Posn(-1, -1), 
                 new Color(255, 255, 255)));
     }
-
-    // tests displayCell for the class Cell TODO
-    void testDisplayCell(Tester t) {
-        Cell c1 = new Cell(-1, 2, 3, false);
-        Cell c2 = new Cell(-1, 2, 3, true);
-        Cell c3 = new Cell(0, 1, 2, true);
-        Cell c4 = new Cell(1, 2, 3);
-        Cell c5 = new Cell(30, 5, 4);
-        Cell c6 = new OceanCell(0, 0);
-    }
     // tests cellColor for the class Cell and OceanCell TODO
     void testCellColor(Tester t) {
         Cell c1 = new Cell(-1, 2, 3, false);
@@ -1481,6 +1480,21 @@ class ExamplesIsland {
         Cell c4 = new Cell(1, 2, 3);
         Cell c5 = new Cell(30, 5, 4);
         Cell c6 = new OceanCell(0, 0);
+    }
+    // tests displayCell for the class Cell TODO
+    void testDisplayCell(Tester t) {
+        Cell c1 = new Cell(-1, 2, 3, false);
+        Cell c2 = new Cell(-1, 2, 3, true);
+        Cell c3 = new Cell(0, 1, 2, true);
+        Cell c4 = new Cell(1, 2, 3);
+        Cell c5 = new Cell(30, 5, 4);
+        Cell c6 = new OceanCell(0, 0);
+      /*  t.checkExpect(c1.displayCell(0), )
+        t.checkExpect(c1.displayCell(0), )
+        t.checkExpect(c1.displayCell(0), )
+        t.checkExpect(c1.displayCell(0), )
+        t.checkExpect(c1.displayCell(0), )
+        t.checkExpect(c1.displayCell(0), )*/
     }
     // tests floodDanger for the class Cell TODO
     void testFloodDanger(Tester t) {
@@ -1494,8 +1508,10 @@ class ExamplesIsland {
         t.checkExpect(new OceanCell(2, 3).isOcean(), true);
     }
 
-    // tests updateFloodHelp  for the class Cell
+    // tests updateFloodHelp  for the class Cell TODO
+    void testFloodHelp(Tester t) {
 
+    }
 
 
     // tests makeMountain for the class ForbiddenIslandWorld TODO
@@ -1527,7 +1543,9 @@ class ExamplesIsland {
     }
     // tests onKeyEvent for the class ForbiddenIslandWorld TODO
     void testOnKeyEvent(Tester t) {
-
+        // key press M
+        t.checkExpect(this.nullWorld.board, null);
+        
     }
     // tests onTick for the class ForbiddenIslandWorld TODO
     void testOnTick(Tester t) {
