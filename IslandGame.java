@@ -463,11 +463,19 @@ class Cell {
     void floodNeighbors(int waterLevel) {
         if (this.belowWaterLevel(waterLevel) && this.isCoastalCell() && !this.isFlooded) {
             this.isFlooded = true;
-            this.left.floodNeighbors(waterLevel);
-            this.right.floodNeighbors(waterLevel);
-            this.top.floodNeighbors(waterLevel);
-            this.bottom.floodNeighbors(waterLevel);
         }
+        /*if (this.top != this) {
+            this.top.floodNeighbors(waterLevel);
+        }
+        if (this.right != this) {
+            this.right.floodNeighbors(waterLevel);
+        }
+        if (this.left != this) {
+            this.left.floodNeighbors(waterLevel);
+        }
+        if (this.bottom != this) {
+            this.bottom.floodNeighbors(waterLevel);
+        }*/
     }
     // Determines whether this cell is in danger of flooding or flooded
     boolean belowWaterLevel(int waterLevel) {
@@ -766,9 +774,10 @@ class ForbiddenIslandWorld extends World {
         DisplayCellsVisitor dCVisitor = 
                 new DisplayCellsVisitor(this.board, this.waterHeight);
         if (this.isPaused) {
-            return new OverlayImages(dCVisitor.board.accept(dCVisitor), 
+            return new OverlayImages(new TextImage(new Posn(600, 600), "Press m for mountain, r for random mountain, and t for random terrain.", new Color(255, 255, 255)),
+                    new OverlayImages(dCVisitor.board.accept(dCVisitor), 
                     new RectangleImage(
-                            new Posn(0, 0), 1280, 1280, new Color(255, 0, 0, 150)));
+                            new Posn(0, 0), 1280, 1280, new Color(255, 0, 0, 150))));
 
         }
         return dCVisitor.board.accept(dCVisitor);
