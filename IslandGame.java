@@ -241,7 +241,8 @@ class ArrDub2ListCell implements IFunc<ArrayList<ArrayList<Double>>, IList<Cell>
         return result;
     }
     // assigns the given cell its neighbors
-    void assignNeighbors(Cell tempCell, int index1, int index2, ArrayList<ArrayList<Cell>> result) {
+    void assignNeighbors(Cell tempCell, int index1, int index2, 
+            ArrayList<ArrayList<Cell>> result) {
         if (index1 == 0) {
             tempCell.left = tempCell;
         }
@@ -325,7 +326,8 @@ class DisplayCellsVisitor implements IVisitor<Cell, WorldImage> {
     }
     //
     public WorldImage visit(Node<Cell> n) {
-        return new OverlayImages(n.data.displayCell(waterLevel), new OverlayImages(n.left.accept(this), n.right.accept(this)));
+        return new OverlayImages(n.data.displayCell(waterLevel), 
+                new OverlayImages(n.left.accept(this), n.right.accept(this)));
     }
     //
     public WorldImage visit(Leaf<Cell> n) {
@@ -401,7 +403,9 @@ class Cell {
     WorldImage displayCell(int waterLevel) {
         int sideLength = 10;
         int posnShift = sideLength / 2;
-        return new RectangleImage(new Posn((this.x * sideLength) + posnShift, (this.y * sideLength) + posnShift), sideLength, sideLength, this.cellColor(waterLevel));
+        return new RectangleImage(new Posn((this.x * sideLength) + posnShift, 
+                (this.y * sideLength) + posnShift), 
+                sideLength, sideLength, this.cellColor(waterLevel));
     }
     // Computes this cell's color
     Color cellColor(int waterLevel) {
@@ -421,12 +425,14 @@ class Cell {
         else {
             // blue and red from 255 - 0
             if ((int)this.height - waterLevel >= 15) {
-                int other = Math.min(Math.max(0, ((((int)this.height - waterLevel) - 15) * (255 / 18))), 255);
+                int other = Math.min(Math.max(0, ((((int)this.height - waterLevel) - 15) 
+                        * (255 / 18))), 255);
                 return new Color(other, 255, other);
             }
             // green from 255 - 120
             else {
-                int other = Math.min(Math.max(bound, (((int)this.height - waterLevel) * (255 / 15))), 255);
+                int other = Math.min(Math.max(bound, (((int)this.height - waterLevel) 
+                        * (255 / 15))), 255);
                 return new Color(0, other, 0);
             }
         }
@@ -535,7 +541,8 @@ class ForbiddenIslandWorld extends World {
 
         for (int index1 = 0; index1 < newBoard.size(); index1 += 1) {
             for(int index2 = 0; index2 < ISLAND_SIZE; index2 += 1) {
-                newBoard.get(index1).add(maxHeight - (Math.abs(maxHeight - index1) + (Math.abs(maxHeight - index2))));
+                newBoard.get(index1).add(maxHeight - (Math.abs(maxHeight - index1) 
+                        + (Math.abs(maxHeight - index2))));
             }
         }
 
@@ -596,7 +603,8 @@ class ForbiddenIslandWorld extends World {
         newBoard.get(size / 2).set(size / 2, 1.0);
     }
 
-    void terrainProcedure(int size, ArrayList<ArrayList<Double>> board, int tLx, int tLy, int tRx, 
+    void terrainProcedure(int size, ArrayList<ArrayList<Double>> board, 
+            int tLx, int tLy, int tRx, 
             int tRy, int bLx, int bLy, int bRx, int bRy) {
         Random ran = new Random();
         // corner heights
@@ -644,10 +652,12 @@ class ForbiddenIslandWorld extends World {
     }
     // Draws the World
     public WorldImage makeImage() {
-        DisplayCellsVisitor dCVisitor = new DisplayCellsVisitor(this.board, this.waterHeight);
+        DisplayCellsVisitor dCVisitor = 
+                new DisplayCellsVisitor(this.board, this.waterHeight);
         if (this.isPaused) {
-            return new OverlayImages(dCVisitor.board.accept(dCVisitor), new RectangleImage(
-                    new Posn(0, 0), 1280, 1280, new Color(255, 0, 0, 150)));
+            return new OverlayImages(dCVisitor.board.accept(dCVisitor), 
+                    new RectangleImage(
+                            new Posn(0, 0), 1280, 1280, new Color(255, 0, 0, 150)));
         }
         return dCVisitor.board.accept(dCVisitor);
     }
@@ -690,7 +700,7 @@ class ForbiddenIslandWorld extends World {
             this.waterTick += 1;
         }
     }
-    
+    /*
     Cell findValidLoc() {
         
         this.board.accept(new FindValidLoc());
@@ -708,7 +718,7 @@ class FindValidLoc implements IVisitor<Cell, Cell> {
     public Cell visit(Mt<Cell> m) {
         
     }
-    
+    */
 }
 
 // represent the player's avatar: the pilot
@@ -820,7 +830,8 @@ class HelicopterTarget extends Target {
     HelicopterTarget(Cell location, IList<Target> pieces) {
         super(location);
         this.pieces = pieces;
-        this.picture = new FromFileImage(new Posn(this.location.x, this.location.y), "helicopter.png");
+        this.picture = new FromFileImage(new Posn(this.location.x, this.location.y), 
+                "helicopter.png");
     }
 
     // Does the given player have all the pieces?
@@ -977,9 +988,12 @@ class ExamplesIsland {
     Cell ocean4 = new OceanCell(0, 20);
     Cell ocean5 = new OceanCell(50, 0);
     Cell ocean6 = new OceanCell(0, 20);
-    IList<Cell> iList2 = new Cons<Cell>(landSunk1, new Cons<Cell>(landSunk2, new Cons<Cell>(landSunk3, new Cons<Cell>(landSunk4, new Mt<Cell>()))));
-    IList<Cell> iList3 = new Cons<Cell>(landAbove1, new Cons<Cell>(landAbove2, new Cons<Cell>(landAbove3, new Cons<Cell>(landAbove4, new Mt<Cell>()))));
-    IList<Cell> iList4 = new Cons<Cell>(landDan1, new Cons<Cell>(landDan2, new Cons<Cell>(landDan3, new Cons<Cell>(landDan4, new Mt<Cell>()))));
+    IList<Cell> iList2 = new Cons<Cell>(landSunk1, new Cons<Cell>(landSunk2, 
+            new Cons<Cell>(landSunk3, new Cons<Cell>(landSunk4, new Mt<Cell>()))));
+    IList<Cell> iList3 = new Cons<Cell>(landAbove1, new Cons<Cell>(landAbove2, 
+            new Cons<Cell>(landAbove3, new Cons<Cell>(landAbove4, new Mt<Cell>()))));
+    IList<Cell> iList4 = new Cons<Cell>(landDan1, new Cons<Cell>(landDan2, 
+            new Cons<Cell>(landDan3, new Cons<Cell>(landDan4, new Mt<Cell>()))));
     IList<Cell> iLAll = new Mt<Cell>();
     Cell s = new OceanCell(0, 1);
 
@@ -1004,15 +1018,24 @@ class ExamplesIsland {
     Cell colorTest18 = new Cell(16, 17, 0, false);
     Cell colorTest19 = new Cell(31, 18, 0, false);
     Cell colorTest20 = new Cell(18, 19, 0, false);
-    IList<Cell> theList = new Cons<Cell>(colorTest1, new Cons<Cell>(colorTest2,
-            new Cons<Cell>(colorTest3, new Cons<Cell>(colorTest4, new Cons<Cell>(colorTest5,
-                    new Cons<Cell>(colorTest6, new Cons<Cell>(colorTest7, new Cons<Cell>(colorTest8,
-                            new Cons<Cell>(colorTest9, new Cons<Cell>(colorTest10,
-                                    new Cons<Cell>(colorTest11, new Cons<Cell>(colorTest12,
-                                            new Cons<Cell>(colorTest13, new Cons<Cell>(colorTest14,
-                                                    new Cons<Cell>(colorTest15, new Cons<Cell>(colorTest16,
-                                                            new Cons<Cell>(colorTest17, new Cons<Cell>(colorTest18,
-                                                                    new Cons<Cell>(colorTest19, new Mt<Cell>())))))))))))))))))));
+    IList<Cell> theList2 = new Cons<Cell>(colorTest14, 
+            new Cons<Cell>(colorTest15, 
+                    new Cons<Cell>(colorTest16,
+                            new Cons<Cell>(colorTest17,
+                                    new Cons<Cell>(colorTest18,
+                                            new Cons<Cell>(colorTest19, 
+                                                    new Mt<Cell>()))))));
+    IList<Cell> theList = 
+            new Cons<Cell>(colorTest1, new Cons<Cell>(colorTest2, new Cons<Cell>(colorTest3,
+                    new Cons<Cell>(colorTest4, new Cons<Cell>(colorTest5, 
+                            new Cons<Cell>(colorTest6, new Cons<Cell>(colorTest7,
+                                    new Cons<Cell>(colorTest8, new Cons<Cell>(colorTest9,
+                                            new Cons<Cell>(colorTest10, 
+                                                    new Cons<Cell>(colorTest11,
+                                                            new Cons<Cell>(colorTest12,
+                                                                    new Cons<Cell>(colorTest13,
+                                                                            theList2)))))))))))));
+                                                                            
 
     Cell land7 = new Cell(0, 10, 10);
     Cell land8 = new Cell(-1, 10, 11);
@@ -1030,6 +1053,8 @@ class ExamplesIsland {
 
     IFunc<Cell, Cell> upFld = new UpdateFlood(64);
     ArrDub2ListCell aDLC = new ArrDub2ListCell();
+    TargetListVisitor tLV = new TargetListVisitor(new Mt<Target>());
+    TargetVisitor tV = new TargetVisitor(new Target(new Cell(0, 0, 0)));
     IComp<Cell> compCell = new CompCell();
     IComp<Cell> compRand = new RandCellComp();
 
@@ -1201,7 +1226,8 @@ class ExamplesIsland {
     // tests add for the class IList<T>
     void testAdd(Tester t) {
         IList<String> iS = new Cons<String>("one", new Mt<String>());
-        t.checkExpect(iS.add("two"), new Cons<String>("two", new Cons<String>("one", new Mt<String>())));
+        t.checkExpect(iS.add("two"), 
+                new Cons<String>("two", new Cons<String>("one", new Mt<String>())));
     }
 
     // tests accept for the interfaces IList<T> and IBST<T>
@@ -1213,8 +1239,10 @@ class ExamplesIsland {
         DisplayCellsVisitor dCV = new DisplayCellsVisitor(cons, 0);
         t.checkExpect(leaf.accept(dCV), dCV.visit(leaf));
         t.checkExpect(node.accept(dCV), dCV.visit(node));
-        t.checkException(new IllegalArgumentException("IList is not a valid argument"), cons, "accept", dCV);
-        t.checkException(new IllegalArgumentException("IList is not a valid argument"), mT, "accept", dCV);
+        t.checkException(
+                new IllegalArgumentException("IList is not a valid argument"), cons, "accept", dCV);
+        t.checkException(
+                new IllegalArgumentException("IList is not a valid argument"), mT, "accept", dCV);
     }
     // tests apply for the class UpdateFlood
     void testUpdateFlood(Tester t) {
@@ -1251,7 +1279,8 @@ class ExamplesIsland {
     // tests lengthT for the IList<T> class 
     void testLengthT(Tester t) {
         initializeWorlds();
-        IList<Integer> list = new Cons<Integer>(2, new Cons<Integer>(3, new Mt<Integer>()));
+        IList<Integer> list = new Cons<Integer>(2, 
+                new Cons<Integer>(3, new Mt<Integer>()));
         IList<Integer> mT = new Mt<Integer>();
         t.checkExpect(mountain.board.lengthT(0), 4096);
         t.checkExpect(list.lengthT(0), 2);
@@ -1262,7 +1291,8 @@ class ExamplesIsland {
     // tests length for the IList<T> class 
     void testLength(Tester t) {
         initializeWorlds();
-        IList<Integer> list = new Cons<Integer>(2, new Cons<Integer>(3, new Mt<Integer>()));
+        IList<Integer> list = new Cons<Integer>(2, 
+                new Cons<Integer>(3, new Mt<Integer>()));
         IList<Integer> mT = new Mt<Integer>();
         t.checkExpect(mountain.board.length(), 4096);
         t.checkExpect(list.length(), 2);
@@ -1500,14 +1530,16 @@ class ExamplesIsland {
         Mt<Cell> mT = new Mt<Cell>();
         Cons<Cell> cons = new Cons<Cell>(new Cell(5, 5, 7), mT);    
         DisplayCellsVisitor dCV = new DisplayCellsVisitor(cons, 0);
-        t.checkException(new IllegalArgumentException("IList is not a valid argument"), dCV, "visit", cons);
+        t.checkException(
+                new IllegalArgumentException("IList is not a valid argument"), dCV, "visit", cons);
 
     }
     // tests visit(MT) for the class DisplayVisitor 
     void testDisplayVisitM(Tester t) {
         Mt<Cell> mT = new Mt<Cell>();
         DisplayCellsVisitor dCV = new DisplayCellsVisitor(mT, 0);
-        t.checkException(new IllegalArgumentException("IList is not a valid argument"), dCV, "visit", mT);
+        t.checkException(
+                new IllegalArgumentException("IList is not a valid argument"), dCV, "visit", mT);
     }
     // tests visit(Node) for the class DisplayVisitor 
     void testDisplayVisitN(Tester t) {
@@ -1553,12 +1585,18 @@ class ExamplesIsland {
         Cell c4 = new Cell(1, 2, 3);
         Cell c5 = new Cell(30, 5, 4);
         Cell c6 = new OceanCell(0, 0);
-        t.checkExpect(c1.displayCell(0), new RectangleImage(new Posn(25, 35), 10, 10, c1.cellColor(0)));
-        t.checkExpect(c2.displayCell(0), new RectangleImage(new Posn(25, 35), 10, 10, c2.cellColor(0)));
-        t.checkExpect(c3.displayCell(0), new RectangleImage(new Posn(15, 25), 10, 10, c3.cellColor(0)));
-        t.checkExpect(c4.displayCell(0), new RectangleImage(new Posn(25, 35), 10, 10, c4.cellColor(0)));
-        t.checkExpect(c5.displayCell(0), new RectangleImage(new Posn(55, 45), 10, 10, c5.cellColor(0)));
-        t.checkExpect(c6.displayCell(0), new RectangleImage(new Posn(5, 5), 10, 10, c6.cellColor(0)));
+        t.checkExpect(c1.displayCell(0), 
+                new RectangleImage(new Posn(25, 35), 10, 10, c1.cellColor(0)));
+        t.checkExpect(c2.displayCell(0), 
+                new RectangleImage(new Posn(25, 35), 10, 10, c2.cellColor(0)));
+        t.checkExpect(c3.displayCell(0), 
+                new RectangleImage(new Posn(15, 25), 10, 10, c3.cellColor(0)));
+        t.checkExpect(c4.displayCell(0), 
+                new RectangleImage(new Posn(25, 35), 10, 10, c4.cellColor(0)));
+        t.checkExpect(c5.displayCell(0), 
+                new RectangleImage(new Posn(55, 45), 10, 10, c5.cellColor(0)));
+        t.checkExpect(c6.displayCell(0), 
+                new RectangleImage(new Posn(5, 5), 10, 10, c6.cellColor(0)));
     }
     // tests floodDanger for the class Cell TODO
     void testFloodDanger(Tester t) {
@@ -1607,8 +1645,14 @@ class ExamplesIsland {
     }
     // tests onKeyEvent for the class ForbiddenIslandWorld TODO
     void testOnKeyEvent(Tester t) {
+        this.initialize();
         // key press M
         t.checkExpect(this.nullWorld.board, null);
+        nullWorld.onKeyEvent("m");
+        t.checkExpect(((Cons<Cell>)(this.nullWorld.board)).first, 
+                ((Cons<Cell>)(this.nullWorld.makeMountain(false))).first);
+        // key press P
+        
         
     }
     // tests onTick for the class ForbiddenIslandWorld TODO
@@ -1651,30 +1695,42 @@ class ExamplesIsland {
     void testTargetListVisitM(Tester t) {
 
     }
-    // tests visit(Node) for the class TargetListVisitor TODO
+    // tests visit(Node) for the class TargetListVisitor
     void testTargetListVisitN(Tester t) {
-
+        Node<Cell> node = new Node<Cell>(new Cell(0, 0, 0), new Leaf<Cell>(), 
+                new Leaf<Cell>());
+        t.checkException(new IllegalArgumentException("IBST is not a valid argument"), 
+                this.tLV, "visit", node);
     }
-    // tests visit(Leaf) for the class TargetListVisitor TODO
+    // tests visit(Leaf) for the class TargetListVisitor
     void testTargetListVisitL(Tester t) {
+        Leaf<Cell> leaf = new Leaf<Cell>();
+        t.checkException(new IllegalArgumentException("IBST is not a valid argument"), 
+                this.tLV, "visit", leaf);
 
     }
 
-    // tests visit(Cons) for the class TargetVisitor TODO
+    // tests visit(Cons) for the class TargetVisitor
     void testTargetVisitC(Tester t) {
 
     }
-    // tests visit(Mt) for the class TargetVisitor TODO
+    // tests visit(Mt) for the class TargetVisitor
     void testTargetVisitM(Tester t) {
 
     }
-    // tests visit(Node) for the class TargetVisitor TODO
+    // tests visit(Node) for the class TargetVisitor
     void testTargetVisitN(Tester t) {
+        Node<Cell> node = new Node<Cell>(new Cell(0, 0, 0), new Leaf<Cell>(), 
+                new Leaf<Cell>());
+        t.checkException(new IllegalArgumentException("IBST is not a valid argument"), 
+                this.tV, "visit", node);
 
     }
-    // tests visit(Leaf) for the class TargetVisitor TODO
+    // tests visit(Leaf) for the class TargetVisitor
     void testTargetVisitL(Tester t) {
-
+        Leaf<Cell> leaf = new Leaf<Cell>();
+        t.checkException(new IllegalArgumentException("IBST is not a valid argument"), 
+                this.tV, "visit", leaf);
     }
 
     // tests isLeaf in the IBST interface
