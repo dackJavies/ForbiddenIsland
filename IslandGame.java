@@ -510,12 +510,12 @@ class ForbiddenIslandWorld extends World {
             this.board = this.makeTerrain();
         }
         
-        /*this.thePlayer = new Player(this.findValidLoc(), new Mt<Target>());
-        Target t1 = new Target(this.findValidLoc());
-        Target t2 = new Target(this.findValidLoc());
-        Target t3 = new Target(this.findValidLoc());
-        Target t4 = new Target(this.findValidLoc());
-        this.chopper = new HelicopterTarget(this.findValidLoc(), this.pieces);*/
+        // this.thePlayer = new Player(this.findValidLoc(), new Mt<Target>());
+        // Target t1 = new Target(this.findValidLoc())
+        // Target t2 = new Target(this.findValidLoc())
+        // Target t2 = new Target(this.findValidLoc())
+        // Target t2 = new Target(this.findValidLoc())
+        // this.chopper = new HelicopterTarget(this.findValidLoc(), this.pieces) 
         
     }
     
@@ -693,40 +693,20 @@ class ForbiddenIslandWorld extends World {
     
     Cell findValidLoc() {
         
-        return this.board.accept(new FindValidLoc());
+        this.board.accept(new FindValidLoc());
         
     }
     
 }
 
-// Pick a random one out of all the valid (or dry, unoccupied cells) cells
 class FindValidLoc implements IVisitor<Cell, Cell> {
     
-    Random rando = new Random();
-    ArrayList<Cell> goodCells = new ArrayList<Cell>();
-    
     public Cell visit(Cons<Cell> c) {
-        if (!c.first.isFlooded && !c.first.isCoastalCell() && !c.first.hasTarget && !c.first.hasPlayer) {
-            goodCells.add(c.first);
-        }
-        return c.rest.accept(this);
+        
     }
     
     public Cell visit(Mt<Cell> m) {
-        if (goodCells.size() != 0) {
-            return goodCells.get(rando.nextInt(goodCells.size()));
-        }
-        else {
-            throw new RuntimeException("There are no valid cells.");
-        }
-    }
-
-    public Cell visit(Node<Cell> n) {
-        throw new IllegalArgumentException("IBST is not a valid argument");
-    }
-
-    public Cell visit(Leaf<Cell> n) {
-        throw new IllegalArgumentException("IBST is not a valid argument");
+        
     }
     
 }
