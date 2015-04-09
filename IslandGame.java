@@ -17,7 +17,7 @@ import java.util.Random;
 
 
 //represents a list of T
-interface IList<T> {
+interface IList<T> extends Iterable<T>{
     // Adds the given item to the front of this list
     IList<T> add(T t);
     // Draws the list according to its visitor
@@ -31,6 +31,8 @@ interface IList<T> {
     // Length of this list
     int lengthT(int acc);
     int length();
+    // Is this list empty?
+    boolean isEmpty();
 }
 
 //To represent a non-empty list of T
@@ -71,6 +73,12 @@ class Cons<T> implements IList<T> {
     public IBST<T> list2Tree(IComp<T> comp) {
         return this.rest.list2Tree(comp).insert(comp, this.first);
     }
+    public boolean isEmpty() {
+        return false;
+    }
+    public Iterator<T> iterator() {
+        return new IListIterator<T>(this);
+    }
 }
 
 //To represent an empty list of T
@@ -104,6 +112,12 @@ class Mt<T> implements IList<T> {
     // creates a new Tree from this IList
     public IBST<T> list2Tree(IComp<T> comp) {
         return new Leaf<T>();
+    }
+    public boolean isEmpty() {
+        return true;
+    }
+    public Iterator<T> iterator() {
+        return new IListIterator<T>(this);
     }
 }    
 
@@ -321,7 +335,6 @@ class DisplayCellsVisitor implements IVisitor<Cell, WorldImage> {
     public WorldImage visit(Node<Cell> n) {
         return new OverlayImages(n.data.displayCell(waterLevel), 
                 new OverlayImages(n.left.accept(this), n.right.accept(this)));
-
     }
     //
     public WorldImage visit(Leaf<Cell> n) {
@@ -462,8 +475,8 @@ class Cell {
     }
     // Determines whether this is on the coastline TODO make test
     boolean isCoastalCell() {
-        return this.left.isFlooded || this.right.isFlooded || this.right.isFlooded
-                || this.right.isFlooded;
+        return this.left.isFlooded || this.right.isFlooded || this.bottom.isFlooded
+                || this.top.isFlooded;
     } 
     // Determines whether this is an OceanCell 
     boolean isOcean() { return false; }
@@ -496,6 +509,31 @@ class OceanCell extends Cell {
     Color cellColor(int waterLevel) {
         return new Color(0, 0, 120);
     }
+}
+
+class IListIterator<T> implements Iterator<T> {
+    
+    IList<T> worklist;
+    
+    IListIterator(IList<T> worklist) {
+        this.worklist = worklist;
+    }
+    
+    public boolean hasNext() {
+        return !this.worklist.isEmpty();
+    }
+    
+    public T next() {
+        if (!this.hasNext()) {
+            throw new RuntimeException("Does not have a next");
+        }
+        @SuppressWarnings("unchecked")
+        Cons<T> worklistAsCons = (Cons<T>)this.worklist;
+        T result = worklistAsCons.first;
+        this.worklist = worklistAsCons.rest;
+        return result;
+    }
+    
 }
 
 class ForbiddenIslandWorld extends World {
@@ -770,6 +808,9 @@ class ForbiddenIslandWorld extends World {
     public void onTick() {
         if (this.waterTick >= 10) {
             this.waterHeight += 1;
+            for (Cell c: this.board) {
+                c.floodNeighbors(waterHeight);
+            }
             this.board = this.board.map(new UpdateFlood(this.waterHeight));
             this.waterTick = 0;
         }
@@ -1780,7 +1821,7 @@ class ExamplesIsland {
         FindValidLoc fvl = new FindValidLoc();
         t.checkException(new RuntimeException("There are no valid cells."),
                 fvl, "visit", m);
-        t.checkExpect(c.accept(fvl), c1);
+        //t.checkExpect(c.accept(fvl), c1);
     }
     
     // tests visit for the class FindValidLoc
@@ -1906,7 +1947,7 @@ class ExamplesIsland {
     // runs big bang
     void testRunGame(Tester t) {
         this.initializeWorlds();
-        //this.random.bigBang(640, 640);
+        this.mountain.bigBang(640, 640, 0.0001);
 
     }
 
