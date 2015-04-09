@@ -235,6 +235,7 @@ class ArrDub2ListCell implements IFunc<ArrayList<ArrayList<Double>>, IList<Cell>
     // assigns the given cell its neighbors
     void assignNeighbors(Cell tempCell, int index1, int index2, 
             ArrayList<ArrayList<Cell>> result) {
+
         if (index1 == 0) {
             tempCell.left = tempCell;
         }
@@ -320,6 +321,7 @@ class DisplayCellsVisitor implements IVisitor<Cell, WorldImage> {
     public WorldImage visit(Node<Cell> n) {
         return new OverlayImages(n.data.displayCell(waterLevel), 
                 new OverlayImages(n.left.accept(this), n.right.accept(this)));
+
     }
     //
     public WorldImage visit(Leaf<Cell> n) {
@@ -398,6 +400,7 @@ class Cell {
         return new RectangleImage(new Posn((this.x * sideLength) + posnShift, 
                 (this.y * sideLength) + posnShift), 
                 sideLength, sideLength, this.cellColor(waterLevel));
+
     }
     // Computes this cell's color
     Color cellColor(int waterLevel) {
@@ -419,12 +422,14 @@ class Cell {
             if ((int)this.height - waterLevel >= 15) {
                 int other = Math.min(Math.max(0, ((((int)this.height - waterLevel) - 15) 
                         * (255 / 18))), 255);
+
                 return new Color(other, 255, other);
             }
             // green from 255 - 120
             else {
                 int other = Math.min(Math.max(bound, (((int)this.height - waterLevel) 
                         * (255 / 15))), 255);
+
                 return new Color(0, other, 0);
             }
         }
@@ -516,7 +521,6 @@ class ForbiddenIslandWorld extends World {
         this.chopper = new HelicopterTarget(this.findValidLoc(), this.pieces);*/
 
     }
-
     // Creates a standard map
     IList<Cell> makeMountain(boolean isRandom) {
 
@@ -535,6 +539,7 @@ class ForbiddenIslandWorld extends World {
             for(int index2 = 0; index2 < ISLAND_SIZE; index2 += 1) {
                 newBoard.get(index1).add(maxHeight - (Math.abs(maxHeight - index1) 
                         + (Math.abs(maxHeight - index2))));
+
             }
         }
 
@@ -595,6 +600,7 @@ class ForbiddenIslandWorld extends World {
         newBoard.get(size / 2).set(size / 2, 1.0);
     }
 
+    // generate random terrain
     void terrainProcedure(int size, ArrayList<ArrayList<Double>> board, 
             int tLx, int tLy, int tRx, 
             int tRy, int bLx, int bLy, int bRx, int bRy) {
@@ -631,11 +637,27 @@ class ForbiddenIslandWorld extends World {
         board.get(rightX).set(rightY, r);
         // middle
         board.get(topX).set(leftY, m);
-
-        // recursion
-        /*if () {
-      this.terrainProcedure(size, board, tLx, tLy, tRx, tRy, bLx, bLy, bRx, bRy);
-      }*/
+        // recur on four new quadrants if there are still quadrants to process
+        if (!terrainTerminate(topX, topY, rightX, rightY, bottomX, bottomY,
+                leftX, leftY)) {
+            this.terrainProcedure(size / 2, board, tLx, tLy, topX, topY,
+                    leftX, leftY, topX, leftY);
+            this.terrainProcedure(size / 2, board, topX, topY, tRx, tRy,
+                    topX, leftY, rightX, rightY);
+            this.terrainProcedure(size / 2, board, topX, leftY, rightX, rightY,
+                    bottomX, bottomY, bRx, bRy);
+            this.terrainProcedure(size / 2, board, leftX, leftY, topX, leftY,
+                    bLx, bLy, bottomX, bottomY);
+        }
+    }
+    
+    // Has the size of the next quadrant shrank to a termination size?
+    boolean terrainTerminate(int topX, int topY, int rightX, int rightY,
+            int bottomX, int bottomY, int leftX, int leftY) {
+        return topX == rightX || topX == leftX || topY == bottomY || 
+                rightX == leftX ||  rightY == topY || rightY == bottomY ||
+                    bottomX == rightX || bottomX == leftX || leftY == topY ||
+                        leftY == bottomY;
     }
 
     // pauses the game
@@ -650,6 +672,7 @@ class ForbiddenIslandWorld extends World {
             return new OverlayImages(dCVisitor.board.accept(dCVisitor), 
                     new RectangleImage(
                             new Posn(0, 0), 1280, 1280, new Color(255, 0, 0, 150)));
+
         }
         return dCVisitor.board.accept(dCVisitor);
     }
@@ -672,11 +695,11 @@ class ForbiddenIslandWorld extends World {
         else if (ke.equals("p")) {
             this.isPaused = false;
         }
-        //else if (!this.isPaused){
-        //    this.thePlayer.movePlayer(ke);
-        //}
+        else if (!this.isPaused){
+            this.thePlayer.movePlayer(ke);
+        }
         else {
-            // DO NOTHING
+            this.isPaused = this.isPaused;
         }
 
     }
@@ -692,25 +715,44 @@ class ForbiddenIslandWorld extends World {
             this.waterTick += 1;
         }
     }
-    /*
+    
     Cell findValidLoc() {
-
-        this.board.accept(new FindValidLoc());
-
+        
+        return this.board.accept(new FindValidLoc());
+        
     }
-
+    
 }
 
+// Pick a random one out of all the valid (or dry, unoccupied cells) cells
 class FindValidLoc implements IVisitor<Cell, Cell> {
-
+    
+    Random rando = new Random();
+    ArrayList<Cell> goodCells = new ArrayList<Cell>();
+    
     public Cell visit(Cons<Cell> c) {
-
+        if (!c.first.isFlooded && !c.first.isCoastalCell() && !c.first.hasTarget && !c.first.hasPlayer) {
+            goodCells.add(c.first);
+        }
+        return c.rest.accept(this);
     }
-
+    
     public Cell visit(Mt<Cell> m) {
-
+        if (goodCells.size() != 0) {
+            return goodCells.get(rando.nextInt(goodCells.size()));
+        }
+        else {
+            throw new RuntimeException("There are no valid cells.");
+        }
     }
-     */
+
+    public Cell visit(Node<Cell> n) {
+        throw new IllegalArgumentException("IBST is not a valid argument");
+    }
+
+    public Cell visit(Leaf<Cell> n) {
+        throw new IllegalArgumentException("IBST is not a valid argument");
+    }
 }
 
 // represent the player's avatar: the pilot
@@ -805,7 +847,6 @@ class Target {
     IList<Target> pickedUp(Player p) {
         this.location.hasTarget = false;
         return p.inventory.add(this);
-
     }
 
 }
@@ -824,6 +865,7 @@ class HelicopterTarget extends Target {
         this.pieces = pieces;
         this.picture = new FromFileImage(new Posn(this.location.x, this.location.y), 
                 "helicopter.png");
+
     }
 
     // Does the given player have all the pieces?
@@ -986,6 +1028,7 @@ class ExamplesIsland {
             new Cons<Cell>(landAbove3, new Cons<Cell>(landAbove4, new Mt<Cell>()))));
     IList<Cell> iList4 = new Cons<Cell>(landDan1, new Cons<Cell>(landDan2, 
             new Cons<Cell>(landDan3, new Cons<Cell>(landDan4, new Mt<Cell>()))));
+
     IList<Cell> iLAll = new Mt<Cell>();
     Cell s = new OceanCell(0, 1);
 
@@ -1027,7 +1070,6 @@ class ExamplesIsland {
                                                             new Cons<Cell>(colorTest12,
                                                                     new Cons<Cell>(colorTest13,
                                                                             theList2)))))))))))));
-
 
     Cell land7 = new Cell(0, 10, 10);
     Cell land8 = new Cell(-1, 10, 11);
@@ -1220,6 +1262,7 @@ class ExamplesIsland {
         IList<String> iS = new Cons<String>("one", new Mt<String>());
         t.checkExpect(iS.add("two"), 
                 new Cons<String>("two", new Cons<String>("one", new Mt<String>())));
+
     }
 
     // tests accept for the interfaces IList<T> and IBST<T>
@@ -1235,6 +1278,7 @@ class ExamplesIsland {
                 new IllegalArgumentException("IList is not a valid argument"), cons, "accept", dCV);
         t.checkException(
                 new IllegalArgumentException("IList is not a valid argument"), mT, "accept", dCV);
+
     }
     // tests apply for the class UpdateFlood
     void testUpdateFlood(Tester t) {
@@ -1271,8 +1315,7 @@ class ExamplesIsland {
     // tests lengthT for the IList<T> class 
     void testLengthT(Tester t) {
         initializeWorlds();
-        IList<Integer> list = new Cons<Integer>(2, 
-                new Cons<Integer>(3, new Mt<Integer>()));
+        IList<Integer> list = new Cons<Integer>(2, new Cons<Integer>(3, new Mt<Integer>()));
         IList<Integer> mT = new Mt<Integer>();
         t.checkExpect(mountain.board.lengthT(0), 4096);
         t.checkExpect(list.lengthT(0), 2);
@@ -1283,8 +1326,7 @@ class ExamplesIsland {
     // tests length for the IList<T> class 
     void testLength(Tester t) {
         initializeWorlds();
-        IList<Integer> list = new Cons<Integer>(2, 
-                new Cons<Integer>(3, new Mt<Integer>()));
+        IList<Integer> list = new Cons<Integer>(2, new Cons<Integer>(3, new Mt<Integer>()));
         IList<Integer> mT = new Mt<Integer>();
         t.checkExpect(mountain.board.length(), 4096);
         t.checkExpect(list.length(), 2);
@@ -1645,7 +1687,6 @@ class ExamplesIsland {
         //        ((Cons<Cell>)(this.nullWorld.makeMountain(false))).first);
         // key press P
 
-
     }
     // tests onTick for the class ForbiddenIslandWorld TODO
     void testOnTick(Tester t) {
@@ -1723,6 +1764,7 @@ class ExamplesIsland {
         Leaf<Cell> leaf = new Leaf<Cell>();
         t.checkException(new IllegalArgumentException("IBST is not a valid argument"), 
                 this.tV, "visit", leaf);
+
     }
 
     // tests isLeaf in the IBST interface
@@ -1758,6 +1800,7 @@ class ExamplesIsland {
     void testRunGame(Tester t) {
         this.initializeWorlds();
         this.random.bigBang(640, 640);
+
     }
 
 }
