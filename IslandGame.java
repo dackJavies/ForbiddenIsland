@@ -446,11 +446,21 @@ class Cell {
             }
         }
     }
+    //Initiates flooding TODO test
+    void floodNeighbors(int waterLevel) {
+        if (this.belowWaterLevel(waterLevel) && this.isCoastalCell() && !this.isFlooded) {
+            this.isFlooded = true;
+            this.left.floodNeighbors(waterLevel);
+            this.right.floodNeighbors(waterLevel);
+            this.top.floodNeighbors(waterLevel);
+            this.bottom.floodNeighbors(waterLevel);
+        }
+    }
     // Determines whether this cell is in danger of flooding or flooded
     boolean belowWaterLevel(int waterLevel) {
         return this.height <= waterLevel || this.isFlooded;
     }
-    // Determines whether this is on the coastline
+    // Determines whether this is on the coastline TODO make test
     boolean isCoastalCell() {
         return this.left.isFlooded || this.right.isFlooded || this.right.isFlooded
                 || this.right.isFlooded;
@@ -530,7 +540,8 @@ class ForbiddenIslandWorld extends World {
         }
         else if (gameMode.equals("r")) {
             this.board = this.makeMountain(true);
-           /* this.thePlayer = new Player(this.findValidLoc(), new Mt<Target>());
+
+            /*this.thePlayer = new Player(this.findValidLoc(), new Mt<Target>());
             Target t1 = new Target(this.findValidLoc());
             Target t2 = new Target(this.findValidLoc());
             Target t3 = new Target(this.findValidLoc());
@@ -538,11 +549,11 @@ class ForbiddenIslandWorld extends World {
             IList<Target> list = new Cons<Target>(t1, new Cons<Target>(t2, new Cons<Target>(t3, 
                     new Cons<Target>(t4, new Mt<Target>()))));
             this.pieces = list;
-            this.chopper = new HelicopterTarget(this.findValidLoc(), this.pieces);*/
+            this.chopper = new HelicopterTarget(this.findValidLoc(), this.pieces); */
         }
         else  if(gameMode.equals("t")) {
             this.board = this.makeTerrain();
-            /*this.thePlayer = new Player(this.findValidLoc(), new Mt<Target>());
+           /* this.thePlayer = new Player(this.findValidLoc(), new Mt<Target>());
             Target t1 = new Target(this.findValidLoc());
             Target t2 = new Target(this.findValidLoc());
             Target t3 = new Target(this.findValidLoc());
@@ -624,12 +635,12 @@ class ForbiddenIslandWorld extends World {
     }
 
     void startTerrain(ArrayList<ArrayList<Double>> newBoard, int size) {
-        newBoard.get(0).set(0, 0.0);
+        newBoard.get(0).set(0, -1.0);
         newBoard.get(0).set(size, 0.0);
         newBoard.get(size).set(0, 0.0);
         newBoard.get(size).set(size, 0.0);
 
-        newBoard.get(size / 2).set(size / 2, 1.0);
+        newBoard.get(size / 2).set(size / 2, (double) (size / 3));
     }
 
     // generate random terrain
@@ -643,11 +654,17 @@ class ForbiddenIslandWorld extends World {
         double bL = board.get(bLx).get(bLy);
         double bR = board.get(bRx).get(bRy);
         // new heights
-        double t = (ran.nextDouble() * size / 2) + ((tL + tR) / 2);
-        double b = (ran.nextDouble() * size / 2) + ((bL + bR) / 2);
-        double l = (ran.nextDouble() * size / 2) + ((tL + bL) / 2);
-        double r = (ran.nextDouble() * size / 2) + ((tR + bR) / 2);
-        double m = (ran.nextDouble() * size / 2) + ((tL + tR + bL + bR) / 4);
+        double div = 6;
+        double t = (ran.nextDouble() * size * this.randomSign() / div) 
+                + ((tL + tR) / 2);
+        double b = (ran.nextDouble() * size * this.randomSign() / div)
+                + ((bL + bR) / 2);
+        double l = (ran.nextDouble() * size * this.randomSign() / div) 
+                + ((tL + bL) / 2);
+        double r = (ran.nextDouble() * size * this.randomSign() / div) 
+                + ((tR + bR) / 2);
+        double m = (ran.nextDouble() * size * this.randomSign() / div) 
+                + ((tL + tR + bL + bR) / 4);
 
         // constants 
         int topX = (tRx + tLx) / 2;
@@ -692,7 +709,15 @@ class ForbiddenIslandWorld extends World {
                 leftY == bottomY;
     }
     
-    // picks either 
+    // picks either negative or positive
+    int randomSign() {
+        if (Math.random() <= 0.5) {
+            return -1;
+        }
+        else {
+            return 1;
+        }
+    }
 
     // pauses the game
     void pauseGame() {
@@ -723,10 +748,10 @@ class ForbiddenIslandWorld extends World {
         else if (ke.equals("t")) {
             this.board = this.makeTerrain();
         }
-        else if (ke.equals("p") && !this.isPaused) {
+        else if (ke.equals("h") && !this.isPaused) {
             this.isPaused = true;
         }
-        else if (ke.equals("p")) {
+        else if (ke.equals("h")) {
             this.isPaused = false;
         }
         else if (!this.isPaused && ((ke.equals("up")
@@ -1376,6 +1401,7 @@ class ExamplesIsland {
         IComp<Cell> rand = new RandCellComp();
         // its random...
         //t.checkExpect(rand.compare(c1, c2) <= 0 || rand.compare(c1, c2) >= 0, true);
+
     }
     // tests compare in the CompCell class 
     void testCompCell(Tester t) {
