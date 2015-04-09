@@ -397,6 +397,18 @@ class Cell {
     WorldImage displayCell(int waterLevel) {
         int sideLength = 10;
         int posnShift = sideLength / 2;
+        if (this.hasPlayer) {
+            return new OverlayImages(new RectangleImage(new Posn((this.x * sideLength) + posnShift, 
+                (this.y * sideLength) + posnShift), 
+                sideLength, sideLength, this.cellColor(waterLevel)), 
+                new FromFileImage(new Posn(this.x, this.y) , "pilot-icon.png"));
+        }
+        else if (this.hasTarget) {
+            return new OverlayImages(new RectangleImage(new Posn((this.x * sideLength) + posnShift, 
+                    (this.y * sideLength) + posnShift), 
+                    sideLength, sideLength, this.cellColor(waterLevel)), 
+                    new FromFileImage(new Posn(this.x, this.y) , "helicopter.pngj"));
+        }
         return new RectangleImage(new Posn((this.x * sideLength) + posnShift, 
                 (this.y * sideLength) + posnShift), 
                 sideLength, sideLength, this.cellColor(waterLevel));
@@ -497,7 +509,8 @@ class ForbiddenIslandWorld extends World {
 
         this.waterHeight = 0;
         this.waterTick = 0;
-        this.board = null;
+        this.board = new Cons<Cell>(new Cell(0, 0, 0), 
+                new Mt<Cell>());
         this.isPaused = false;
         this.thePlayer = null;
         this.pieces = null;
@@ -505,21 +518,40 @@ class ForbiddenIslandWorld extends World {
 
         if (gameMode.equals("m")) {
             this.board = this.makeMountain(false);
+            this.thePlayer = new Player(this.findValidLoc(), new Mt<Target>());
+            Target t1 = new Target(this.findValidLoc());
+            Target t2 = new Target(this.findValidLoc());
+            Target t3 = new Target(this.findValidLoc());
+            Target t4 = new Target(this.findValidLoc());
+            IList<Target> list = new Cons<Target>(t1, new Cons<Target>(t2, new Cons<Target>(t3, 
+                    new Cons<Target>(t4, new Mt<Target>()))));
+            this.pieces = list;
+            this.chopper = new HelicopterTarget(this.findValidLoc(), this.pieces);
         }
         else if (gameMode.equals("r")) {
             this.board = this.makeMountain(true);
+            this.thePlayer = new Player(this.findValidLoc(), new Mt<Target>());
+            Target t1 = new Target(this.findValidLoc());
+            Target t2 = new Target(this.findValidLoc());
+            Target t3 = new Target(this.findValidLoc());
+            Target t4 = new Target(this.findValidLoc());
+            IList<Target> list = new Cons<Target>(t1, new Cons<Target>(t2, new Cons<Target>(t3, 
+                    new Cons<Target>(t4, new Mt<Target>()))));
+            this.pieces = list;
+            this.chopper = new HelicopterTarget(this.findValidLoc(), this.pieces);
         }
         else  if(gameMode.equals("t")) {
             this.board = this.makeTerrain();
+            this.thePlayer = new Player(this.findValidLoc(), new Mt<Target>());
+            Target t1 = new Target(this.findValidLoc());
+            Target t2 = new Target(this.findValidLoc());
+            Target t3 = new Target(this.findValidLoc());
+            Target t4 = new Target(this.findValidLoc());
+            IList<Target> list = new Cons<Target>(t1, new Cons<Target>(t2, new Cons<Target>(t3, 
+                    new Cons<Target>(t4, new Mt<Target>()))));
+            this.pieces = list;
+            this.chopper = new HelicopterTarget(this.findValidLoc(), this.pieces);
         }
-
-        /*this.thePlayer = new Player(this.findValidLoc(), new Mt<Target>());
-        Target t1 = new Target(this.findValidLoc());
-        Target t2 = new Target(this.findValidLoc());
-        Target t3 = new Target(this.findValidLoc());
-        Target t4 = new Target(this.findValidLoc());
-        this.chopper = new HelicopterTarget(this.findValidLoc(), this.pieces);*/
-
     }
     // Creates a standard map
     IList<Cell> makeMountain(boolean isRandom) {
@@ -650,15 +682,17 @@ class ForbiddenIslandWorld extends World {
                     bLx, bLy, bottomX, bottomY);
         }
     }
-    
+
     // Has the size of the next quadrant shrank to a termination size?
     boolean terrainTerminate(int topX, int topY, int rightX, int rightY,
             int bottomX, int bottomY, int leftX, int leftY) {
         return topX == rightX || topX == leftX || topY == bottomY || 
                 rightX == leftX ||  rightY == topY || rightY == bottomY ||
-                    bottomX == rightX || bottomX == leftX || leftY == topY ||
-                        leftY == bottomY;
+                bottomX == rightX || bottomX == leftX || leftY == topY ||
+                leftY == bottomY;
     }
+    
+    // picks either 
 
     // pauses the game
     void pauseGame() {
@@ -695,11 +729,14 @@ class ForbiddenIslandWorld extends World {
         else if (ke.equals("p")) {
             this.isPaused = false;
         }
-        else if (!this.isPaused){
+        else if (!this.isPaused && ((ke.equals("up")
+                || ke.equals("down") || ke.equals("left") 
+                || ke.equals("right"))))
+                {
             this.thePlayer.movePlayer(ke);
         }
         else {
-            this.isPaused = this.isPaused;
+            // DO SOMETHING
         }
 
     }
@@ -715,28 +752,28 @@ class ForbiddenIslandWorld extends World {
             this.waterTick += 1;
         }
     }
-    
+
     Cell findValidLoc() {
-        
+
         return this.board.accept(new FindValidLoc());
-        
+
     }
-    
+
 }
 
 // Pick a random one out of all the valid (or dry, unoccupied cells) cells
 class FindValidLoc implements IVisitor<Cell, Cell> {
-    
+
     Random rando = new Random();
     ArrayList<Cell> goodCells = new ArrayList<Cell>();
-    
+
     public Cell visit(Cons<Cell> c) {
         if (!c.first.isFlooded && !c.first.isCoastalCell() && !c.first.hasTarget && !c.first.hasPlayer) {
             goodCells.add(c.first);
         }
         return c.rest.accept(this);
     }
-    
+
     public Cell visit(Mt<Cell> m) {
         if (goodCells.size() != 0) {
             return goodCells.get(rando.nextInt(goodCells.size()));
@@ -946,7 +983,7 @@ class TargetVisitor implements IVisitor<Target, Boolean> {
 
 //represents examples and tests for the ForbiddenIslandWorld class
 class ExamplesIsland {
-    ForbiddenIslandWorld nullWorld = new ForbiddenIslandWorld("not a world");
+    // TODO ForbiddenIslandWorld nullWorld = new ForbiddenIslandWorld("not a world");
 
     ForbiddenIslandWorld mountain = new ForbiddenIslandWorld("not a mountain yet"); 
     ForbiddenIslandWorld random = new ForbiddenIslandWorld("not a random yet");
@@ -1251,10 +1288,10 @@ class ExamplesIsland {
     }
     // initializes the Worlds
     void initializeWorlds() {
-        this.nullWorld.board = null;
-        this.mountain.board = this.nullWorld.makeMountain(false);
-        this.random.board = this.nullWorld.makeMountain(true);
-        this.terrain.board = this.nullWorld.makeTerrain();
+        // TODO this.nullWorld.board = null;
+        this.mountain = new ForbiddenIslandWorld("m");
+        this.random = new ForbiddenIslandWorld("r");
+        this.terrain = new ForbiddenIslandWorld("t");
     }
 
     // tests add for the class IList<T>
@@ -1681,8 +1718,8 @@ class ExamplesIsland {
     void testOnKeyEvent(Tester t) {
         this.initialize();
         // key press M
-        t.checkExpect(this.nullWorld.board, null);
-        nullWorld.onKeyEvent("m");
+        //t.checkExpect(this.nullWorld.board, null);
+        // TODO nullWorld.onKeyEvent("m");
         //t.checkExpect(((Cons<Cell>)(this.nullWorld.board)).first, 
         //        ((Cons<Cell>)(this.nullWorld.makeMountain(false))).first);
         // key press P
