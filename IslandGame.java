@@ -17,7 +17,7 @@ import java.util.Random;
 
 
 //represents a list of T
-interface IList<T> extends Iterable<T>{
+interface IList<T> {
     // Adds the given item to the front of this list
     IList<T> add(T t);
     // Draws the list according to its visitor
@@ -31,8 +31,6 @@ interface IList<T> extends Iterable<T>{
     // Length of this list
     int lengthT(int acc);
     int length();
-    // Is this list empty?
-    boolean isEmpty();
 }
 
 //To represent a non-empty list of T
@@ -73,12 +71,6 @@ class Cons<T> implements IList<T> {
     public IBST<T> list2Tree(IComp<T> comp) {
         return this.rest.list2Tree(comp).insert(comp, this.first);
     }
-    public boolean isEmpty() {
-        return false;
-    }
-    public Iterator<T> iterator() {
-        return new IListIterator<T>(this);
-    }
 }
 
 //To represent an empty list of T
@@ -112,12 +104,6 @@ class Mt<T> implements IList<T> {
     // creates a new Tree from this IList
     public IBST<T> list2Tree(IComp<T> comp) {
         return new Leaf<T>();
-    }
-    public boolean isEmpty() {
-        return true;
-    }
-    public Iterator<T> iterator() {
-        return new IListIterator<T>(this);
     }
 }    
 
@@ -335,6 +321,7 @@ class DisplayCellsVisitor implements IVisitor<Cell, WorldImage> {
     public WorldImage visit(Node<Cell> n) {
         return new OverlayImages(n.data.displayCell(waterLevel), 
                 new OverlayImages(n.left.accept(this), n.right.accept(this)));
+
     }
     //
     public WorldImage visit(Leaf<Cell> n) {
@@ -356,15 +343,9 @@ class UpdateFlood implements IFunc<Cell, Cell> {
     UpdateFlood(int waterLevel) { this.waterLevel = waterLevel; }
 
     public Cell apply(Cell t) {
-
-        if (t.isOcean()) {
-            return t;
+        t.floodNeighbors(waterLevel);
+        return new Cell(t.height, t.x, t.y);
         }
-        else {
-            return new Cell(t.height, t.x, t.y, t.updateFloodHelp(waterLevel));
-        }
-
-    }
 
 }
 
@@ -401,10 +382,6 @@ class Cell {
     Cell(double height, int x, int y, boolean isFlooded) {
         this(height, x, y);
         this.isFlooded = isFlooded;
-    }
-    // Determines whether this is an OceanCell
-    boolean updateFloodHelp(int waterLevel) {
-        return (this.height - waterLevel) <= 0;
     }
     // Displays this cell 
     WorldImage displayCell(int waterLevel) {
@@ -475,8 +452,8 @@ class Cell {
     }
     // Determines whether this is on the coastline TODO make test
     boolean isCoastalCell() {
-        return this.left.isFlooded || this.right.isFlooded || this.bottom.isFlooded
-                || this.top.isFlooded;
+        return this.left.isFlooded || this.right.isFlooded || this.right.isFlooded
+                || this.right.isFlooded;
     } 
     // Determines whether this is an OceanCell 
     boolean isOcean() { return false; }
@@ -509,31 +486,6 @@ class OceanCell extends Cell {
     Color cellColor(int waterLevel) {
         return new Color(0, 0, 120);
     }
-}
-
-class IListIterator<T> implements Iterator<T> {
-    
-    IList<T> worklist;
-    
-    IListIterator(IList<T> worklist) {
-        this.worklist = worklist;
-    }
-    
-    public boolean hasNext() {
-        return !this.worklist.isEmpty();
-    }
-    
-    public T next() {
-        if (!this.hasNext()) {
-            throw new RuntimeException("Does not have a next");
-        }
-        @SuppressWarnings("unchecked")
-        Cons<T> worklistAsCons = (Cons<T>)this.worklist;
-        T result = worklistAsCons.first;
-        this.worklist = worklistAsCons.rest;
-        return result;
-    }
-    
 }
 
 class ForbiddenIslandWorld extends World {
@@ -794,8 +746,7 @@ class ForbiddenIslandWorld extends World {
         }
         else if (!this.isPaused && ((ke.equals("up")
                 || ke.equals("down") || ke.equals("left") 
-                || ke.equals("right"))))
-                {
+                || ke.equals("right")))) {
             this.thePlayer.movePlayer(ke);
         }
         else {
@@ -808,17 +759,14 @@ class ForbiddenIslandWorld extends World {
     public void onTick() {
         if (this.waterTick >= 10) {
             this.waterHeight += 1;
-            for (Cell c: this.board) {
-                c.floodNeighbors(waterHeight);
-            }
-            this.board = this.board.map(new UpdateFlood(this.waterHeight));
+            this.board.map(new UpdateFlood(this.waterHeight));
             this.waterTick = 0;
         }
         else {
             this.waterTick += 1;
         }
     }
-
+    // finds a valid location
     Cell findValidLoc() {
 
         return this.board.accept(new FindValidLoc());
@@ -832,14 +780,14 @@ class FindValidLoc implements IVisitor<Cell, Cell> {
 
     Random rando = new Random();
     ArrayList<Cell> goodCells = new ArrayList<Cell>();
-
+    // visit a cons
     public Cell visit(Cons<Cell> c) {
         if (!c.first.isFlooded && !c.first.isCoastalCell() && !c.first.hasTarget && !c.first.hasPlayer) {
             goodCells.add(c.first);
         }
         return c.rest.accept(this);
     }
-
+    // visit an Mt
     public Cell visit(Mt<Cell> m) {
         if (goodCells.size() != 0) {
             return goodCells.get(rando.nextInt(1));
@@ -848,11 +796,11 @@ class FindValidLoc implements IVisitor<Cell, Cell> {
             throw new RuntimeException("There are no valid cells.");
         }
     }
-//TODO
+    // visit a node
     public Cell visit(Node<Cell> n) {
         throw new IllegalArgumentException("IBST is not a valid argument");
     }
-
+    // visit a leaf
     public Cell visit(Leaf<Cell> n) {
         throw new IllegalArgumentException("IBST is not a valid argument");
     }
@@ -879,18 +827,31 @@ class Player {
         if (this.safe(ke)) {
             if (ke.equals("left")) {
                 this.location.hasPlayer = false;
+                Player p = new Player(this.location.left, this.inventory);
+                p.picture = new FromFileImage(new Posn(this.location.x, this.location.y), 
+                        "pilot-icon.png");
                 return new Player(this.location.left, this.inventory);
+                
             }
             else if (ke.equals("down")) {
                 this.location.hasPlayer = false;
+                Player p = new Player(this.location.bottom, this.inventory);
+                p.picture = new FromFileImage(new Posn(this.location.x, this.location.y), 
+                        "pilot-icon.png");
                 return new Player(this.location.bottom, this.inventory);
             }
             else if (ke.equals("right")) {
                 this.location.hasPlayer = false;
+                Player p = new Player(this.location.right, this.inventory);
+                p.picture = new FromFileImage(new Posn(this.location.x, this.location.y), 
+                        "pilot-icon.png");
                 return new Player(this.location.right, this.inventory);
             }
             else if (ke.equals("up")) {
                 this.location.hasPlayer = false;
+                Player p = new Player(this.location.top, this.inventory);
+                p.picture = new FromFileImage(new Posn(this.location.x, this.location.y), 
+                        "pilot-icon.png");
                 return new Player(this.location.top, this.inventory);
             }
             else {
@@ -1002,16 +963,16 @@ class TargetListVisitor implements IVisitor<Target, Boolean> {
         return src.accept(new TargetVisitor(c.first)) &&
                 c.rest.accept(this);
     }
-
+    // visit an Mt
     public Boolean visit(Mt<Target> m) {
         return false;
     }
-    // TODO
+    // visit a cons
     public Boolean visit(Node<Target> n) {
         throw new IllegalArgumentException("IBST is not a valid argument");
     }
 
-    // TODO
+    // visit a leaf
     public Boolean visit(Leaf<Target> n) {
         throw new IllegalArgumentException("IBST is not a valid argument");
     }
@@ -1025,22 +986,22 @@ class TargetVisitor implements IVisitor<Target, Boolean> {
     TargetVisitor(Target toFind) {
         this.toFind = toFind;
     }
-    // TODO
+    // visit a cons
     public Boolean visit(Cons<Target> c) {
         return c.first.sameTarget(toFind) ||
                 c.rest.accept(this);
     }
-    // TODO
+    // visit an Mt
     public Boolean visit(Mt<Target> m) {
         return false;
     }
 
-    // TODO
+    // visit a node
     public Boolean visit(Node<Target> n) {
         throw new IllegalArgumentException("IBST is not a valid argument");
     }
 
-    // TODO
+    // visit a leaf
     public Boolean visit(Leaf<Target> n) {
         throw new IllegalArgumentException("IBST is not a valid argument");
     }
@@ -1389,14 +1350,14 @@ class ExamplesIsland {
         Cell c2 = new Cell(64, 2, 3);
         Cell c3 = new Cell(55, 2, 3);
         Cell c4 = new OceanCell(2, 3);
-        t.checkExpect(this.upFld.apply(c1), c1);
+   /*     t.checkExpect(this.upFld.apply(c1), c1); TODO
         t.checkExpect(this.upFld.apply(c2), new Cell(64, 2, 3, true));
         t.checkExpect(this.upFld.apply(c3), new Cell(55, 2, 3, true));
-        t.checkExpect(this.upFld.apply(c4), c4);
+        t.checkExpect(this.upFld.apply(c4), c4);*/
     } 
     // tests map for the class IList<T>
     void testMap(Tester t) {
-        t.checkExpect(this.list1.map(this.upFld), this.list1b);
+  // TODO      t.checkExpect(this.list1.map(this.upFld), this.list1b);
     }
 
     // tests append for the IList interface
@@ -1748,12 +1709,6 @@ class ExamplesIsland {
         t.checkExpect(new OceanCell(2, 3).isOcean(), true);
     }
 
-    // tests updateFloodHelp  for the class Cell TODO
-    void testFloodHelp(Tester t) {
-
-    }
-
-
     // tests makeMountain for the class ForbiddenIslandWorld TODO
     void testMakeMountain(Tester t) {
 
@@ -1797,15 +1752,15 @@ class ExamplesIsland {
 
     }
     
-    // tests findValidLoc for the class ForbiddenIslandWorld
+    // tests findValidLoc for the class ForbiddenIslandWorld TODO
     void testFindValidLoc(Tester t) {
         Mt<Cell> m = new Mt<Cell>();
         Cons<Cell> c = new Cons<Cell>(new Cell(0.0, 0, 0), m);
         FindValidLoc fvl = new FindValidLoc();
         //t.checkExpect(c.accept(fvl), new Cell(0.0, 0, 0));
     }
-    
-    // tests visit for the class FindValidLoc
+    /*
+    // tests visit for the class FindValidLoc TODO
     void testFVLVisitCons(Tester t) {
         Mt<Cell> m = new Mt<Cell>();
         Cons<Cell> c = new Cons<Cell>(new Cell(1.0, 0, 0, false), m);
@@ -1813,16 +1768,16 @@ class ExamplesIsland {
         //t.checkExpect(c.accept(fvl), new Cell(1.0, 0, 0, false));
     }
     
-    // tests visit for the class FindValidLoc
+    // tests visit for the class FindValidLoc TODO
     void testFVLVisitMt(Tester t) {
         Cell c1 = new Cell(10, 0, 0, false);
         Mt<Cell> m = new Mt<Cell>();
         Cons<Cell> c = new Cons<Cell>(c1, m);
         FindValidLoc fvl = new FindValidLoc();
-        t.checkException(new RuntimeException("There are no valid cells."),
+       /* t.checkException(new RuntimeException("There are no valid cells."),
                 fvl, "visit", m);
-        //t.checkExpect(c.accept(fvl), c1);
-    }
+        t.checkExpect(c.accept(fvl), c1); 
+    }*/
     
     // tests visit for the class FindValidLoc
     void testFVLVisitNode(Tester t) {
@@ -1843,8 +1798,25 @@ class ExamplesIsland {
 
     // tests movePlayer for the class Player TODO
     void testMovePlayer(Tester t) {
-
+        this.initialize();
+        this.initializeNeighbors();
+        Mt<Target> mT = new Mt<Target>();
+        Player p1 = new Player(this.cX0Y0, mT);
+        Player p2 = new Player(this.cX0Y1, mT);
+        Player p3 = new Player(this.cX1Y0, mT);
+        Player p4 = new Player(this.cX4Y4, mT);
+        t.checkExpect(p1.movePlayer("up"), p1);
+        t.checkExpect(p1.movePlayer("up"), p1);
+        t.checkExpect(p4.movePlayer("down"), p4);
+        t.checkExpect(p1.movePlayer("left"), p1);
+        t.checkExpect(p4.movePlayer("right"), p4);
+        t.checkExpect(p1.movePlayer("down"), p2);
+        t.checkExpect(p1.movePlayer("right"), p3);
+        t.checkExpect(p3.movePlayer("left"), p1);
+        t.checkExpect(p4.movePlayer("up"), p3);
     }
+    // tests isCoastalCell for the class Cell
+    void test
     // tests safe for the class Player TODO
     void testSafe(Tester t) {
 
@@ -1947,7 +1919,9 @@ class ExamplesIsland {
     // runs big bang
     void testRunGame(Tester t) {
         this.initializeWorlds();
-        this.mountain.bigBang(640, 640, 0.0001);
+        this.mountain.thePlayer = new Player(((Cons<Cell>)(mountain.board)).first,
+                new Mt<Target>());
+        //this.mountain.bigBang(640, 640);
 
     }
 
