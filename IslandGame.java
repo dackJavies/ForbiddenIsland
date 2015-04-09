@@ -518,7 +518,6 @@ class ForbiddenIslandWorld extends World {
         // this.chopper = new HelicopterTarget(this.findValidLoc(), this.pieces) 
         
     }
-    
     // Creates a standard map
     IList<Cell> makeMountain(boolean isRandom) {
 
@@ -690,25 +689,6 @@ class ForbiddenIslandWorld extends World {
             this.waterTick += 1;
         }
     }
-    
-    Cell findValidLoc() {
-        
-        this.board.accept(new FindValidLoc());
-        
-    }
-    
-}
-
-class FindValidLoc implements IVisitor<Cell, Cell> {
-    
-    public Cell visit(Cons<Cell> c) {
-        
-    }
-    
-    public Cell visit(Mt<Cell> m) {
-        
-    }
-    
 }
 
 // represent the player's avatar: the pilot
@@ -767,14 +747,11 @@ class Player {
 
     // Can the player move in the given direction?
     boolean safe(String dir) {
+
         return this.location.safeHelp(dir);
+
+
     }
-    
-    // Is the player dead?
-    boolean isDead() {
-        return this.location.isFlooded;
-    }
-    
 }
 
 // represents objects the player needs to obtain
@@ -832,16 +809,10 @@ class HelicopterTarget extends Target {
             return this.pieces.accept(new TargetListVisitor(p.inventory));
         }
     }
-    
-    // Did the given Player win?
-    boolean win(Player p) {
-        return this.touching(p.location.x, p.location.y) &&
-                this.canBeRepaired(p);
-    }
 
 }
 
-// Goes through a list of Targets, seeing if each one is in the given 2nd list
+//Goes through a list of Targets, seeing if each one is in the given 2nd list
 class TargetListVisitor implements IVisitor<Target, Boolean> {
 
     IList<Target> src;
@@ -869,7 +840,7 @@ class TargetListVisitor implements IVisitor<Target, Boolean> {
     }
 }
 
-// Is the given Target in a list of Targets?
+//Is the given Target in a list of Targets?
 class TargetVisitor implements IVisitor<Target, Boolean> {
 
     Target toFind;
