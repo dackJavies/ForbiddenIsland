@@ -29,7 +29,7 @@ interface IList<T> {
     // creates a new Tree from this IList
     IBST<T> list2Tree(IComp<T> comp);
     // Length of this list
-    int lengthT(int acc);
+    int length_t(int acc);
     int length();
 }
 
@@ -60,12 +60,12 @@ class Cons<T> implements IList<T> {
         return new Cons<T>(this.first, this.rest.append(other));
     }
     // Length of this list helper
-    public int lengthT(int acc) {
-        return this.rest.lengthT(1 + acc);
+    public int length_t(int acc) {
+        return this.rest.length_t(1 + acc);
     }
     // Length of this list
     public int length() {
-        return this.lengthT(0);
+        return this.length_t(0);
     }
     // creates a new Tree from this IList
     public IBST<T> list2Tree(IComp<T> comp) {
@@ -94,7 +94,7 @@ class Mt<T> implements IList<T> {
         return other;
     }
     // Length of this list helper
-    public int lengthT(int acc) { 
+    public int length_t(int acc) { 
         return acc; 
     }
     // Length of this list
@@ -369,10 +369,6 @@ class Cell {
     Cell left, top, right, bottom;
     // reports whether this cell is flooded or not
     boolean isFlooded;
-    // determines whether this Cell has a target
-    boolean hasTarget;
-    // determines whether this Cell has a Player
-    boolean hasPlayer;
 
     Cell(double height, int x, int y) {
 
@@ -386,7 +382,6 @@ class Cell {
         this.bottom = null;
 
         this.isFlooded = false;  
-        this.hasTarget = false;
     }
     // constructor for testing
     Cell(double height, int x, int y, boolean isFlooded) {
@@ -412,7 +407,7 @@ class Cell {
             return new Color(0, 0, bound + b);
         }
         // cells in danger of flooding range from green to red
-        else if (this.belowWaterLevel(waterLevel)) {
+        else if (this.floodDanger(waterLevel)) {
             int red = Math.max(waterLevel - (int)this.height, -bound);
             int green = Math.max((int)this.height - waterLevel, -bound);
             return new Color(red, bound + green, 0);
@@ -432,14 +427,9 @@ class Cell {
         }
     }
     // Determines whether this cell is in danger of flooding or flooded
-    boolean belowWaterLevel(int waterLevel) {
+    boolean floodDanger(int waterLevel) {
         return this.height <= waterLevel || this.isFlooded;
     }
-    // Determines whether this is on the coastline
-    boolean isCoastalCell() {
-        return this.left.isFlooded || this.right.isFlooded || this.right.isFlooded
-                || this.right.isFlooded;
-    } 
     // Determines whether this is an OceanCell 
     boolean isOcean() { return false; }
 
@@ -456,6 +446,20 @@ class Cell {
 
         else { return true; }
 
+    }
+
+    // Is the given Player standing on this Cell?
+    boolean hasPlayer(Player p) {
+
+        return p.location == this;
+
+    }
+    
+    // Is the given Target on this Cell?
+    boolean hasTarget(Target t) {
+        
+        return t.location == this;
+        
     }
 }
 
@@ -486,19 +490,15 @@ class ForbiddenIslandWorld extends World {
     IList<Cell> board;
     // the current height of the ocean
     int waterHeight;
-    // is the game paused
     boolean isPaused;
-    // tracks the waterTicks
-    int waterTick;
     ForbiddenIslandWorld(String gameMode) {
 
         this.waterHeight = 0;
-        this.waterTick = 0;
         this.board = null;
         this.isPaused = false;
-        this.thePlayer = null;
-        this.pieces = null;
-        this.chopper = null;
+        //this.thePlayer = new Player(null, null);
+        //this.pieces = new Mt<Target>();
+        //this.chopper = new HelicopterTarget(null, null);
         
         if (gameMode.equals("m")) {
             this.board = this.makeMountain(false);
@@ -523,7 +523,7 @@ class ForbiddenIslandWorld extends World {
 
         Random randy = new Random();
 
-        double maxHeight = ISLAND_SIZE / 2;
+        double MAX_HEIGHT = ISLAND_SIZE / 2;
 
         ArrayList<ArrayList<Double>> newBoard = new ArrayList<ArrayList<Double>>();
 
@@ -534,7 +534,7 @@ class ForbiddenIslandWorld extends World {
 
         for (int index1 = 0; index1 < newBoard.size(); index1 += 1) {
             for(int index2 = 0; index2 < ISLAND_SIZE; index2 += 1) {
-                newBoard.get(index1).add(maxHeight - (Math.abs(maxHeight - index1) + (Math.abs(maxHeight - index2))));
+                newBoard.get(index1).add(MAX_HEIGHT - (Math.abs(MAX_HEIGHT - index1) + (Math.abs(MAX_HEIGHT - index2))));
             }
         }
 
@@ -552,36 +552,35 @@ class ForbiddenIslandWorld extends World {
     }
     // Makes a realistic randomly generated world
     IList<Cell> makeTerrain() {
-        int iS = ISLAND_SIZE;
-        int hS = ISLAND_SIZE / 2;
+
         ArrayList<ArrayList<Double>> newBoard = new ArrayList<ArrayList<Double>>();
 
-        for (int index1 = 0; index1 <= iS; index1 += 1) {
+        for (int index1 = 0; index1 <= ISLAND_SIZE; index1 += 1) {
 
             newBoard.add(new ArrayList<Double>());
 
-            for (int index2 = 0; index2 <= iS; index2 += 1) {
+            for (int index2 = 0; index2 <= ISLAND_SIZE; index2 += 1) {
                 newBoard.get(index1).add(0.0);
             }
 
         }
 
         // gives the board its heights
-        this.startTerrain(newBoard, iS);
+        this.startTerrain(newBoard, ISLAND_SIZE);
 
         // top left quadrant
-        this.terrainProcedure(iS, newBoard, 0, 0, hS, 0, 0, hS, 
-                hS, hS);
+        this.terrainProcedure(ISLAND_SIZE, newBoard, 0, 0, ISLAND_SIZE / 2, 0, 0, ISLAND_SIZE / 2, 
+                ISLAND_SIZE / 2, ISLAND_SIZE / 2);
         // top right quadrant
-        this.terrainProcedure(iS, newBoard, hS, 0, iS, 0, hS, 
-                hS, iS, hS);
+        this.terrainProcedure(ISLAND_SIZE, newBoard, ISLAND_SIZE / 2, 0, ISLAND_SIZE, 0, ISLAND_SIZE / 2, 
+                ISLAND_SIZE / 2, ISLAND_SIZE, ISLAND_SIZE / 2);
         // bottom left quadrant
-        this.terrainProcedure(iS, newBoard, 0, hS, hS, 
-                hS, 0, iS, hS, iS);
+        this.terrainProcedure(ISLAND_SIZE, newBoard, 0, ISLAND_SIZE / 2, ISLAND_SIZE /2, 
+                ISLAND_SIZE / 2, 0, ISLAND_SIZE, ISLAND_SIZE / 2, ISLAND_SIZE);
         // bottom right quadrant
-        this.terrainProcedure(iS, newBoard, hS, hS, 
-                iS, hS, hS, iS, iS, 
-                iS);
+        this.terrainProcedure(ISLAND_SIZE, newBoard, ISLAND_SIZE / 2, ISLAND_SIZE / 2, 
+                ISLAND_SIZE, ISLAND_SIZE / 2, ISLAND_SIZE / 2, ISLAND_SIZE, ISLAND_SIZE, 
+                ISLAND_SIZE);
 
         return new ArrDub2ListCell().apply(newBoard);
     }
@@ -645,8 +644,7 @@ class ForbiddenIslandWorld extends World {
     public WorldImage makeImage() {
         DisplayCellsVisitor dCVisitor = new DisplayCellsVisitor(this.board, this.waterHeight);
         if (this.isPaused) {
-            return new OverlayImages(dCVisitor.board.accept(dCVisitor), new RectangleImage(
-                    new Posn(0, 0), 1280, 1280, new Color(255, 0, 0, 150)));
+            return new OverlayImages(dCVisitor.board.accept(dCVisitor), new RectangleImage(new Posn(0, 0), 1280, 1280, new Color(255, 0, 0, 150)));
         }
         return dCVisitor.board.accept(dCVisitor);
     }
@@ -680,14 +678,10 @@ class ForbiddenIslandWorld extends World {
 
     // Handling time passage and subsequent flooding
     public void onTick() {
-        if (this.waterTick >= 10) {
-            this.waterHeight += 1;
-            this.board = this.board.map(new UpdateFlood(this.waterHeight));
-            this.waterTick = 0;
-        }
-        else {
-            this.waterTick += 1;
-        }
+
+        this.board = this.board.map(new UpdateFlood(this.waterHeight));
+        this.waterHeight += 1;
+
     }
 }
 
@@ -703,7 +697,6 @@ class Player {
         this.location = location;
         this.inventory = inventory;
         this.picture = new FromFileImage(new Posn(this.location.x, this.location.y), "pilot-icon.png");
-        this.location.hasPlayer = true;
     }
 
     // Move the player left, right, up, or down with the arrow keys
@@ -711,19 +704,15 @@ class Player {
 
         if (this.safe(ke)) {
             if (ke.equals("left")) {
-                this.location.hasPlayer = false;
                 return new Player(this.location.left, this.inventory);
             }
             else if (ke.equals("down")) {
-                this.location.hasPlayer = false;
                 return new Player(this.location.bottom, this.inventory);
             }
             else if (ke.equals("right")) {
-                this.location.hasPlayer = false;
                 return new Player(this.location.right, this.inventory);
             }
             else if (ke.equals("up")) {
-                this.location.hasPlayer = false;
                 return new Player(this.location.top, this.inventory);
             }
             else {
@@ -778,7 +767,7 @@ class Target {
     
     // Add this Target to the Player's inventory
     IList<Target> pickedUp(Player p) {
-        this.location.hasTarget = false;
+        
         return p.inventory.add(this);
         
     }
@@ -883,31 +872,31 @@ class ExamplesIsland {
     ArrayList<Double> arrayListD64 = new ArrayList<Double>();
     ArrayList<ArrayList<Double>> arrayListD = new ArrayList<ArrayList<Double>>();
 
-    Cell cX0Y0 = new Cell(0, 0, 0);
-    Cell cX0Y1 = new Cell(0, 0, 1);
-    Cell cX0Y2 = new Cell(0, 0, 2);
-    Cell cX0Y3 = new Cell(0, 0, 3);
-    Cell cX0Y4 = new Cell(0, 0, 4);
-    Cell cX1Y0 = new Cell(0, 1, 0);
-    Cell cX1Y1 = new Cell(0, 1, 1);
-    Cell cX1Y2 = new Cell(0, 1, 2);
-    Cell cX1Y3 = new Cell(0, 1, 3);
-    Cell cX1Y4 = new Cell(0, 1, 4);
-    Cell cX2Y0 = new Cell(0, 2, 0);
-    Cell cX2Y1 = new Cell(0, 2, 1);
-    Cell cX2Y2 = new Cell(0, 2, 2);
-    Cell cX2Y3 = new Cell(0, 2, 3);
-    Cell cX2Y4 = new Cell(0, 2, 4);
-    Cell cX3Y0 = new Cell(0, 3, 0);
-    Cell cX3Y1 = new Cell(0, 3, 1);
-    Cell cX3Y2 = new Cell(0, 3, 2);
-    Cell cX3Y3 = new Cell(0, 3, 3);
-    Cell cX3Y4 = new Cell(0, 3, 4);
-    Cell cX4Y0 = new Cell(0, 4, 0);
-    Cell cX4Y1 = new Cell(0, 4, 1);
-    Cell cX4Y2 = new Cell(0, 4, 2);
-    Cell cX4Y3 = new Cell(0, 4, 3);
-    Cell cX4Y4 = new Cell(0, 4, 4);
+    Cell c0_0 = new Cell(0, 0, 0);
+    Cell c0_1 = new Cell(0, 0, 1);
+    Cell c0_2 = new Cell(0, 0, 2);
+    Cell c0_3 = new Cell(0, 0, 3);
+    Cell c0_4 = new Cell(0, 0, 4);
+    Cell c1_0 = new Cell(0, 1, 0);
+    Cell c1_1 = new Cell(0, 1, 1);
+    Cell c1_2 = new Cell(0, 1, 2);
+    Cell c1_3 = new Cell(0, 1, 3);
+    Cell c1_4 = new Cell(0, 1, 4);
+    Cell c2_0 = new Cell(0, 2, 0);
+    Cell c2_1 = new Cell(0, 2, 1);
+    Cell c2_2 = new Cell(0, 2, 2);
+    Cell c2_3 = new Cell(0, 2, 3);
+    Cell c2_4 = new Cell(0, 2, 4);
+    Cell c3_0 = new Cell(0, 3, 0);
+    Cell c3_1 = new Cell(0, 3, 1);
+    Cell c3_2 = new Cell(0, 3, 2);
+    Cell c3_3 = new Cell(0, 3, 3);
+    Cell c3_4 = new Cell(0, 3, 4);
+    Cell c4_0 = new Cell(0, 4, 0);
+    Cell c4_1 = new Cell(0, 4, 1);
+    Cell c4_2 = new Cell(0, 4, 2);
+    Cell c4_3 = new Cell(0, 4, 3);
+    Cell c4_4 = new Cell(0, 4, 4);
 
 
     ArrayList<Cell> aL0 = new ArrayList<Cell>();
@@ -955,35 +944,35 @@ class ExamplesIsland {
     Cell s = new OceanCell(0, 1);
 
 
-    Cell colorTest1 = new OceanCell(0, 0);
-    Cell colorTest2 = new Cell(10, 1, 0, false);
-    Cell colorTest3 = new OceanCell(2, 0);
-    Cell colorTest4 = new Cell(3, 3, 0, false);
-    Cell colorTest5 = new OceanCell(4, 0);
-    Cell colorTest6 = new Cell(22, 5, 0, false);
-    Cell colorTest7 = new Cell(20, 6, 0, false);
-    Cell colorTest8 = new Cell(7, 7, 0, false);
-    Cell colorTest9 = new Cell(16, 8, 0, false);
-    Cell colorTest10 = new Cell(9, 9, 0, false);
-    Cell colorTest11 = new OceanCell(10, 0);
-    Cell colorTest12 = new Cell(9, 11, 0, false);
-    Cell colorTest13 = new Cell(19, 12, 0, false);
-    Cell colorTest14 = new Cell(13, 13, 0, false);
-    Cell colorTest15 = new Cell(1, 14, 0, false);
-    Cell colorTest16 = new Cell(10, 15, 0, false);
-    Cell colorTest17 = new OceanCell(16, 0);
-    Cell colorTest18 = new Cell(16, 17, 0, false);
-    Cell colorTest19 = new Cell(31, 18, 0, false);
-    Cell colorTest20 = new Cell(18, 19, 0, false);
-    IList<Cell> theList = new Cons<Cell>(colorTest1, new Cons<Cell>(colorTest2,
-            new Cons<Cell>(colorTest3, new Cons<Cell>(colorTest4, new Cons<Cell>(colorTest5,
-                    new Cons<Cell>(colorTest6, new Cons<Cell>(colorTest7, new Cons<Cell>(colorTest8,
-                            new Cons<Cell>(colorTest9, new Cons<Cell>(colorTest10,
-                                    new Cons<Cell>(colorTest11, new Cons<Cell>(colorTest12,
-                                            new Cons<Cell>(colorTest13, new Cons<Cell>(colorTest14,
-                                                    new Cons<Cell>(colorTest15, new Cons<Cell>(colorTest16,
-                                                            new Cons<Cell>(colorTest17, new Cons<Cell>(colorTest18,
-                                                                    new Cons<Cell>(colorTest19, new Mt<Cell>())))))))))))))))))));
+    Cell color_test1 = new OceanCell(0, 0);
+    Cell color_test2 = new Cell(10, 1, 0, false);
+    Cell color_test3 = new OceanCell(2, 0);
+    Cell color_test4 = new Cell(3, 3, 0, false);
+    Cell color_test5 = new OceanCell(4, 0);
+    Cell color_test6 = new Cell(22, 5, 0, false);
+    Cell color_test7 = new Cell(20, 6, 0, false);
+    Cell color_test8 = new Cell(7, 7, 0, false);
+    Cell color_test9 = new Cell(16, 8, 0, false);
+    Cell color_test10 = new Cell(9, 9, 0, false);
+    Cell color_test11 = new OceanCell(10, 0);
+    Cell color_test12 = new Cell(9, 11, 0, false);
+    Cell color_test13 = new Cell(19, 12, 0, false);
+    Cell color_test14 = new Cell(13, 13, 0, false);
+    Cell color_test15 = new Cell(1, 14, 0, false);
+    Cell color_test16 = new Cell(10, 15, 0, false);
+    Cell color_test17 = new OceanCell(16, 0);
+    Cell color_test18 = new Cell(16, 17, 0, false);
+    Cell color_test19 = new Cell(31, 18, 0, false);
+    Cell color_test20 = new Cell(18, 19, 0, false);
+    IList<Cell> TEH_LIST = new Cons<Cell>(color_test1, new Cons<Cell>(color_test2,
+            new Cons<Cell>(color_test3, new Cons<Cell>(color_test4, new Cons<Cell>(color_test5,
+                    new Cons<Cell>(color_test6, new Cons<Cell>(color_test7, new Cons<Cell>(color_test8,
+                            new Cons<Cell>(color_test9, new Cons<Cell>(color_test10,
+                                    new Cons<Cell>(color_test11, new Cons<Cell>(color_test12,
+                                            new Cons<Cell>(color_test13, new Cons<Cell>(color_test14,
+                                                    new Cons<Cell>(color_test15, new Cons<Cell>(color_test16,
+                                                            new Cons<Cell>(color_test17, new Cons<Cell>(color_test18,
+                                                                    new Cons<Cell>(color_test19, new Mt<Cell>())))))))))))))))))));
 
     Cell land7 = new Cell(0, 10, 10);
     Cell land8 = new Cell(-1, 10, 11);
@@ -991,11 +980,11 @@ class ExamplesIsland {
     OceanCell ocean7 = new OceanCell(13, 13);
     IList<Cell> list1 = new Cons<Cell>(land7, new Cons<Cell>(land8,
             new Cons<Cell>(land9, new Cons<Cell>(ocean7, new Mt<Cell>()))));
-    Cell land7b = new Cell(0, 10, 10, true);
-    Cell land8b = new Cell(-1, 10, 11, true);
-    Cell land9b = new Cell(70, 10, 12, false);
-    IList<Cell> list1b = new Cons<Cell>(land7b, new Cons<Cell>(land8b,
-            new Cons<Cell>(land9b, new Cons<Cell>(ocean7, new Mt<Cell>()))));   
+    Cell land7_2 = new Cell(0, 10, 10, true);
+    Cell land8_2 = new Cell(-1, 10, 11, true);
+    Cell land9_2 = new Cell(70, 10, 12, false);
+    IList<Cell> list1_2 = new Cons<Cell>(land7_2, new Cons<Cell>(land8_2,
+            new Cons<Cell>(land9_2, new Cons<Cell>(ocean7, new Mt<Cell>()))));   
 
     IList<Cell> list2 = new Mt<Cell>();
 
@@ -1007,91 +996,91 @@ class ExamplesIsland {
     // initializes the examples class
     void initialize() {
 
-        this.cX0Y0 = new Cell(1, 0, 0);
-        this.cX0Y1 = new Cell(1, 0, 1);
-        this.cX0Y2 = new Cell(1, 0, 2);
-        this.cX0Y3 = new Cell(1, 0, 3);
-        this.cX0Y4 = new Cell(1, 0, 4);
-        this.cX1Y0 = new Cell(1, 1, 0);
-        this.cX1Y1 = new Cell(1, 1, 1);
-        this.cX1Y2 = new Cell(1, 1, 2);
-        this.cX1Y3 = new Cell(1, 1, 3);
-        this.cX1Y4 = new Cell(1, 1, 4);
-        this.cX2Y0 = new Cell(1, 2, 0);
-        this.cX2Y1 = new Cell(1, 2, 1);
-        this.cX2Y2 = new Cell(1, 2, 2);
-        this.cX2Y3 = new Cell(1, 2, 3);
-        this.cX2Y4 = new Cell(1, 2, 4);
-        this.cX3Y0 = new Cell(1, 3, 0);
-        this.cX3Y1 = new Cell(1, 3, 1);
-        this.cX3Y2 = new Cell(1, 3, 2);
-        this.cX3Y3 = new Cell(1, 3, 3);
-        this.cX3Y4 = new Cell(1, 3, 4);
-        this.cX4Y0 = new OceanCell(4, 0);
-        this.cX4Y1 = new OceanCell(4, 1);
-        this.cX4Y2 = new OceanCell(4, 2);
-        this.cX4Y3 = new OceanCell(4, 3);
-        this.cX4Y4 = new OceanCell(4, 4);
+        this.c0_0 = new Cell(1, 0, 0);
+        this.c0_1 = new Cell(1, 0, 1);
+        this.c0_2 = new Cell(1, 0, 2);
+        this.c0_3 = new Cell(1, 0, 3);
+        this.c0_4 = new Cell(1, 0, 4);
+        this.c1_0 = new Cell(1, 1, 0);
+        this.c1_1 = new Cell(1, 1, 1);
+        this.c1_2 = new Cell(1, 1, 2);
+        this.c1_3 = new Cell(1, 1, 3);
+        this.c1_4 = new Cell(1, 1, 4);
+        this.c2_0 = new Cell(1, 2, 0);
+        this.c2_1 = new Cell(1, 2, 1);
+        this.c2_2 = new Cell(1, 2, 2);
+        this.c2_3 = new Cell(1, 2, 3);
+        this.c2_4 = new Cell(1, 2, 4);
+        this.c3_0 = new Cell(1, 3, 0);
+        this.c3_1 = new Cell(1, 3, 1);
+        this.c3_2 = new Cell(1, 3, 2);
+        this.c3_3 = new Cell(1, 3, 3);
+        this.c3_4 = new Cell(1, 3, 4);
+        this.c4_0 = new OceanCell(4, 0);
+        this.c4_1 = new OceanCell(4, 1);
+        this.c4_2 = new OceanCell(4, 2);
+        this.c4_3 = new OceanCell(4, 3);
+        this.c4_4 = new OceanCell(4, 4);
 
         // IList cell
-        IList<Cell> iL1 = new Cons<Cell>(cX4Y1,
-                new Cons<Cell>(cX4Y2,
-                        new Cons<Cell>(cX4Y3,
-                                new Cons<Cell>(cX4Y4, new Mt<Cell>()))));
-        IList<Cell> iL2 = new Cons<Cell>(cX3Y1,
-                new Cons<Cell>(cX3Y2,
-                        new Cons<Cell>(cX3Y3,
-                                new Cons<Cell>(cX3Y4,
-                                        new Cons<Cell>(cX4Y0, iL1)))));
-        IList<Cell> iL3 = new Cons<Cell>(cX2Y1,
-                new Cons<Cell>(cX2Y2,
-                        new Cons<Cell>(cX2Y3,
-                                new Cons<Cell>(cX2Y4,
-                                        new Cons<Cell>(cX3Y0, iL2)))));
-        IList<Cell> iL4 = new Cons<Cell>(cX1Y1,
-                new Cons<Cell>(cX1Y2,
-                        new Cons<Cell>(cX1Y3,
-                                new Cons<Cell>(cX1Y4,
-                                        new Cons<Cell>(cX2Y0, iL3)))));
-        this.iLAll = new Cons<Cell>(cX0Y0,      
-                new Cons<Cell>(cX0Y1,
-                        new Cons<Cell>(cX0Y2,
-                                new Cons<Cell>(cX0Y3,
-                                        new Cons<Cell>(cX0Y4,
-                                                new Cons<Cell>(cX1Y0, iL4))))));
+        IList<Cell> iL1 = new Cons<Cell>(c4_1,
+                new Cons<Cell>(c4_2,
+                        new Cons<Cell>(c4_3,
+                                new Cons<Cell>(c4_4, new Mt<Cell>()))));
+        IList<Cell> iL2 = new Cons<Cell>(c3_1,
+                new Cons<Cell>(c3_2,
+                        new Cons<Cell>(c3_3,
+                                new Cons<Cell>(c3_4,
+                                        new Cons<Cell>(c4_0, iL1)))));
+        IList<Cell> iL3 = new Cons<Cell>(c2_1,
+                new Cons<Cell>(c2_2,
+                        new Cons<Cell>(c2_3,
+                                new Cons<Cell>(c2_4,
+                                        new Cons<Cell>(c3_0, iL2)))));
+        IList<Cell> iL4 = new Cons<Cell>(c1_1,
+                new Cons<Cell>(c1_2,
+                        new Cons<Cell>(c1_3,
+                                new Cons<Cell>(c1_4,
+                                        new Cons<Cell>(c2_0, iL3)))));
+        this.iLAll = new Cons<Cell>(c0_0,      
+                new Cons<Cell>(c0_1,
+                        new Cons<Cell>(c0_2,
+                                new Cons<Cell>(c0_3,
+                                        new Cons<Cell>(c0_4,
+                                                new Cons<Cell>(c1_0, iL4))))));
 
 
         // array list cell
         aL0.clear();
-        aL0.add(cX0Y0);
-        aL0.add(cX0Y1);
-        aL0.add(cX0Y2);
-        aL0.add(cX0Y3);
-        aL0.add(cX0Y4);
+        aL0.add(c0_0);
+        aL0.add(c0_1);
+        aL0.add(c0_2);
+        aL0.add(c0_3);
+        aL0.add(c0_4);
         aL1.clear();
-        aL1.add(cX1Y0);
-        aL1.add(cX1Y1);
-        aL1.add(cX1Y2);
-        aL1.add(cX1Y3);
-        aL1.add(cX1Y4);
+        aL1.add(c1_0);
+        aL1.add(c1_1);
+        aL1.add(c1_2);
+        aL1.add(c1_3);
+        aL1.add(c1_4);
         aL2.clear();
-        aL2.add(cX2Y0);
-        aL2.add(cX2Y1);
-        aL2.add(cX2Y2);
-        aL2.add(cX2Y3);
-        aL2.add(cX2Y4);
+        aL2.add(c2_0);
+        aL2.add(c2_1);
+        aL2.add(c2_2);
+        aL2.add(c2_3);
+        aL2.add(c2_4);
         aL3.clear();
-        aL3.add(cX3Y0);
-        aL3.add(cX3Y1);
-        aL3.add(cX3Y2);
-        aL3.add(cX3Y3);
-        aL3.add(cX3Y4);
+        aL3.add(c3_0);
+        aL3.add(c3_1);
+        aL3.add(c3_2);
+        aL3.add(c3_3);
+        aL3.add(c3_4);
         aL4.clear();
-        aL4.add(cX4Y0);
-        aL4.add(cX4Y1);
-        aL4.add(cX4Y2);
-        aL4.add(cX4Y3);
-        aL4.add(cX4Y4);
+        aL4.add(c4_0);
+        aL4.add(c4_1);
+        aL4.add(c4_2);
+        aL4.add(c4_3);
+        aL4.add(c4_4);
         aLAll.clear();
         aLAll.add(aL0);
         aLAll.add(aL1);
@@ -1200,7 +1189,7 @@ class ExamplesIsland {
     } 
     // tests map for the class IList<T>
     void testMap(Tester t) {
-        t.checkExpect(this.list1.map(this.upFld), this.list1b);
+        t.checkExpect(this.list1.map(this.upFld), this.list1_2);
     }
 
     // tests append for the IList interface
@@ -1219,16 +1208,16 @@ class ExamplesIsland {
     void testList2Tree(Tester t) {
 
     }
-    // tests lengthT for the IList<T> class 
+    // tests length_t for the IList<T> class 
     void testLengthT(Tester t) {
         initializeWorlds();
         IList<Integer> list = new Cons<Integer>(2, new Cons<Integer>(3, new Mt<Integer>()));
         IList<Integer> mT = new Mt<Integer>();
-        t.checkExpect(mountain.board.lengthT(0), 4096);
-        t.checkExpect(list.lengthT(0), 2);
-        t.checkExpect(list.lengthT(2), 4);
-        t.checkExpect(mT.lengthT(0), 0);
-        t.checkExpect(mT.lengthT(100), 100);
+        t.checkExpect(mountain.board.length_t(0), 4096);
+        t.checkExpect(list.length_t(0), 2);
+        t.checkExpect(list.length_t(2), 4);
+        t.checkExpect(mT.length_t(0), 0);
+        t.checkExpect(mT.length_t(100), 100);
     }
     // tests length for the IList<T> class 
     void testLength(Tester t) {
@@ -1334,124 +1323,124 @@ class ExamplesIsland {
         this.initialize();
 
         // top left corner (0, 0)
-        t.checkExpect(cX0Y0.left, null);
-        t.checkExpect(cX0Y0.right, null);
-        t.checkExpect(cX0Y0.top, null);
-        t.checkExpect(cX0Y0.bottom, null);
+        t.checkExpect(c0_0.left, null);
+        t.checkExpect(c0_0.right, null);
+        t.checkExpect(c0_0.top, null);
+        t.checkExpect(c0_0.bottom, null);
 
-        this.aDLC.assignNeighbors(cX0Y0, 0, 0, aLAll);
-        t.checkExpect(cX0Y0.top, cX0Y0);
-        t.checkExpect(cX0Y0.left, cX0Y0);
-        t.checkExpect(cX0Y0.right, cX1Y0);
-        t.checkExpect(cX0Y0.bottom, cX0Y1);
+        this.aDLC.assignNeighbors(c0_0, 0, 0, aLAll);
+        t.checkExpect(c0_0.top, c0_0);
+        t.checkExpect(c0_0.left, c0_0);
+        t.checkExpect(c0_0.right, c1_0);
+        t.checkExpect(c0_0.bottom, c0_1);
 
         // top right corner (4, 0)
-        t.checkExpect(cX4Y0.left, null);
-        t.checkExpect(cX4Y0.right, null);
-        t.checkExpect(cX4Y0.top, null);
-        t.checkExpect(cX4Y0.bottom, null);
+        t.checkExpect(c4_0.left, null);
+        t.checkExpect(c4_0.right, null);
+        t.checkExpect(c4_0.top, null);
+        t.checkExpect(c4_0.bottom, null);
 
-        this.aDLC.assignNeighbors(cX4Y0, 4, 0, aLAll);
-        t.checkExpect(cX4Y0.top, cX4Y0);
-        t.checkExpect(cX4Y0.left, cX3Y0);
-        t.checkExpect(cX4Y0.right, cX4Y0);
-        t.checkExpect(cX4Y0.bottom, cX4Y1);
+        this.aDLC.assignNeighbors(c4_0, 4, 0, aLAll);
+        t.checkExpect(c4_0.top, c4_0);
+        t.checkExpect(c4_0.left, c3_0);
+        t.checkExpect(c4_0.right, c4_0);
+        t.checkExpect(c4_0.bottom, c4_1);
 
         // bottom left corner (0, 4)
-        t.checkExpect(cX0Y4.left, null);
-        t.checkExpect(cX0Y4.right, null);
-        t.checkExpect(cX0Y4.top, null);
-        t.checkExpect(cX0Y4.bottom, null);
+        t.checkExpect(c0_4.left, null);
+        t.checkExpect(c0_4.right, null);
+        t.checkExpect(c0_4.top, null);
+        t.checkExpect(c0_4.bottom, null);
 
-        this.aDLC.assignNeighbors(cX0Y4, 0, 4, aLAll);
-        t.checkExpect(cX0Y4.top, cX0Y3);
-        t.checkExpect(cX0Y4.left, cX0Y4);
-        t.checkExpect(cX0Y4.right, cX1Y4);
-        t.checkExpect(cX0Y4.bottom, cX0Y4);
+        this.aDLC.assignNeighbors(c0_4, 0, 4, aLAll);
+        t.checkExpect(c0_4.top, c0_3);
+        t.checkExpect(c0_4.left, c0_4);
+        t.checkExpect(c0_4.right, c1_4);
+        t.checkExpect(c0_4.bottom, c0_4);
 
         // bottom right corner (4, 4)
-        t.checkExpect(cX4Y4.left, null);
-        t.checkExpect(cX4Y4.right, null);
-        t.checkExpect(cX4Y4.top, null);
-        t.checkExpect(cX4Y4.bottom, null);
+        t.checkExpect(c4_4.left, null);
+        t.checkExpect(c4_4.right, null);
+        t.checkExpect(c4_4.top, null);
+        t.checkExpect(c4_4.bottom, null);
 
-        this.aDLC.assignNeighbors(cX4Y4, 4, 4, aLAll);
-        t.checkExpect(cX4Y4.top, cX4Y3);
-        t.checkExpect(cX4Y4.left, cX3Y4);
-        t.checkExpect(cX4Y4.right, cX4Y4);
-        t.checkExpect(cX4Y4.bottom, cX4Y4);
+        this.aDLC.assignNeighbors(c4_4, 4, 4, aLAll);
+        t.checkExpect(c4_4.top, c4_3);
+        t.checkExpect(c4_4.left, c3_4);
+        t.checkExpect(c4_4.right, c4_4);
+        t.checkExpect(c4_4.bottom, c4_4);
 
         // all neighbors (2, 2)
-        t.checkExpect(cX2Y2.left, null);
-        t.checkExpect(cX2Y2.right, null);
-        t.checkExpect(cX2Y2.top, null);
-        t.checkExpect(cX2Y2.bottom, null);
+        t.checkExpect(c2_2.left, null);
+        t.checkExpect(c2_2.right, null);
+        t.checkExpect(c2_2.top, null);
+        t.checkExpect(c2_2.bottom, null);
 
-        this.aDLC.assignNeighbors(cX2Y2, 2, 2, aLAll);
-        t.checkExpect(cX2Y2.top, cX2Y1);
-        t.checkExpect(cX2Y2.left, cX1Y2);
-        t.checkExpect(cX2Y2.right, cX3Y2);
-        t.checkExpect(cX2Y2.bottom, cX2Y3);
+        this.aDLC.assignNeighbors(c2_2, 2, 2, aLAll);
+        t.checkExpect(c2_2.top, c2_1);
+        t.checkExpect(c2_2.left, c1_2);
+        t.checkExpect(c2_2.right, c3_2);
+        t.checkExpect(c2_2.bottom, c2_3);
     }
     // tests assignAllNeighbors for the class ArrDub2ListCell
     void testAssignAllNeighbors(Tester t) {
         this.initialize();
 
         // top left corner (0, 0)
-        t.checkExpect(cX0Y0.left, null);
-        t.checkExpect(cX0Y0.right, null);
-        t.checkExpect(cX0Y0.top, null);
-        t.checkExpect(cX0Y0.bottom, null);
+        t.checkExpect(c0_0.left, null);
+        t.checkExpect(c0_0.right, null);
+        t.checkExpect(c0_0.top, null);
+        t.checkExpect(c0_0.bottom, null);
 
         // top right corner (4, 0)
-        t.checkExpect(cX4Y0.left, null);
-        t.checkExpect(cX4Y0.right, null);
-        t.checkExpect(cX4Y0.top, null);
-        t.checkExpect(cX4Y0.bottom, null);
+        t.checkExpect(c4_0.left, null);
+        t.checkExpect(c4_0.right, null);
+        t.checkExpect(c4_0.top, null);
+        t.checkExpect(c4_0.bottom, null);
 
         // bottom left corner (0, 4)
-        t.checkExpect(cX0Y4.left, null);
-        t.checkExpect(cX0Y4.right, null);
-        t.checkExpect(cX0Y4.top, null);
-        t.checkExpect(cX0Y4.bottom, null);
+        t.checkExpect(c0_4.left, null);
+        t.checkExpect(c0_4.right, null);
+        t.checkExpect(c0_4.top, null);
+        t.checkExpect(c0_4.bottom, null);
 
         // bottom right corner (4, 4)
-        t.checkExpect(cX4Y4.left, null);
-        t.checkExpect(cX4Y4.right, null);
-        t.checkExpect(cX4Y4.top, null);
-        t.checkExpect(cX4Y4.bottom, null);
+        t.checkExpect(c4_4.left, null);
+        t.checkExpect(c4_4.right, null);
+        t.checkExpect(c4_4.top, null);
+        t.checkExpect(c4_4.bottom, null);
 
         // all neighbors (2, 2)
-        t.checkExpect(cX2Y2.left, null);
-        t.checkExpect(cX2Y2.right, null);
-        t.checkExpect(cX2Y2.top, null);
-        t.checkExpect(cX2Y2.bottom, null);
+        t.checkExpect(c2_2.left, null);
+        t.checkExpect(c2_2.right, null);
+        t.checkExpect(c2_2.top, null);
+        t.checkExpect(c2_2.bottom, null);
 
         this.aDLC.assignAllNeighbors(aLAll);
-        t.checkExpect(cX0Y0.top, cX0Y0);
-        t.checkExpect(cX0Y0.left, cX0Y0);
-        t.checkExpect(cX0Y0.right, cX1Y0);
-        t.checkExpect(cX0Y0.bottom, cX0Y1);
+        t.checkExpect(c0_0.top, c0_0);
+        t.checkExpect(c0_0.left, c0_0);
+        t.checkExpect(c0_0.right, c1_0);
+        t.checkExpect(c0_0.bottom, c0_1);
 
-        t.checkExpect(cX4Y0.top, cX4Y0);
-        t.checkExpect(cX4Y0.left, cX3Y0);
-        t.checkExpect(cX4Y0.right, cX4Y0);
-        t.checkExpect(cX4Y0.bottom, cX4Y1);
+        t.checkExpect(c4_0.top, c4_0);
+        t.checkExpect(c4_0.left, c3_0);
+        t.checkExpect(c4_0.right, c4_0);
+        t.checkExpect(c4_0.bottom, c4_1);
 
-        t.checkExpect(cX0Y4.top, cX0Y3);
-        t.checkExpect(cX0Y4.left, cX0Y4);
-        t.checkExpect(cX0Y4.right, cX1Y4);
-        t.checkExpect(cX0Y4.bottom, cX0Y4);
+        t.checkExpect(c0_4.top, c0_3);
+        t.checkExpect(c0_4.left, c0_4);
+        t.checkExpect(c0_4.right, c1_4);
+        t.checkExpect(c0_4.bottom, c0_4);
 
-        t.checkExpect(cX4Y4.top, cX4Y3);
-        t.checkExpect(cX4Y4.left, cX3Y4);
-        t.checkExpect(cX4Y4.right, cX4Y4);
-        t.checkExpect(cX4Y4.bottom, cX4Y4);
+        t.checkExpect(c4_4.top, c4_3);
+        t.checkExpect(c4_4.left, c3_4);
+        t.checkExpect(c4_4.right, c4_4);
+        t.checkExpect(c4_4.bottom, c4_4);
 
-        t.checkExpect(cX2Y2.top, cX2Y1);
-        t.checkExpect(cX2Y2.left, cX1Y2);
-        t.checkExpect(cX2Y2.right, cX3Y2);
-        t.checkExpect(cX2Y2.bottom, cX2Y3);
+        t.checkExpect(c2_2.top, c2_1);
+        t.checkExpect(c2_2.left, c1_2);
+        t.checkExpect(c2_2.right, c3_2);
+        t.checkExpect(c2_2.bottom, c2_3);
     }
     //tests cellArrArr2cellList for the class ArrDub2ListCell
     void testCellArrArr2cellList(Tester t) {
@@ -1501,7 +1490,7 @@ class ExamplesIsland {
         t.checkExpect(dCV.visit(leaf), new LineImage(new Posn(-1, -1), new Posn(-1, -1), 
                 new Color(255, 255, 255)));
     }
-    // tests cellColor for the class Cell and OceanCell
+    // tests cellColor for the class Cell and OceanCell TODO
     void testCellColor(Tester t) {
         Cell c1 = new Cell(-1, 2, 3, false);
         Cell c2 = new Cell(-1, 2, 3, true);
@@ -1509,14 +1498,8 @@ class ExamplesIsland {
         Cell c4 = new Cell(1, 2, 3);
         Cell c5 = new Cell(30, 5, 4);
         Cell c6 = new OceanCell(0, 0);
-        t.checkExpect(c1.cellColor(0), new Color(1, 99, 0));
-        t.checkExpect(c2.cellColor(0), new Color(0, 0, 99));
-        t.checkExpect(c3.cellColor(0), new Color(0, 0, 100));
-        t.checkExpect(c4.cellColor(0), new Color(0, 100, 0));
-        t.checkExpect(c5.cellColor(0), new Color(210, 255, 210));
-        t.checkExpect(c6.cellColor(0), new Color(0, 0, 120));
     }
-    // tests displayCell for the class Cell 
+    // tests displayCell for the class Cell TODO
     void testDisplayCell(Tester t) {
         Cell c1 = new Cell(-1, 2, 3, false);
         Cell c2 = new Cell(-1, 2, 3, true);
@@ -1524,12 +1507,12 @@ class ExamplesIsland {
         Cell c4 = new Cell(1, 2, 3);
         Cell c5 = new Cell(30, 5, 4);
         Cell c6 = new OceanCell(0, 0);
-        t.checkExpect(c1.displayCell(0), new RectangleImage(new Posn(25, 35), 10, 10, c1.cellColor(0)));
-        t.checkExpect(c2.displayCell(0), new RectangleImage(new Posn(25, 35), 10, 10, c2.cellColor(0)));
-        t.checkExpect(c3.displayCell(0), new RectangleImage(new Posn(15, 25), 10, 10, c3.cellColor(0)));
-        t.checkExpect(c4.displayCell(0), new RectangleImage(new Posn(25, 35), 10, 10, c4.cellColor(0)));
-        t.checkExpect(c5.displayCell(0), new RectangleImage(new Posn(55, 45), 10, 10, c5.cellColor(0)));
-        t.checkExpect(c6.displayCell(0), new RectangleImage(new Posn(5, 5), 10, 10, c6.cellColor(0)));
+        //t.checkExpect(c1.displayCell(0), new RectangleImage(new Posn(25, 35), 10, 5, c1.cellColor(0)));
+        //t.checkExpect(c2.displayCell(0), new RectangleImage(new Posn(25, 35), 10, 5, c2.cellColor(0)));
+        //t.checkExpect(c3.displayCell(0), new RectangleImage(new Posn(15, 25), 10, 5, c3.cellColor(0)));
+        //t.checkExpect(c4.displayCell(0), new RectangleImage(new Posn(25, 35), 10, 5, c4.cellColor(0)));
+        //t.checkExpect(c5.displayCell(0), new RectangleImage(new Posn(55, 45), 10, 5, c5.cellColor(0)));
+        //t.checkExpect(c6.displayCell(0), 2)
     }
     // tests floodDanger for the class Cell TODO
     void testFloodDanger(Tester t) {
