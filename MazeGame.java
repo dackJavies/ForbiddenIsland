@@ -8,6 +8,7 @@ import tester.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 
 import javalib.colors.*;
 import javalib.impworld.*;
@@ -265,14 +266,25 @@ class Queue<T> {
 
 // represents a maze cell
 class Vertex {
+    
     IList<Edge> edges;
     boolean wasSearched;
     boolean correctPath;
+    
     Vertex() {
         this.edges = new Mt<Edge>();
         this.wasSearched = false;
         this.correctPath = false;
     }
+    
+    // Add an Edge with a random weight
+    void addRandomEdge(Vertex other) {
+        Random randy = new Random();
+        Edge toAdd = new Edge(this, other, randy.nextInt());
+        this.edges.add(toAdd);
+        other.edges.add(toAdd);
+    }
+    
 }
 
 // represents an edge of the maze graph
@@ -330,7 +342,27 @@ class MazeWorld extends World {
     // Add edges to the given ArrayList<ArrayList<Vertex>>
     void addEdges(ArrayList<ArrayList<Vertex>> grid) {
         
-        //for()
+        // Connections to the left/right
+        for(int i = 1; i < gameSizeX; i += 1) {
+            
+            for(int i2 = 0; i2 < gameSizeY; i2 += 1) {
+                
+                grid.get(i).get(i2).addRandomEdge(grid.get(i - 1).get(i2));
+                
+            }
+            
+        }
+        
+        // Connections to the top/bottom
+        for(int i = 0; i < gameSizeX; i += 1) {
+            
+            for(int i2 = 1; i2 < gameSizeY; i2 += 1) {
+                
+                grid.get(i).get(i2).addRandomEdge(grid.get(i).get(i2 - 1));
+                
+            }
+            
+        }
         
     }
 
