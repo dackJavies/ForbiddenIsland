@@ -343,6 +343,16 @@ class MazeWorld extends World {
 
 
 class ExamplesMaze {
+    MazeWorld maze0 = new MazeWorld(0, 0);
+    MazeWorld maze5 = new MazeWorld(5, 5);
+
+    ArrayList<Vertex> aV0 = new ArrayList<Vertex>();
+    ArrayList<Vertex> aV1 = new ArrayList<Vertex>();
+    ArrayList<Vertex> aV2 = new ArrayList<Vertex>();
+    ArrayList<Vertex> aV3 = new ArrayList<Vertex>();
+    ArrayList<Vertex> aV4 = new ArrayList<Vertex>();
+    ArrayList<ArrayList<Vertex>> aVFinal = new ArrayList<ArrayList<Vertex>>();
+    
     // List test lists
     IList<Integer> mTI = new Mt<Integer>();
     IList<Integer> listI1 = new Cons<Integer>(1, new Cons<Integer>(2, 
@@ -351,6 +361,43 @@ class ExamplesMaze {
     
     // Function objects
     ToString tS = new ToString();
+    
+    void initialize() {
+        this.aV0.clear();
+        this.aV0.add(new Vertex());
+        this.aV0.add(new Vertex());
+        this.aV0.add(new Vertex());
+        this.aV0.add(new Vertex());
+        this.aV0.add(new Vertex());
+        this.aV1.add(new Vertex());
+        this.aV1.add(new Vertex());
+        this.aV1.add(new Vertex());
+        this.aV1.add(new Vertex());
+        this.aV1.add(new Vertex());
+        this.aV2.add(new Vertex());
+        this.aV2.add(new Vertex());
+        this.aV2.add(new Vertex());
+        this.aV2.add(new Vertex());
+        this.aV2.add(new Vertex());
+        this.aV3.add(new Vertex());
+        this.aV3.add(new Vertex());
+        this.aV3.add(new Vertex());
+        this.aV3.add(new Vertex());
+        this.aV3.add(new Vertex());
+        this.aV4.add(new Vertex());
+        this.aV4.add(new Vertex());
+        this.aV4.add(new Vertex());
+        this.aV4.add(new Vertex());
+        this.aV4.add(new Vertex());
+        
+        this.aVFinal.add(aV0);
+        this.aVFinal.add(aV1);
+        this.aVFinal.add(aV2);
+        this.aVFinal.add(aV3);
+        this.aVFinal.add(aV4);
+        
+        
+    }
     
     // tests length for the interface IList<T> TODO 
     void testLength(Tester t) {
@@ -375,5 +422,11 @@ class ExamplesMaze {
                 new Cons<String>("2", new Cons<String>("3", 
                         new Cons<String>("4", new Mt<String>())))));
         t.checkExpect(mTI.map(tS), new Mt<String>());
+    }
+    // tests createGrid for the class MazeWorld
+    void testCreateGrid(Tester t) {
+        this.initialize();
+        t.checkExpect(maze5.createGrid(), this.aVFinal);
+        t.checkExpect(maze0.createGrid(), new ArrayList<ArrayList<Vertex>>());
     }
 }
