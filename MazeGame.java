@@ -264,38 +264,23 @@ class Queue<T> {
 }
 
 // represents a maze cell
-class Cell {
+class Vertex {
+    IList<Edge> edges;
     boolean wasSearched;
     boolean correctPath;
-    // convenience constructor for testing
-    Cell(boolean wasSearched, boolean correctPath) {
-        this.wasSearched = wasSearched;
-        this.correctPath = correctPath;
-    }
-    Cell() {
+    Vertex() {
+        this.edges = new Mt<Edge>();
         this.wasSearched = false;
         this.correctPath = false;
     }
 }
 
-// represents a vertex of the tree
-class Vertex<T> {
-    IList<Edge<T>> edges;
-    boolean wasSearched;
-    boolean correctPath;
-    Vertex(IList<Edge<T>> edges) {
-        this.edges = edges;
-        this.wasSearched = false;
-        this.correctPath = false;
-    }
-}
-
-// represents an edge of the tree
-class Edge<T> {
-    Vertex<T> from;
-    Vertex<T> to;
+// represents an edge of the maze graph
+class Edge {
+    Vertex from;
+    Vertex to;
     int weight;
-    Edge(Vertex<T> from, Vertex<T> to, int weight) {
+    Edge(Vertex from, Vertex to, int weight) {
         this.from = from;
         this.to = to;
         this.weight = weight;
@@ -303,12 +288,50 @@ class Edge<T> {
 }
 
 class MazeWorld extends World {
+    // Size of the game
+    int gameSizeX;
+    int gameSizeY;
+    // Hashmap for Union/Find
     HashMap<String, String> representatives;
-    IList<Edge<Cell>> worldEdges;
-    IList<Edge<Cell>> workList;
-    MazeWorld() {
+    IList<Edge> worldEdges;
+    IList<Edge> workList;
+    
+    MazeWorld(int gameSizeX, int gameSizeY) {
+        this.gameSizeX = gameSizeX;
+        this.gameSizeY = gameSizeY;
         this.representatives = new HashMap<String, String>();
-        this.workList = new Mt<Edge<Cell>>();
+        this.workList = new Mt<Edge>();
+    }
+    
+    // Create a grid of blank Vertices
+    ArrayList<ArrayList<Vertex>> createGrid() {
+        ArrayList<ArrayList<Vertex>> result = new ArrayList<ArrayList<Vertex>>();
+        
+        for(int i = 0; i < gameSizeX; i += 1) {
+            
+            result.add(new ArrayList<Vertex>());
+            
+        }
+        
+        for(int i = 0; i < gameSizeX; i += 1) {
+            
+            for(int i2 = 0; i2 < gameSizeY; i2 += 1) {
+                
+                result.get(i).add(new Vertex());
+                
+            }
+            
+        }
+        
+        return result;
+        
+    }
+    
+    // Add edges to the given ArrayList<ArrayList<Vertex>>
+    void addEdges(ArrayList<ArrayList<Vertex>> grid) {
+        
+        //for()
+        
     }
 
     // Draws the world TODO
