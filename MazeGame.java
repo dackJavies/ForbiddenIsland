@@ -302,16 +302,10 @@ class MazeWorld extends World {
     // Size of the game
     int gameSizeX;
     int gameSizeY;
-    // Hashmap for Union/Find
-    HashMap<String, String> representatives;
-    IList<Edge> worldEdges;
-    IList<Edge> workList;
     
     MazeWorld(int gameSizeX, int gameSizeY) {
         this.gameSizeX = gameSizeX;
         this.gameSizeY = gameSizeY;
-        this.representatives = new HashMap<String, String>();
-        this.workList = new Mt<Edge>();
     }
     
     // Create a grid of blank Vertices
@@ -365,11 +359,43 @@ class MazeWorld extends World {
         
     }
     
+    // Convert a 2D arraylist of Vertices 
+    /*ArrayList<Edge> vertexToEdge(ArrayList<ArrayList<Vertex>> grid) {
+        
+        
+        
+    }*/
+    
     // Implement Union/Find data structure while applying
     // Kruskel's algorithm.
     // EFFECT: mutates the edge lists in each Vertex in the given ArrayList
     ArrayList<ArrayList<Vertex>> kruskel(ArrayList<ArrayList<Vertex>> grid) {
-        return grid; //TODO
+        HashMap<String, String> representatives = new HashMap<String, String>();
+        ArrayList<ArrayList<Vertex>> worklist = grid;
+        
+        // populate hashmap
+        for(Integer i = 0; i < grid.size(); i += 1) {
+            
+            for(Integer i2 = 0; i2 < grid.get(i).size(); i2 += 1) {
+                
+                // Vertices are represented as their coordinates separated
+                // by a dash. i.e. (1, 1) is 1-1.
+                String toPut = i.toString() + "-" + i2.toString();
+                
+                // All values are initialized the same value as the key
+                representatives.put(toPut, toPut);
+                
+            }
+            
+        }
+        
+        while(worklist.size() > 0) {
+            
+            
+            
+        }
+        
+        return grid; //THIS IS A STUB: TODO
     }
 
     // Draws the world TODO
