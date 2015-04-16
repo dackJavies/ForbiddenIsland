@@ -343,9 +343,9 @@ class MazeWorld extends World {
     void addEdges(ArrayList<ArrayList<Vertex>> grid) {
         
         // Connections to the left/right
-        for(int i = 1; i < gameSizeX; i += 1) {
+        for(int i = 1; i < grid.size(); i += 1) {
             
-            for(int i2 = 0; i2 < gameSizeY; i2 += 1) {
+            for(int i2 = 0; i2 < grid.get(i).size(); i2 += 1) {
                 
                 grid.get(i).get(i2).addRandomEdge(grid.get(i - 1).get(i2));
                 
@@ -354,9 +354,9 @@ class MazeWorld extends World {
         }
         
         // Connections to the top/bottom
-        for(int i = 0; i < gameSizeX; i += 1) {
+        for(int i = 0; i < grid.size(); i += 1) {
             
-            for(int i2 = 1; i2 < gameSizeY; i2 += 1) {
+            for(int i2 = 1; i2 < grid.get(i).size(); i2 += 1) {
                 
                 grid.get(i).get(i2).addRandomEdge(grid.get(i).get(i2 - 1));
                 
@@ -364,6 +364,13 @@ class MazeWorld extends World {
             
         }
         
+    }
+    
+    // Implement Union/Find data structure while applying
+    // Kruskel's algorithm.
+    // EFFECT: mutates the edge lists in each Vertex in the given ArrayList
+    ArrayList<ArrayList<Vertex>> kruskel(ArrayList<ArrayList<Vertex>> grid) {
+        return grid; //TODO
     }
 
     // Draws the world TODO
@@ -375,16 +382,6 @@ class MazeWorld extends World {
 
 
 class ExamplesMaze {
-    MazeWorld maze0 = new MazeWorld(0, 0);
-    MazeWorld maze5 = new MazeWorld(5, 5);
-
-    ArrayList<Vertex> aV0 = new ArrayList<Vertex>();
-    ArrayList<Vertex> aV1 = new ArrayList<Vertex>();
-    ArrayList<Vertex> aV2 = new ArrayList<Vertex>();
-    ArrayList<Vertex> aV3 = new ArrayList<Vertex>();
-    ArrayList<Vertex> aV4 = new ArrayList<Vertex>();
-    ArrayList<ArrayList<Vertex>> aVFinal = new ArrayList<ArrayList<Vertex>>();
-    
     // List test lists
     IList<Integer> mTI = new Mt<Integer>();
     IList<Integer> listI1 = new Cons<Integer>(1, new Cons<Integer>(2, 
@@ -393,43 +390,6 @@ class ExamplesMaze {
     
     // Function objects
     ToString tS = new ToString();
-    
-    void initialize() {
-        this.aV0.clear();
-        this.aV0.add(new Vertex());
-        this.aV0.add(new Vertex());
-        this.aV0.add(new Vertex());
-        this.aV0.add(new Vertex());
-        this.aV0.add(new Vertex());
-        this.aV1.add(new Vertex());
-        this.aV1.add(new Vertex());
-        this.aV1.add(new Vertex());
-        this.aV1.add(new Vertex());
-        this.aV1.add(new Vertex());
-        this.aV2.add(new Vertex());
-        this.aV2.add(new Vertex());
-        this.aV2.add(new Vertex());
-        this.aV2.add(new Vertex());
-        this.aV2.add(new Vertex());
-        this.aV3.add(new Vertex());
-        this.aV3.add(new Vertex());
-        this.aV3.add(new Vertex());
-        this.aV3.add(new Vertex());
-        this.aV3.add(new Vertex());
-        this.aV4.add(new Vertex());
-        this.aV4.add(new Vertex());
-        this.aV4.add(new Vertex());
-        this.aV4.add(new Vertex());
-        this.aV4.add(new Vertex());
-        
-        this.aVFinal.add(aV0);
-        this.aVFinal.add(aV1);
-        this.aVFinal.add(aV2);
-        this.aVFinal.add(aV3);
-        this.aVFinal.add(aV4);
-        
-        
-    }
     
     // tests length for the interface IList<T> TODO 
     void testLength(Tester t) {
@@ -454,11 +414,5 @@ class ExamplesMaze {
                 new Cons<String>("2", new Cons<String>("3", 
                         new Cons<String>("4", new Mt<String>())))));
         t.checkExpect(mTI.map(tS), new Mt<String>());
-    }
-    // tests createGrid for the class MazeWorld
-    void testCreateGrid(Tester t) {
-        this.initialize();
-        t.checkExpect(maze5.createGrid(), this.aVFinal);
-        t.checkExpect(maze0.createGrid(), new ArrayList<ArrayList<Vertex>>());
     }
 }
