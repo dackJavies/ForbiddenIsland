@@ -479,17 +479,19 @@ class ExamplesMaze {
         Edge e9 = new Edge(v9, v6, 0);
         Edge e10 = new Edge(v9, v8, 0);
         IList<Edge> mTE = new Mt<Edge>();
-        IList<Edge> l1 = new Cons<Edge>(e1, mTE);
-        IList<Edge> l2 = new Cons<Edge>(e2, new Cons<Edge>(e3, mTE));
-        IList<Edge> l3 = new Cons<Edge>(e4, new Cons<Edge>(e5, mTE));
-        // add the missing ones for the below TODO
-        IList<Edge> l4 = new Cons<Edge>(e6, mTE);
-        IList<Edge> l5 = new Cons<Edge>(e7, new Cons<Edge>(e8, mTE));
-        IList<Edge> l6 = new Cons<Edge>(e9, new Cons<Edge>(e10, mTE));
-        
-        IList<Edge> l7 = new Cons<Edge>(e1, new Cons<Edge>(e11 , mTE));
-        IList<Edge> l8 = new Cons<Edge>(e2, new Cons<Edge>(e11, new Cons<Edge>(e12, mTE)));
-        IList<Edge> l9 = new Cons<Edge>(e9, new Cons<Edge>(e10, mTE));
+        // row 1
+        IList<Edge> l1 = new Cons<Edge>(e1, new Cons<Edge>(e11 , mTE));
+        IList<Edge> l2 = new Cons<Edge>(e2, new Cons<Edge>(e11, new Cons<Edge>(e12, mTE)));
+        IList<Edge> l3 = new Cons<Edge>(e4, new Cons<Edge>(e12, mTE));
+        // row 2
+        IList<Edge> l4 = new Cons<Edge>(e1, new Cons<Edge>(e6, new Cons<Edge>(e3, mTE)));
+        IList<Edge> l5 = new Cons<Edge>(e2, new Cons<Edge>(e2, new Cons<Edge>(e7, 
+                new Cons<Edge>(e3, new Cons<Edge>(e5, mTE)))));
+        IList<Edge> l6 = new Cons<Edge>(e4, new Cons<Edge>(e9, new Cons<Edge>(e5,mTE)));
+        // row 3
+        IList<Edge> l7 = new Cons<Edge>(e6, new Cons<Edge>(e8, mTE));
+        IList<Edge> l8 = new Cons<Edge>(e7, new Cons<Edge>(e8, new Cons<Edge>(e10, mTE)));
+        IList<Edge> l9 = new Cons<Edge>(e9, new Cons<Edge>(e10, mTE));      
         
     }
     
@@ -526,6 +528,6 @@ class ExamplesMaze {
     // tests addEdges for the class MazeWorld
     void testAddEdges(Tester t) {
         this.initialize();
-        t.checkExpect(this.aVCopy, this.aVFinal);
+        
     }
 }
