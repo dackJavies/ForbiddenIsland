@@ -276,7 +276,6 @@ class Vertex {
         this.wasSearched = false;
         this.correctPath = false;
     }
-    
     // Add an Edge with a random weight
     void addRandomEdge(Vertex other) {
         Random randy = new Random();
@@ -382,6 +381,17 @@ class MazeWorld extends World {
 
 
 class ExamplesMaze {
+    MazeWorld maze0 = new MazeWorld(0, 0);
+    MazeWorld maze5 = new MazeWorld(5, 5);
+
+    ArrayList<Vertex> aV0 = new ArrayList<Vertex>();
+    ArrayList<Vertex> aV1 = new ArrayList<Vertex>();
+    ArrayList<Vertex> aV2 = new ArrayList<Vertex>();
+    ArrayList<Vertex> aV3 = new ArrayList<Vertex>();
+    ArrayList<Vertex> aV4 = new ArrayList<Vertex>();
+    ArrayList<ArrayList<Vertex>> aVFinal = new ArrayList<ArrayList<Vertex>>();
+    ArrayList<ArrayList<Vertex>> aVCopy = new ArrayList<ArrayList<Vertex>>();
+    
     // List test lists
     IList<Integer> mTI = new Mt<Integer>();
     IList<Integer> listI1 = new Cons<Integer>(1, new Cons<Integer>(2, 
@@ -390,6 +400,98 @@ class ExamplesMaze {
     
     // Function objects
     ToString tS = new ToString();
+    
+    void initialize() {
+        this.aV0.clear();
+        this.aV0.add(new Vertex());
+        this.aV0.add(new Vertex());
+        this.aV0.add(new Vertex());
+        this.aV0.add(new Vertex());
+        this.aV0.add(new Vertex());
+        this.aV1.clear();
+        this.aV1.add(new Vertex());
+        this.aV1.add(new Vertex());
+        this.aV1.add(new Vertex());
+        this.aV1.add(new Vertex());
+        this.aV1.add(new Vertex());
+        this.aV2.clear();
+        this.aV2.add(new Vertex());
+        this.aV2.add(new Vertex());
+        this.aV2.add(new Vertex());
+        this.aV2.add(new Vertex());
+        this.aV2.add(new Vertex());
+        this.aV3.clear();
+        this.aV3.add(new Vertex());
+        this.aV3.add(new Vertex());
+        this.aV3.add(new Vertex());
+        this.aV3.add(new Vertex());
+        this.aV3.add(new Vertex());
+        this.aV4.clear();
+        this.aV4.add(new Vertex());
+        this.aV4.add(new Vertex());
+        this.aV4.add(new Vertex());
+        this.aV4.add(new Vertex());
+        this.aV4.add(new Vertex());
+        this.aVFinal.clear();
+        this.aVFinal.add(aV0);
+        this.aVFinal.add(aV1);
+        this.aVFinal.add(aV2);
+        this.aVFinal.add(aV3);
+        this.aVFinal.add(aV4);
+        
+        
+        this.aVCopy.clear();
+        for(int i = 0; i < aVFinal.size(); i += 1) {
+            aVCopy.add(aVFinal.get(i)); 
+        }
+    }
+    
+    // initializes Vertices in aVCopy 
+    void initializeV() {
+        Vertex v1 = new Vertex();
+        Vertex v2 = new Vertex();
+        Vertex v3 = new Vertex();
+        Vertex v4 = new Vertex();
+        Vertex v5  = new Vertex();
+        Vertex v6 = new Vertex();
+        Vertex v7 = new Vertex();
+        Vertex v8 = new Vertex();
+        Vertex v9 = new Vertex();
+        // TODO make edge weights correct and double check edges
+        // v2 
+        Edge e11 = new Edge(v2, v1, 0);
+        // v3
+        Edge e12 = new Edge(v3, v2, 0);
+        // v4
+        Edge e1 = new Edge(v4, v1, 0);
+        // v5
+        Edge e2 = new Edge(v5, v2, 0);
+        Edge e3 = new Edge(v5, v4, 0);
+        // v6 
+        Edge e4 = new Edge(v6, v3, 0);
+        Edge e5 = new Edge(v6, v5, 0);
+        // v7 
+        Edge e6 = new Edge(v7, v4, 0);
+        // v8
+        Edge e7 = new Edge(v8, v5, 0);
+        Edge e8 = new Edge(v8, v7, 0);
+        // v9 
+        Edge e9 = new Edge(v9, v6, 0);
+        Edge e10 = new Edge(v9, v8, 0);
+        IList<Edge> mTE = new Mt<Edge>();
+        IList<Edge> l1 = new Cons<Edge>(e1, mTE);
+        IList<Edge> l2 = new Cons<Edge>(e2, new Cons<Edge>(e3, mTE));
+        IList<Edge> l3 = new Cons<Edge>(e4, new Cons<Edge>(e5, mTE));
+        // add the missing ones for the below TODO
+        IList<Edge> l4 = new Cons<Edge>(e6, mTE);
+        IList<Edge> l5 = new Cons<Edge>(e7, new Cons<Edge>(e8, mTE));
+        IList<Edge> l6 = new Cons<Edge>(e9, new Cons<Edge>(e10, mTE));
+        
+        IList<Edge> l7 = new Cons<Edge>(e1, new Cons<Edge>(e11 , mTE));
+        IList<Edge> l8 = new Cons<Edge>(e2, new Cons<Edge>(e11, new Cons<Edge>(e12, mTE)));
+        IList<Edge> l9 = new Cons<Edge>(e9, new Cons<Edge>(e10, mTE));
+        
+    }
     
     // tests length for the interface IList<T> TODO 
     void testLength(Tester t) {
@@ -414,5 +516,16 @@ class ExamplesMaze {
                 new Cons<String>("2", new Cons<String>("3", 
                         new Cons<String>("4", new Mt<String>())))));
         t.checkExpect(mTI.map(tS), new Mt<String>());
+    }
+    // tests createGrid for the class MazeWorld
+    void testCreateGrid(Tester t) {
+        this.initialize();
+        t.checkExpect(maze5.createGrid(), this.aVFinal);
+        t.checkExpect(maze0.createGrid(), new ArrayList<ArrayList<Vertex>>());
+    }
+    // tests addEdges for the class MazeWorld
+    void testAddEdges(Tester t) {
+        this.initialize();
+        t.checkExpect(this.aVCopy, this.aVFinal);
     }
 }
