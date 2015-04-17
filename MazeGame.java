@@ -20,7 +20,9 @@ interface IList<T> extends Iterable<T> {
     // Computes the size of this list
     int length();
     // creates a new list with the given item added to the front
-    IList<T> add(T item);
+    IList<T> addToFront(T item);
+    // creates a new list with the given item added to the front
+    IList<T> addToBack(T item);
     // map the given IFunc over the entire list
     <R> IList<R> map(IFunc<T,R> func);
     // append this list onto the given one
@@ -112,8 +114,12 @@ class Cons<T> implements IList<T> {
         return 1 + this.rest.length();
     }
     // creates a new list with the given item added to the front
-    public IList<T> add(T item) {
+    public IList<T> addToFront(T item) {
         return new Cons<T>(item, this);
+    }
+    // creates a new list with the given item added to the back
+    public IList<T> addToBack(T item) {
+        return new Cons<T>(this.first, this.rest.addToBack(item));
     }
     // map the given function over the entire list
     public <R> IList<R> map(IFunc<T, R> func) {
@@ -121,11 +127,7 @@ class Cons<T> implements IList<T> {
     }
     // appends this list onto the given one
     public IList<T> append(IList<T> other) {
-        IList<T> result = this;
-        for(T t: other) {
-            result = this.add(t);
-        }
-        return result;
+        return new Cons<T>(this.first, this.rest.append(other));
     }
     // reverses this list
     public IList<T> rev() {
@@ -151,7 +153,11 @@ class Mt<T> implements IList<T> {
         return 0;
     }
     // creates a new list with the given item added to the front
-    public IList<T> add(T item) {
+    public IList<T> addToFront(T item) {
+        return new Cons<T>(item, this);
+    }
+    // creates a new list with the given item added to the back
+    public IList<T> addToBack(T item) {
         return new Cons<T>(item, this);
     }
     // map the given function over the entire list
@@ -391,22 +397,14 @@ class Vertex {
     void addRandomEdge(Vertex other) {
         Random randy = new Random();
         Edge toAdd = new Edge(this, other, Math.abs(randy.nextInt() / 10000));
-        this.edges = this.edges.add(toAdd);
-        other.edges = other.edges.add(toAdd);
+        this.edges = this.edges.addToBack(toAdd);
+        other.edges = other.edges.addToBack(toAdd);
     }
-    // Add an Edge with a pseudo random weight (FOR TESTING)
+    // Add an Edge with an entered weight (FOR TESTING)
     void addRandomEdge(Vertex other, int opt) {
-        Random testR = new Random(opt);
-        if (opt > 0) {
-        Edge toAdd = new Edge(this, other, Math.abs(testR.nextInt() / 10000));
-        this.edges = this.edges.add(toAdd);
-        other.edges = other.edges.add(toAdd);
-        }
-        else {
-            Edge toAdd = new Edge(this, other, 1);
-            this.edges = this.edges.add(toAdd);
-            other.edges = other.edges.add(toAdd);
-        }
+        Edge toAdd = new Edge(this, other, opt);
+        this.edges = this.edges.addToBack(toAdd);
+        other.edges = other.edges.addToBack(toAdd);
     }
     
 }
@@ -498,7 +496,7 @@ class MazeWorld extends World {
             
             for(int i2 = 0; i2 < grid.get(i).size(); i2 += 1) {
                 
-                grid.get(i).get(i2).addRandomEdge(grid.get(i - 1).get(i2), -1);
+                grid.get(i).get(i2).addRandomEdge(grid.get(i - 1).get(i2), 1);
                 
             }
             
@@ -509,7 +507,7 @@ class MazeWorld extends World {
             
             for(int i2 = 1; i2 < grid.get(i).size(); i2 += 1) {
                 
-                grid.get(i).get(i2).addRandomEdge(grid.get(i).get(i2 - 1), -1);
+                grid.get(i).get(i2).addRandomEdge(grid.get(i).get(i2 - 1), 1);
                 
             }
             
@@ -598,6 +596,8 @@ class ExamplesMaze {
     MazeWorld maze0 = new MazeWorld(0, 0);
     MazeWorld maze5 = new MazeWorld(5, 5);
     MazeWorld maze3 = new MazeWorld(3, 3);
+    MazeWorld maze2 = new MazeWorld(2, 2);
+
 
     ArrayList<Vertex> aV0 = new ArrayList<Vertex>();
     ArrayList<Vertex> aV1 = new ArrayList<Vertex>();
@@ -612,12 +612,18 @@ class ExamplesMaze {
     ArrayList<Vertex> aVN1 = new ArrayList<Vertex>();
     ArrayList<Vertex> aVN2 = new ArrayList<Vertex>();
     ArrayList<ArrayList<Vertex>> aVN = new ArrayList<ArrayList<Vertex>>();
+    // for neighbors 2
+    ArrayList<Vertex> aVN00 = new ArrayList<Vertex>();
+    ArrayList<Vertex> aVN01 = new ArrayList<Vertex>();
+    ArrayList<ArrayList<Vertex>> aVNB = new ArrayList<ArrayList<Vertex>>();
     
     // List test lists
     IList<Integer> mTI = new Mt<Integer>();
     IList<Integer> listI1 = new Cons<Integer>(1, new Cons<Integer>(2, 
             new Cons<Integer>(3, new Cons<Integer>(4, mTI))));
     IList<Integer> listI2 = new Cons<Integer>(5, this.listI1);
+    IList<Integer> listI2B = new Cons<Integer>(1, new Cons<Integer>(2, 
+            new Cons<Integer>(3, new Cons<Integer>(4, new Cons<Integer>(5, mTI)))));
     
     // Function objects
     ToString tS = new ToString();
@@ -631,6 +637,11 @@ class ExamplesMaze {
     Vertex v7 = new Vertex(0, 0);
     Vertex v8 = new Vertex(0, 0);
     Vertex v9 = new Vertex(0, 0);
+    
+    Vertex v01 = new Vertex(0, 0);
+    Vertex v02 = new Vertex(0, 0);
+    Vertex v03 = new Vertex(0, 0);
+    Vertex v04 = new Vertex(0, 0);
     
     // v2 
     Edge e11 = new Edge(v2, v1, 0);
@@ -719,10 +730,38 @@ class ExamplesMaze {
         v9 = new Vertex(2, 2);
         
         // for neighbors
-        ArrayList<Vertex> aVN0 = new ArrayList<Vertex>();
-        ArrayList<Vertex> aVN1 = new ArrayList<Vertex>();
-        ArrayList<Vertex> aVN2 = new ArrayList<Vertex>();
-        ArrayList<ArrayList<Vertex>> aVN = new ArrayList<ArrayList<Vertex>>();
+        aVN0.clear();
+        aVN0.add(v1);
+        aVN0.add(v2);
+        aVN0.add(v3);
+        aVN1.clear();
+        aVN1.add(v4);
+        aVN1.add(v5);
+        aVN1.add(v6);
+        aVN2.clear();
+        aVN2.add(v7);
+        aVN2.add(v8);
+        aVN2.add(v9);
+        aVN.clear();
+        aVN.add(aVN0);
+        aVN.add(aVN1);
+        aVN.add(aVN2);
+        
+        v01 = new Vertex(0, 0);
+        v02 = new Vertex(0, 1);
+        v03 = new Vertex(1, 0);
+        v04 = new Vertex(1, 1);
+        
+        // for neighbors
+        aVN00.clear();
+        aVN00.add(v01);
+        aVN00.add(v02);
+        aVN01.clear();
+        aVN01.add(v03);
+        aVN01.add(v04);
+        aVNB.clear();
+        aVNB.add(aVN00);
+        aVNB.add(aVN01);
         
         this.aVCopy.clear();
         for(int i = 0; i < aVFinal.size(); i += 1) {
@@ -790,10 +829,43 @@ class ExamplesMaze {
         t.checkExpect(listI1.length(), 4);
         t.checkExpect(listI2.length(), 5);
     }
-    // tests add for the interface IList<T> TODO
-    void testAdd(Tester t) {
-        t.checkExpect(mTI.add(2), new Cons<Integer>(2, mTI));
-        t.checkExpect(listI1.add(5), listI2);
+    // tests addToFront for the interface IList<T> 
+    void testAddToFront(Tester t) {
+        t.checkExpect(mTI.addToFront(2), new Cons<Integer>(2, mTI));
+        t.checkExpect(listI1.addToFront(5), listI2);
+    }
+    // tests addToBack for the interface IList<T>
+    void testAddToBack(Tester t) {
+        t.checkExpect(mTI.addToBack(2), new Cons<Integer>(2, mTI));
+        t.checkExpect(listI1.addToBack(5), listI2B);
+    }
+    // tests append for the interface IList<T>
+    void testAppend(Tester t) {
+        IList<Integer> iz = new Cons<Integer>(1, new Cons<Integer>(3, 
+                new Mt<Integer>()));
+        t.checkExpect(mTI.append(iz), iz);
+        t.checkExpect(listI1.append(iz), new Cons<Integer>(1, new Cons<Integer>(2,
+                new Cons<Integer>(3, new Cons<Integer>(4, iz)))));
+    }
+    // tests revT for the interface IList<T>
+    void testRevT(Tester t) {
+        IList<Integer> iA = new Cons<Integer>(4, new Cons<Integer>(3,
+                new Cons<Integer>(2, new Cons<Integer>(1, new Mt<Integer>()))));
+        t.checkExpect(this.mTI.revT(mTI), this.mTI);
+        t.checkExpect(this.mTI.revT(iA), iA);
+        t.checkExpect(iA.revT(mTI), this.listI1);
+    }
+    // tests rev for the interface IList<T>
+    void testRev(Tester t) {
+        IList<Integer> iA = new Cons<Integer>(4, new Cons<Integer>(3,
+                new Cons<Integer>(2, new Cons<Integer>(1, new Mt<Integer>()))));
+        t.checkExpect(this.mTI.rev(), this.mTI);
+        t.checkExpect(iA.rev(), this.listI1);
+    }
+    // tests isEmpty for the interface IList<T>
+    void isEmpty(Tester t) {
+        t.checkExpect(this.mTI.isEmpty(), true);
+        t.checkExpect(this.listI1.isEmpty(), false);
     }
     // tests apply for the function ToString
     void testToString(Tester t) {
@@ -817,24 +889,38 @@ class ExamplesMaze {
     // tests addRandomEdge for the class Vertex
     void testAddRandomEdge(Tester t) {
         this.initialize();
-        t.checkExpect(v1.edges, new Mt<Edge>());
-        v1.addRandomEdge(v2, 1);
-        t.checkExpect(v1.edges, new Cons<Edge>(new Edge(v1, v2, 115586),
-                new Mt<Edge>()));
-        t.checkExpect(v2.edges, new Cons<Edge>(new Edge(v1, v2, 115586),
-                new Mt<Edge>()));
-        t.checkExpect(v3.edges, new Mt<Edge>());
-        v3.addRandomEdge(v2, 2);
-        t.checkExpect(v3.edges, new Cons<Edge>(new Edge(v3, v2, 115471),
-                new Mt<Edge>()));
-       /* t.checkExpect(v2.edges, new Cons<Edge>(new Edge(v1, v2, 115586),
-                new Cons<Edge>(new Edge(v3, v2, 115586), new Mt<Edge>())));*/
+        t.checkExpect(v01.edges, new Mt<Edge>());
+        v01.addRandomEdge(v02, 1);
+        t.checkExpect(v01.edges, new Cons<Edge>(
+                new Edge(v01, v02, 1), new Mt<Edge>()));
+        t.checkExpect(v02.edges, new Cons<Edge>(
+                new Edge(v01, v02, 1), new Mt<Edge>()));
+        t.checkExpect(v03.edges, new Mt<Edge>());
+        v01.addRandomEdge(v03, 1);
+        t.checkExpect(v02.edges, new Cons<Edge>(
+                new Edge(v01, v02, 1), new Mt<Edge>()));
+        t.checkExpect(v01.edges, new Cons<Edge>(
+                new Edge(v01, v02, 1), 
+                new Cons<Edge>(new Edge(v01, v03, 1), new Mt<Edge>())));
+        t.checkExpect(v03.edges, new Cons<Edge>(new Edge(v01, v03, 1), new Mt<Edge>()));
+        v03.addRandomEdge(v02, 1);
+        t.checkExpect(v01.edges, new Cons<Edge>(
+                new Edge(v01, v02, 1), new Cons<Edge>(new Edge(v01, v03, 1), 
+                        new Mt<Edge>())));
+        t.checkExpect(v02.edges, new Cons<Edge>(
+                new Edge(v01, v02, 1), new Cons<Edge>(new Edge(v03, v02, 1),
+                        new Mt<Edge>())));
+        t.checkExpect(v03.edges, new Cons<Edge>(
+                new Edge(v01, v03, 1), new Cons<Edge>(new Edge(v03, v02, 1),
+                        new Mt<Edge>())));
     }
-    // tests addEdges for the class MazeWorld
+    // tests addEdges for the class MazeWorld TODO
     void testAddEdges(Tester t) {
         this.initialize();
-        this.initializeV();
-        t.checkExpect(this.aVFinal, this.aVCopy);
-        this.maze3.addEdges(aVFinal, 1);
+        this.maze2.addEdges(aVNB, 1);
+     /*   t.checkExpect(this.aVNB.get(0).get(0).edges.length(), 2);
+        t.checkExpect(this.aVNB.get(0).get(1).edges.length(), 3);
+        t.checkExpect(this.aVNB.get(1).get(0).edges.length(), 2);
+        t.checkExpect(this.aVNB.get(1).get(1).edges.length(), 3);*/
     }
 }
