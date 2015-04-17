@@ -267,13 +267,11 @@ class Queue<T> {
 // represents a maze cell
 class Vertex {
     
-    int x;
-    int y;
     IList<Edge> edges;
     boolean wasSearched;
     boolean correctPath;
     
-    Vertex(int x, int y) {
+    Vertex() {
         this.edges = new Mt<Edge>();
         this.wasSearched = false;
         this.correctPath = false;
@@ -304,16 +302,10 @@ class MazeWorld extends World {
     // Size of the game
     int gameSizeX;
     int gameSizeY;
-    // Hashmap for Union/Find
-    HashMap<String, String> representatives;
-    IList<Edge> worldEdges;
-    IList<Edge> workList;
     
     MazeWorld(int gameSizeX, int gameSizeY) {
         this.gameSizeX = gameSizeX;
         this.gameSizeY = gameSizeY;
-        this.representatives = new HashMap<String, String>();
-        this.workList = new Mt<Edge>();
     }
     
     // Create a grid of blank Vertices
@@ -330,7 +322,7 @@ class MazeWorld extends World {
             
             for(int i2 = 0; i2 < gameSizeY; i2 += 1) {
                 
-                result.get(i).add(new Vertex(i, i2));
+                result.get(i).add(new Vertex());
                 
             }
             
@@ -367,11 +359,43 @@ class MazeWorld extends World {
         
     }
     
+    // Convert a 2D arraylist of Vertices 
+    /*ArrayList<Edge> vertexToEdge(ArrayList<ArrayList<Vertex>> grid) {
+        
+        
+        
+    }*/
+    
     // Implement Union/Find data structure while applying
     // Kruskel's algorithm.
     // EFFECT: mutates the edge lists in each Vertex in the given ArrayList
     ArrayList<ArrayList<Vertex>> kruskel(ArrayList<ArrayList<Vertex>> grid) {
-        return grid; //TODO
+        HashMap<String, String> representatives = new HashMap<String, String>();
+        ArrayList<ArrayList<Vertex>> worklist = grid;
+        
+        // populate hashmap
+        for(Integer i = 0; i < grid.size(); i += 1) {
+            
+            for(Integer i2 = 0; i2 < grid.get(i).size(); i2 += 1) {
+                
+                // Vertices are represented as their coordinates separated
+                // by a dash. i.e. (1, 1) is 1-1.
+                String toPut = i.toString() + "-" + i2.toString();
+                
+                // All values are initialized the same value as the key
+                representatives.put(toPut, toPut);
+                
+            }
+            
+        }
+        
+        while(worklist.size() > 0) {
+            
+            
+            
+        }
+        
+        return grid; //THIS IS A STUB: TODO
     }
 
     // Draws the world TODO
@@ -405,35 +429,35 @@ class ExamplesMaze {
     
     void initialize() {
         this.aV0.clear();
-        this.aV0.add(new Vertex(0, 0));
-        this.aV0.add(new Vertex(0, 1));
-        this.aV0.add(new Vertex(0, 2));
-        this.aV0.add(new Vertex(0, 3));
-        this.aV0.add(new Vertex(0, 4));
+        this.aV0.add(new Vertex());
+        this.aV0.add(new Vertex());
+        this.aV0.add(new Vertex());
+        this.aV0.add(new Vertex());
+        this.aV0.add(new Vertex());
         this.aV1.clear();
-        this.aV1.add(new Vertex(1, 0));
-        this.aV1.add(new Vertex(1, 1));
-        this.aV1.add(new Vertex(1, 2));
-        this.aV1.add(new Vertex(1, 3));
-        this.aV1.add(new Vertex(1, 4));
+        this.aV1.add(new Vertex());
+        this.aV1.add(new Vertex());
+        this.aV1.add(new Vertex());
+        this.aV1.add(new Vertex());
+        this.aV1.add(new Vertex());
         this.aV2.clear();
-        this.aV2.add(new Vertex(2, 0));
-        this.aV2.add(new Vertex(2, 1));
-        this.aV2.add(new Vertex(2, 2));
-        this.aV2.add(new Vertex(2, 3));
-        this.aV2.add(new Vertex(2, 4));
+        this.aV2.add(new Vertex());
+        this.aV2.add(new Vertex());
+        this.aV2.add(new Vertex());
+        this.aV2.add(new Vertex());
+        this.aV2.add(new Vertex());
         this.aV3.clear();
-        this.aV3.add(new Vertex(3, 0));
-        this.aV3.add(new Vertex(3, 1));
-        this.aV3.add(new Vertex(3, 2));
-        this.aV3.add(new Vertex(3, 3));
-        this.aV3.add(new Vertex(3, 4));
+        this.aV3.add(new Vertex());
+        this.aV3.add(new Vertex());
+        this.aV3.add(new Vertex());
+        this.aV3.add(new Vertex());
+        this.aV3.add(new Vertex());
         this.aV4.clear();
-        this.aV4.add(new Vertex(4, 0));
-        this.aV4.add(new Vertex(4, 1));
-        this.aV4.add(new Vertex(4, 2));
-        this.aV4.add(new Vertex(4, 3));
-        this.aV4.add(new Vertex(4, 4));
+        this.aV4.add(new Vertex());
+        this.aV4.add(new Vertex());
+        this.aV4.add(new Vertex());
+        this.aV4.add(new Vertex());
+        this.aV4.add(new Vertex());
         this.aVFinal.clear();
         this.aVFinal.add(aV0);
         this.aVFinal.add(aV1);
@@ -450,15 +474,15 @@ class ExamplesMaze {
     
     // initializes Vertices in aVCopy 
     void initializeV() {
-        Vertex v1 = new Vertex(0, 0);
-        Vertex v2 = new Vertex(0, 1);
-        Vertex v3 = new Vertex(0, 2);
-        Vertex v4 = new Vertex(1, 0);
-        Vertex v5  = new Vertex(1, 0);
-        Vertex v6 = new Vertex(1, 2);
-        Vertex v7 = new Vertex(2, 0);
-        Vertex v8 = new Vertex(2, 1);
-        Vertex v9 = new Vertex(2, 2);
+        Vertex v1 = new Vertex();
+        Vertex v2 = new Vertex();
+        Vertex v3 = new Vertex();
+        Vertex v4 = new Vertex();
+        Vertex v5  = new Vertex();
+        Vertex v6 = new Vertex();
+        Vertex v7 = new Vertex();
+        Vertex v8 = new Vertex();
+        Vertex v9 = new Vertex();
         // TODO make edge weights correct and double check edges
         // v2 
         Edge e11 = new Edge(v2, v1, 0);
