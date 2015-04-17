@@ -393,15 +393,8 @@ class Vertex {
         this.y = y;
     }
     
-    // Add an Edge with a random weight
-    void addRandomEdge(Vertex other) {
-        Random randy = new Random();
-        Edge toAdd = new Edge(this, other, Math.abs(randy.nextInt() / 10000));
-        this.edges = this.edges.addToBack(toAdd);
-        other.edges = other.edges.addToBack(toAdd);
-    }
-    // Add an Edge with an entered weight (FOR TESTING)
-    void addRandomEdge(Vertex other, int opt) {
+    // Add an Edge with an entered weight 
+    void addEdge(Vertex other, int opt) {
         Edge toAdd = new Edge(this, other, opt);
         this.edges = this.edges.addToBack(toAdd);
         other.edges = other.edges.addToBack(toAdd);
@@ -462,13 +455,15 @@ class MazeWorld extends World {
     
     // Add edges to the given ArrayList<ArrayList<Vertex>>
     void addEdges(ArrayList<ArrayList<Vertex>> grid) {
+        Random randy = new Random();
         
         // Connections to the left/right
         for(int i = 1; i < grid.size(); i += 1) {
             
             for(int i2 = 0; i2 < grid.get(i).size(); i2 += 1) {
                 
-                grid.get(i).get(i2).addRandomEdge(grid.get(i - 1).get(i2));
+                grid.get(i).get(i2).addEdge(grid.get(i - 1).get(i2), 
+                        Math.abs(randy.nextInt() / 10000));
                 
             }
             
@@ -477,9 +472,10 @@ class MazeWorld extends World {
         // Connections to the top/bottom
         for(int i = 0; i < grid.size(); i += 1) {
             
-            for(int i2 = 1; i2 < grid.get(i).size(); i2 += 1) {
+            for(int i2 = 0; i2 < grid.get(i).size(); i2 += 1) {
                 
-                grid.get(i).get(i2).addRandomEdge(grid.get(i).get(i2 - 1));
+                grid.get(i).get(i2).addEdge(grid.get(i).get(i2 - 1), 
+                        Math.abs(randy.nextInt() / 10000));
                 
             }
             
@@ -496,18 +492,18 @@ class MazeWorld extends World {
             
             for(int i2 = 0; i2 < grid.get(i).size(); i2 += 1) {
                 
-                grid.get(i).get(i2).addRandomEdge(grid.get(i - 1).get(i2), 1);
+                grid.get(i).get(i2).addEdge(grid.get(i - 1).get(i2), 1);
                 
             }
             
         }
         
         // Connections to the top/bottom
-        for(int i = 0; i < grid.size(); i += 1) {
+        for(int i3 = 0; i3 < grid.size(); i3 += 1) {
             
-            for(int i2 = 1; i2 < grid.get(i).size(); i2 += 1) {
+            for(int i4 = 1; i4 < grid.get(i3).size(); i4 += 1) {
                 
-                grid.get(i).get(i2).addRandomEdge(grid.get(i).get(i2 - 1), 1);
+                grid.get(i3).get(i4).addEdge(grid.get(i3).get(i4 - 1), 1);
                 
             }
             
@@ -615,6 +611,7 @@ class ExamplesMaze {
     // for neighbors 2
     ArrayList<Vertex> aVN00 = new ArrayList<Vertex>();
     ArrayList<Vertex> aVN01 = new ArrayList<Vertex>();
+    ArrayList<Vertex> aVN02 = new ArrayList<Vertex>();
     ArrayList<ArrayList<Vertex>> aVNB = new ArrayList<ArrayList<Vertex>>();
     
     // List test lists
@@ -642,41 +639,45 @@ class ExamplesMaze {
     Vertex v02 = new Vertex(0, 0);
     Vertex v03 = new Vertex(0, 0);
     Vertex v04 = new Vertex(0, 0);
+    Vertex v05 = new Vertex(0, 0);
+    Vertex v06 = new Vertex(0, 0);
+    Vertex v07 = new Vertex(0, 0);
+    Vertex v08 = new Vertex(0, 0);
+    Vertex v09 = new Vertex(0, 0);
     
     // v2 
-    Edge e11 = new Edge(v2, v1, 0);
+    Edge e2to1 = new Edge(v1, v1, 0);
     // v3
-    Edge e12 = new Edge(v3, v2, 0);
+    Edge e3to2 = new Edge(v1, v1, 0);
     // v4
-    Edge e1 = new Edge(v4, v1, 0);
+    Edge e4to1 = new Edge(v1, v1, 0);
     // v5
-    Edge e2 = new Edge(v5, v2, 0);
-    Edge e3 = new Edge(v5, v4, 0);
+    Edge e5to2 = new Edge(v1, v1, 0);
+    Edge e5to4 = new Edge(v1, v1, 0);
     // v6 
-    Edge e4 = new Edge(v6, v3, 0);
-    Edge e5 = new Edge(v6, v5, 0);
+    Edge e6to3 = new Edge(v1, v1, 0);
+    Edge e6to5 = new Edge(v1, v1, 0);
     // v7 
-    Edge e6 = new Edge(v7, v4, 0);
+    Edge e7to4 = new Edge(v1, v1, 0);
     // v8
-    Edge e7 = new Edge(v8, v5, 0);
-    Edge e8 = new Edge(v8, v7, 0);
+    Edge e8to5 = new Edge(v1, v1, 0);
+    Edge e8to7 = new Edge(v1, v1, 0);
     // v9 
-    Edge e9 = new Edge(v9, v6, 0);
-    Edge e10 = new Edge(v9, v8, 0);
+    Edge e9to6 = new Edge(v1, v1, 0);
+    Edge e9to8 = new Edge(v1, v1, 0);
     IList<Edge> mTE = new Mt<Edge>();
     // row 1
-    IList<Edge> l1 = new Cons<Edge>(e1, new Cons<Edge>(e11 , mTE));
-    IList<Edge> l2 = new Cons<Edge>(e2, new Cons<Edge>(e11, new Cons<Edge>(e12, mTE)));
-    IList<Edge> l3 = new Cons<Edge>(e4, new Cons<Edge>(e12, mTE));
+    IList<Edge> l1 = new Mt<Edge>();
+    IList<Edge> l2 = new Mt<Edge>();
+    IList<Edge> l3 = new Mt<Edge>();
     // row 2
-    IList<Edge> l4 = new Cons<Edge>(e1, new Cons<Edge>(e6, new Cons<Edge>(e3, mTE)));
-    IList<Edge> l5 = new Cons<Edge>(e2, new Cons<Edge>(e2, new Cons<Edge>(e7, 
-            new Cons<Edge>(e3, new Cons<Edge>(e5, mTE)))));
-    IList<Edge> l6 = new Cons<Edge>(e4, new Cons<Edge>(e9, new Cons<Edge>(e5, mTE)));
+    IList<Edge> l4 = new Mt<Edge>();
+    IList<Edge> l5 = new Mt<Edge>();
+    IList<Edge> l6 = new Mt<Edge>();
     // row 3
-    IList<Edge> l7 = new Cons<Edge>(e6, new Cons<Edge>(e8, mTE));
-    IList<Edge> l8 = new Cons<Edge>(e7, new Cons<Edge>(e8, new Cons<Edge>(e10, mTE)));
-    IList<Edge> l9 = new Cons<Edge>(e9, new Cons<Edge>(e10, mTE));
+    IList<Edge> l7 = new Mt<Edge>();
+    IList<Edge> l8 = new Mt<Edge>();
+    IList<Edge> l9 = new Mt<Edge>();
     
     void initialize() {
         
@@ -749,19 +750,31 @@ class ExamplesMaze {
         
         v01 = new Vertex(0, 0);
         v02 = new Vertex(0, 1);
-        v03 = new Vertex(1, 0);
-        v04 = new Vertex(1, 1);
+        v03 = new Vertex(0, 2);
+        v04 = new Vertex(1, 0);
+        v05 = new Vertex(1, 1);
+        v06 = new Vertex(1, 1);
+        v07 = new Vertex(2, 0);
+        v08 = new Vertex(2, 1);
+        v09 = new Vertex(2, 2);
         
         // for neighbors
         aVN00.clear();
         aVN00.add(v01);
         aVN00.add(v02);
+        aVN00.add(v03);
         aVN01.clear();
-        aVN01.add(v03);
         aVN01.add(v04);
+        aVN01.add(v05);
+        aVN01.add(v06);
+        aVN02.clear();
+        aVN02.add(v07);
+        aVN02.add(v08);
+        aVN02.add(v09);
         aVNB.clear();
         aVNB.add(aVN00);
         aVNB.add(aVN01);
+        aVNB.add(aVN02);
         
         this.aVCopy.clear();
         for(int i = 0; i < aVFinal.size(); i += 1) {
@@ -772,41 +785,40 @@ class ExamplesMaze {
     // initializes Vertices in aVCopy 
     void initializeV() {
         this.initialize();
-        // TODO make edge weights correct and double check edges
         // v2 
-        e11 = new Edge(v2, v1, 0);
+        e2to1 = new Edge(v2, v1, 1);
         // v3
-        e12 = new Edge(v3, v2, 0);
+        e3to2 = new Edge(v3, v2, 1);
         // v4
-         e1 = new Edge(v4, v1, 0);
+        e4to1 = new Edge(v4, v1, 1);
         // v5
-        e2 = new Edge(v5, v2, 0);
-        e3 = new Edge(v5, v4, 0);
+        e5to2 = new Edge(v5, v2, 1);
+        e5to4 = new Edge(v5, v4, 1);
         // v6 
-        e4 = new Edge(v6, v3, 0);
-        e5 = new Edge(v6, v5, 0);
+        e6to3 = new Edge(v6, v3, 1);
+        e6to5 = new Edge(v6, v5, 1);
         // v7 
-        e6 = new Edge(v7, v4, 0);
+        e7to4 = new Edge(v7, v4, 1);
         // v8
-        e7 = new Edge(v8, v5, 0);
-        e8 = new Edge(v8, v7, 0);
+        e8to5 = new Edge(v8, v5, 1);
+        e8to7 = new Edge(v8, v7, 1);
         // v9 
-        e9 = new Edge(v9, v6, 0);
-        e10 = new Edge(v9, v8, 0);
+        e9to6 = new Edge(v9, v6, 1);
+        e9to8 = new Edge(v9, v8, 1);
         mTE = new Mt<Edge>();
         // row 1
-        l1 = new Cons<Edge>(e1, new Cons<Edge>(e11 , mTE));
-        l2 = new Cons<Edge>(e2, new Cons<Edge>(e11, new Cons<Edge>(e12, mTE)));
-        l3 = new Cons<Edge>(e4, new Cons<Edge>(e12, mTE));
+        l1 = new Cons<Edge>(e4to1, new Cons<Edge>(e2to1 , mTE));
+        l2 = new Cons<Edge>(e5to2, new Cons<Edge>(e2to1, new Cons<Edge>(e3to2, mTE)));
+        l3 = new Cons<Edge>(e6to3, new Cons<Edge>(e3to2, mTE));
         // row 2
-        l4 = new Cons<Edge>(e1, new Cons<Edge>(e6, new Cons<Edge>(e3, mTE)));
-        l5 = new Cons<Edge>(e2, new Cons<Edge>(e2, new Cons<Edge>(e7, 
-                new Cons<Edge>(e3, new Cons<Edge>(e5, mTE)))));
-        l6 = new Cons<Edge>(e4, new Cons<Edge>(e9, new Cons<Edge>(e5, mTE)));
+        l4 = new Cons<Edge>(e4to1, new Cons<Edge>(e7to4, new Cons<Edge>(e5to4, mTE)));
+        l5 = new Cons<Edge>(e5to2, new Cons<Edge>(e8to5, new Cons<Edge>(e5to4, 
+                new Cons<Edge>(e6to5, mTE))));
+        l6 = new Cons<Edge>(e6to3, new Cons<Edge>(e9to6, new Cons<Edge>(e6to5, mTE)));
         // row 3
-        l7 = new Cons<Edge>(e6, new Cons<Edge>(e8, mTE));
-        l8 = new Cons<Edge>(e7, new Cons<Edge>(e8, new Cons<Edge>(e10, mTE)));
-        l9 = new Cons<Edge>(e9, new Cons<Edge>(e10, mTE));
+        l7 = new Cons<Edge>(e7to4, new Cons<Edge>(e8to7, mTE));
+        l8 = new Cons<Edge>(e8to5, new Cons<Edge>(e8to7, new Cons<Edge>(e9to8, mTE)));
+        l9 = new Cons<Edge>(e9to6, new Cons<Edge>(e9to8, mTE));
         
         this.v1.edges = l1;
         this.v2.edges = l2;
@@ -886,24 +898,24 @@ class ExamplesMaze {
         t.checkExpect(maze5.createGrid(), this.aVFinal);
         t.checkExpect(maze0.createGrid(), new ArrayList<ArrayList<Vertex>>());
     }
-    // tests addRandomEdge for the class Vertex
-    void testAddRandomEdge(Tester t) {
+    // tests addEdge for the class Vertex
+    void testAddEdge(Tester t) {
         this.initialize();
         t.checkExpect(v01.edges, new Mt<Edge>());
-        v01.addRandomEdge(v02, 1);
+        v01.addEdge(v02, 1);
         t.checkExpect(v01.edges, new Cons<Edge>(
                 new Edge(v01, v02, 1), new Mt<Edge>()));
         t.checkExpect(v02.edges, new Cons<Edge>(
                 new Edge(v01, v02, 1), new Mt<Edge>()));
         t.checkExpect(v03.edges, new Mt<Edge>());
-        v01.addRandomEdge(v03, 1);
+        v01.addEdge(v03, 1);
         t.checkExpect(v02.edges, new Cons<Edge>(
                 new Edge(v01, v02, 1), new Mt<Edge>()));
         t.checkExpect(v01.edges, new Cons<Edge>(
                 new Edge(v01, v02, 1), 
                 new Cons<Edge>(new Edge(v01, v03, 1), new Mt<Edge>())));
         t.checkExpect(v03.edges, new Cons<Edge>(new Edge(v01, v03, 1), new Mt<Edge>()));
-        v03.addRandomEdge(v02, 1);
+        v03.addEdge(v02, 1);
         t.checkExpect(v01.edges, new Cons<Edge>(
                 new Edge(v01, v02, 1), new Cons<Edge>(new Edge(v01, v03, 1), 
                         new Mt<Edge>())));
@@ -913,14 +925,24 @@ class ExamplesMaze {
         t.checkExpect(v03.edges, new Cons<Edge>(
                 new Edge(v01, v03, 1), new Cons<Edge>(new Edge(v03, v02, 1),
                         new Mt<Edge>())));
+        t.checkExpect(v01.edges.length(), 2);
+        t.checkExpect(v01.edges.length(), 2);
+        t.checkExpect(v01.edges.length(), 2);
     }
     // tests addEdges for the class MazeWorld TODO
     void testAddEdges(Tester t) {
         this.initialize();
+        this.initializeV();
         this.maze2.addEdges(aVNB, 1);
-     /*   t.checkExpect(this.aVNB.get(0).get(0).edges.length(), 2);
+        t.checkExpect(this.aVNB.get(0).get(0).edges.length(), 2);
         t.checkExpect(this.aVNB.get(0).get(1).edges.length(), 3);
-        t.checkExpect(this.aVNB.get(1).get(0).edges.length(), 2);
-        t.checkExpect(this.aVNB.get(1).get(1).edges.length(), 3);*/
+        t.checkExpect(this.aVNB.get(0).get(2).edges.length(), 2);
+        t.checkExpect(this.aVNB.get(1).get(0).edges.length(), 3);
+        t.checkExpect(this.aVNB.get(1).get(1).edges.length(), 4);
+        t.checkExpect(this.aVNB.get(1).get(2).edges.length(), 3);
+        t.checkExpect(this.aVNB.get(2).get(0).edges.length(), 2);
+        t.checkExpect(this.aVNB.get(2).get(1).edges.length(), 3);
+        t.checkExpect(this.aVNB.get(2).get(2).edges.length(), 2);
+       // t.checkExpect(this.aVNB, aVN);
     }
 }
