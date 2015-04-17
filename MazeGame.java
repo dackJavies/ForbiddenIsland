@@ -452,7 +452,7 @@ class MazeWorld extends World {
         return result;
         
     }
-    
+    /* TODO edit the next method until tests work then fix this with those fixes
     // Add edges to the given ArrayList<ArrayList<Vertex>>
     void addEdges(ArrayList<ArrayList<Vertex>> grid) {
         Random randy = new Random();
@@ -470,11 +470,11 @@ class MazeWorld extends World {
         }
         
         // Connections to the top/bottom
-        for(int i = 0; i < grid.size(); i += 1) {
+        for(int i3 = 0; i3 < grid.size(); i3 += 1) {
             
-            for(int i2 = 0; i2 < grid.get(i).size(); i2 += 1) {
+            for(int i4 = 0; i4 < grid.get(i3).size(); i4 += 1) {
                 
-                grid.get(i).get(i2).addEdge(grid.get(i).get(i2 - 1), 
+                grid.get(i3).get(i4).addEdge(grid.get(i3).get(i4 - 1), 
                         Math.abs(randy.nextInt() / 10000));
                 
             }
@@ -482,7 +482,7 @@ class MazeWorld extends World {
         }
         
     }
-    
+    */ 
 
     // Add edges to the given ArrayList<ArrayList<Vertex>> (overloaded for testing)
     void addEdges(ArrayList<ArrayList<Vertex>> grid, int r) {
