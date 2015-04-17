@@ -8,6 +8,7 @@ import tester.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Random;
 
 import javalib.colors.*;
@@ -15,13 +16,20 @@ import javalib.impworld.*;
 import javalib.worldimages.*;
 
 // represents a list
-interface IList<T> {
+interface IList<T> extends Iterable<T> {
     // Computes the size of this list
     int length();
     // creates a new list with the given item added to the front
     IList<T> add(T item);
     // map the given IFunc over the entire list
     <R> IList<R> map(IFunc<T,R> func);
+    // append this list onto the given one
+    IList<T> append(IList<T> other);
+    // reverse this list
+    IList<T> rev();
+    IList<T> revT(IList<T> acc);
+    // Is this list empty?
+    boolean isEmpty();
 }
 
 // represents a function object that takes an A and returns an R
@@ -30,11 +38,65 @@ interface IFunc<A, R> {
     R apply(A a);
 }
 
+// represents a predicate object that operates on T's
+interface IPred<T> {
+    // Apply the function
+    boolean apply(T t);
+}
+
 // represents a function that returns the x of a posn
 class ToString implements IFunc<Integer, String> {
     public String apply(Integer i) {
         return (String)i.toString();
     }
+}
+
+// represents a predicate that filters out duplicate Edges
+class NoDups<Edge> implements IPred<Edge> {
+    
+    Edge toCompare;
+    
+    NoDups(Edge toCompare) { this.toCompare = toCompare; }
+    
+    public boolean apply(Edge e) {
+        
+        return this.toCompare.equals(e);
+        
+    }
+    
+}
+
+class IListIterator<T> implements Iterator<T> {
+    
+    IList<T> src;
+    
+    IListIterator(IList<T> src) { this.src = src; }
+    
+    public boolean hasNext() {
+        
+        return !this.src.isEmpty();
+        
+    }
+    
+    public T next() {
+        
+        if (!this.hasNext()) {
+            throw new RuntimeException();
+        }
+        
+        Cons<T> sourceAsCons = (Cons<T>)this.src;
+        T result = sourceAsCons.first;
+        this.src = sourceAsCons.rest;
+        return result;
+        
+    }
+    
+    public void remove() {
+        
+        throw new RuntimeException("What are you doing with your life?");
+        
+    }
+    
 }
 
 // represents a non-empty list
@@ -57,6 +119,29 @@ class Cons<T> implements IList<T> {
     public <R> IList<R> map(IFunc<T, R> func) {
         return new Cons<R>(func.apply(this.first), this.rest.map(func));
     }
+    // appends this list onto the given one
+    public IList<T> append(IList<T> other) {
+        IList<T> result = this;
+        for(T t: other) {
+            result = this.add(t);
+        }
+        return result;
+    }
+    // reverses this list
+    public IList<T> rev() {
+        return this.revT(new Mt<T>());
+    }
+    
+    public IList<T> revT(IList<T> acc) {
+        return this.rest.revT(new Cons<T>(this.first, acc));
+    }
+    
+    // Is this list empty?
+    public boolean isEmpty() { return false; }
+    
+    public Iterator<T> iterator() {
+        return new IListIterator<T>(this);
+    }
 } 
 
 // represents an empty list
@@ -72,6 +157,25 @@ class Mt<T> implements IList<T> {
     // map the given function over the entire list
     public <R> IList<R> map(IFunc<T, R> func) {
         return new Mt<R>();
+    }
+    // appends this list onto the given one
+    public IList<T> append(IList<T> other) {
+        return other;
+    }
+    // reverses this list
+    public IList<T> rev() {
+        return this;
+    }
+    
+    public IList<T> revT(IList<T> acc) {
+        return acc;
+    }
+    
+    // Is this list empty?
+    public boolean isEmpty() { return true; }
+    
+    public Iterator<T> iterator() {
+        return new IListIterator<T>(this);
     }
 }
 
@@ -302,7 +406,7 @@ class Edge {
         this.from = from;
         this.to = to;
         this.weight = weight;
-    }    
+    }
 }
 
 class MazeWorld extends World {
@@ -366,12 +470,41 @@ class MazeWorld extends World {
         
     }
     
-    // Convert a 2D arraylist of Vertices 
-    /*ArrayList<Edge> vertexToEdge(ArrayList<ArrayList<Vertex>> grid) {
+    // Convert a 2D ArrayList of Vertices to a 1D ArrayList of Edges
+    ArrayList<Edge> vertexToEdge(ArrayList<ArrayList<Vertex>> grid) {
         
+        ArrayList<IList<Edge>> listOfLists = new ArrayList<IList<Edge>>();
+        IList<Edge> edges = new Mt<Edge>();
         
+        // Copy all Vertices' Edge lists in grid into listOfLists
+        for(int i = 0; i < grid.size(); i += 1) {
+            
+            for(int i2 = 0; i2 < grid.get(i).size(); i2 += 1) {
+                
+                listOfLists.add(grid.get(i).get(i2).edges);
+                
+            }
+        }
         
-    }*/
+        edges = this.vertexToEdgeHelp(listOfLists);
+        
+    }
+    
+    // Concatenates all the lists in the given ArrayList<Edge> into an IList<Edge>
+    IList<Edge> vertexToEdgeHelp(ArrayList<IList<Edge>> listOfLists) {
+        
+        IList<Edge> edges = new Mt<Edge>();
+        
+        // Append those lists into one large IList<Edge>
+        for(IList<Edge> e: listOfLists) {
+            
+            edges = edges.append(e);
+            
+        }
+        
+        return edges;
+        
+    }
     
     // Implement Union/Find data structure while applying
     // Kruskel's algorithm.
