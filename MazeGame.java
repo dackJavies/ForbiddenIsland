@@ -898,7 +898,7 @@ class ExamplesMaze {
         v2 = new Vertex(0, 1);
         v3 = new Vertex(0, 2);
         v4 = new Vertex(1, 0);
-        v5  = new Vertex(1, 0);
+        v5  = new Vertex(1, 1); // (1, 0)?
         v6 = new Vertex(1, 2);
         v7 = new Vertex(2, 0);
         v8 = new Vertex(2, 1);
@@ -927,7 +927,7 @@ class ExamplesMaze {
         v03 = new Vertex(0, 2);
         v04 = new Vertex(1, 0);
         v05 = new Vertex(1, 1);
-        v06 = new Vertex(1, 1);
+        v06 = new Vertex(1, 2); // (1,1)?
         v07 = new Vertex(2, 0);
         v08 = new Vertex(2, 1);
         v09 = new Vertex(2, 2);
@@ -1159,6 +1159,6 @@ class ExamplesMaze {
         t.checkExpect(this.aVNB.get(2).get(0).edges.length(), 2);
         t.checkExpect(this.aVNB.get(2).get(1).edges.length(), 3);
         t.checkExpect(this.aVNB.get(2).get(2).edges.length(), 2);
-        // t.checkExpect(this.aVNB, aVN);
+        t.checkExpect(this.aVNB, aVN);
     }
 }
