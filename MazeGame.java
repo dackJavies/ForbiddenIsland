@@ -699,6 +699,7 @@ class MazeWorld extends World {
     // Size of the game
     int gameSizeX;
     int gameSizeY;
+    // GAMEMODES:
     // 0 = manual
     // 1 = depth-first search
     // 2 = breadth-first search
@@ -833,6 +834,12 @@ class MazeWorld extends World {
         return edges;
 
     }
+    
+    // Do two elements in the Union/Find hashmap have the same value?
+    // i.e. Will the connection create a cycle in the tree?
+    boolean cycle(HashMap<String, String> uf, String v1, String v2) {
+        return uf.get(v1).equals(uf.get(v2));
+    }
      
     // Implement Union/Find data structure while applying
     // Kruskel's algorithm.
@@ -847,7 +854,7 @@ class MazeWorld extends World {
             for(Integer i2 = 0; i2 < grid.get(i).size(); i2 += 1) {
 
                 // Vertices are represented as their coordinates separated
-                // by a dash. i.e. (1, 1) is 1-1.
+                // by a dash. i.e. (1, 1) is represented as "1-1".
                 String toPut = i.toString() + "-" + i2.toString();
 
                 // All values are initialized the same value as the key
