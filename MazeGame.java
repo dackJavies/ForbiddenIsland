@@ -714,6 +714,12 @@ class MazeWorld extends World {
         this.board = new Mt<Edge>();
         this.representatives = new HashMap<String, String>();
         this.unUsed = new Mt<Edge>();
+        
+        ArrayList<ArrayList<Vertex>> blankCells = this.createGrid();
+        this.addEdges(blankCells);
+        IList<Edge> b = this.vertexToEdge(blankCells);
+        this.board = b;
+        
     }
 
     // Create a grid of blank Vertices
@@ -827,30 +833,15 @@ class MazeWorld extends World {
 
             for(int i2 = 0; i2 < grid.get(i).size(); i2 += 1) {
 
-                listOfLists.add(grid.get(i).get(i2).edges);
+                for (Edge e: grid.get(i).get(i2).edges) {
+                    edges = edges.addToFront(e);
+                }
 
             }
         }
-
-        edges = this.vertexToEdgeHelp(listOfLists);
         
-        return edges.accept(new RemDupsVisitor1<Edge>());
-
-    }
-
-    // Concatenates all the lists in the given ArrayList<Edge> into an IList<Edge>
-    IList<Edge> vertexToEdgeHelp(ArrayList<IList<Edge>> listOfLists) {
-
-        IList<Edge> edges = new Mt<Edge>();
-
-        // Append those lists into one large IList<Edge>
-        for(IList<Edge> e: listOfLists) {
-
-            edges = edges.append(e);
-
-        }
-
         return edges;
+        //return edges.accept(new RemDupsVisitor1<Edge>());
 
     }
     
@@ -1290,19 +1281,27 @@ class ExamplesMaze {
         IBST<Vertex> n3a = new BTNode<Vertex>(c1, n1, n2a);
         t.checkExpect(n3.insert(comp, c4), n3a);
     }
-    // tests accept for the interfaces IList<T> and IBST<T> TODO
+    // tests accept for the interfaces IList<T> and IBST<T> 
     void testAccept(Tester t) {
-        /*  Mt<Vertex> mT = new Mt<Vertex>();
-            Cons<Vertex> cons = new Cons<Vertex>(new Vertex(5, 7), mT);
-            Leaf<Vertex> leaf = new Leaf<Vertex>();
-            Node<Vertex> node = new Node<Vertex>(new Vertex(5, 7), leaf, leaf);
-            DisplayVertexsVisitor dCV = new DisplayVertexsVisitor(cons, 0);
-            t.checkExpect(leaf.accept(dCV), dCV.visit(leaf));
-            t.checkExpect(node.accept(dCV), dCV.visit(node));
-            t.checkException(
-                    new IllegalArgumentException("IList is not a valid argument"), cons, "accept", dCV);
-            t.checkException(
-                    new IllegalArgumentException("IList is not a valid argument"), mT, "accept", dCV);*/
+        Vertex v1 = new Vertex(0, 0);
+        Vertex v2 = new Vertex(0, 1);
+        Vertex v3 = new Vertex(1, 0);
+        Vertex v4 = new Vertex(1, 1);
+        Edge e1 = new Edge(v1, v2, 0);
+        Edge e2 = new Edge(v1, v3, 0);
+        Edge e3 = new Edge(v3, v4, 0);
+        Mt<Edge> mT = new Mt<Edge>();
+        Cons<Edge> cons = new Cons<Edge>(e1, mT);
+        Leaf<Edge> leaf = new Leaf<Edge>();
+        BTNode<Edge> node1 = new BTNode<Edge>(e1, leaf, leaf);
+        BTNode<Edge> node2 = new BTNode<Edge>(e2, node1, leaf);
+        DisplayEdgeVisitor dEV = new DisplayEdgeVisitor(l1, true);
+        t.checkExpect(leaf.accept(dEV), dEV.visit(leaf));
+        t.checkExpect(node2.accept(dEV), dEV.visit(node2));
+        t.checkException(
+                new IllegalArgumentException("IList is not a valid argument"), cons, "accept", dEV);
+        t.checkException(
+                new IllegalArgumentException("IList is not a valid argument"), mT, "accept", dEV);
     }
     // tests list2tree for the interface IList TODO
     void testList2Tree(Tester t) {
@@ -1443,10 +1442,17 @@ class ExamplesMaze {
     
     // runs the animation
     void runMaze(Tester t) {
-        /*  this.initialize();
-        this.initializeV();
-        IList<Edge> b = this.maze0.vertexToEdge(this.aVN);
-        this.maze3.board = b;   
-        this.maze3.bigBang(500, 500);*/
+        MazeWorld maze10 = new MazeWorld(100, 100);
+        /* MazeWorld maze10 = new MazeWorld(30, 30);
+         t.checkExpect(this.maze0.board.length(), 0);
+         t.checkExpect(this.maze2.board.length(), 4);
+         t.checkExpect(this.maze3.board.length(), 12);
+         t.checkExpect(maze10.board.length(), 2);
+         this.initialize();
+         this.initializeV();
+         
+         IList<Edge> b = this.maze0.vertexToEdge(this.aVN);
+         this.maze3.board = b;   
+         this.maze3.bigBang(500, 500);*/
     }
 }
