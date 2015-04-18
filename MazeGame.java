@@ -39,8 +39,6 @@ interface IList<T> extends Iterable<T> {
     boolean isEmpty();
     // Accept the given Visitor
     <R> R accept(IVisitor<T, R> v);
-    // Is the given element in this IList (intentional equality)
-    boolean in(T t);
 }
 
 // represents a function object that takes an A and returns an R
@@ -199,11 +197,6 @@ class Cons<T> implements IList<T> {
     public <R> R accept(IVisitor<T, R> v) {
         return v.visit(this);
     }
-    @Override
-    public boolean in(T t) {
-        // TODO Auto-generated method stub
-        return false;
-    }
     
 } 
 
@@ -251,11 +244,6 @@ class Mt<T> implements IList<T> {
     
     public <R> R accept(IVisitor<T, R> v) {
         return v.visit(this);
-    }
-    @Override
-    public boolean in(T t) {
-        // TODO Auto-generated method stub
-        return false;
     }
 }
 
@@ -709,6 +697,7 @@ class MazeWorld extends World {
     // Size of the game
     int gameSizeX;
     int gameSizeY;
+    // GAMEMODES:
     // 0 = manual
     // 1 = depth-first search
     // 2 = breadth-first search
@@ -725,12 +714,6 @@ class MazeWorld extends World {
         this.board = new Mt<Edge>();
         this.representatives = new HashMap<String, String>();
         this.unUsed = new Mt<Edge>();
-        
-        ArrayList<ArrayList<Vertex>> blankCells = this.createGrid();
-        this.addEdges(blankCells);
-        IList<Edge> b = this.vertexToEdge(blankCells);
-        this.board = b;
-        
     }
 
     // Create a grid of blank Vertices
@@ -819,53 +802,103 @@ class MazeWorld extends World {
 
         ArrayList<IList<Edge>> listOfLists = new ArrayList<IList<Edge>>();
         IList<Edge> edges = new Mt<Edge>();
+        
+        // While we're still working with Vertices, populate the
+        // HashMap we need for Kruskel's alrgorithm
+        for(Integer i = 0; i < grid.size(); i += 1) {
+            
+            for(Integer i2 = 0; i2 < grid.get(i).size(); i2 += 1) {
+                
+                // In the HashMap, vertices are represented with their
+                // coordinates in the format: x-y
+                // i.e. (1, 1) => "1-1"
+                String toPut = i.toString() + "-" + i2.toString();
+                
+                // Each key's value is initialized to itself
+                // in accordance with the Union/Find data structure.
+                this.representatives.put(toPut, toPut);
+                
+            }
+            
+        }
 
         // Copy all Vertices' Edge lists in grid into listOfLists
         for(int i = 0; i < grid.size(); i += 1) {
 
             for(int i2 = 0; i2 < grid.get(i).size(); i2 += 1) {
 
-                for (Edge e: grid.get(i).get(i2).edges) {
-                    edges = edges.addToFront(e);
-                }
+                listOfLists.add(grid.get(i).get(i2).edges);
 
             }
         }
-        return edges;
-        //return edges.accept(new RemDupsVisitor1<Edge>());
 
+        edges = this.vertexToEdgeHelp(listOfLists);
+        
+        return edges.accept(new RemDupsVisitor1<Edge>());
+
+    }
+
+    // Concatenates all the lists in the given ArrayList<Edge> into an IList<Edge>
+    IList<Edge> vertexToEdgeHelp(ArrayList<IList<Edge>> listOfLists) {
+
+        IList<Edge> edges = new Mt<Edge>();
+
+        // Append those lists into one large IList<Edge>
+        for(IList<Edge> e: listOfLists) {
+
+            edges = edges.append(e);
+
+        }
+
+        return edges;
+
+    }
+    
+    // Do two elements in the Union/Find hashmap have the same value?
+    // i.e. Will the connection create a cycle in the tree?
+    boolean cycle(HashMap<String, String> uf, String v1, String v2) {
+        return uf.get(v1).equals(uf.get(v2));
     }
      
     // Implement Union/Find data structure while applying
     // Kruskel's algorithm.
     // EFFECT: mutates the edge lists in each Vertex in the given ArrayList
-    ArrayList<ArrayList<Vertex>> kruskel(ArrayList<ArrayList<Vertex>> grid) {
-        HashMap<String, String> representatives = new HashMap<String, String>();
-        ArrayList<ArrayList<Vertex>> worklist = grid;
+    IList<Edge> kruskel(IList<Edge> grid, HashMap<String, String> representatives) {
+        IList<Edge> blackList = new Mt<Edge>();
+        IList<Edge> finalList = new Mt<Edge>();
+        String toFind1;
+        String toFind2;
 
-        // populate hashmap
-        for(Integer i = 0; i < grid.size(); i += 1) {
-
-            for(Integer i2 = 0; i2 < grid.get(i).size(); i2 += 1) {
-
-                // Vertices are represented as their coordinates separated
-                // by a dash. i.e. (1, 1) is 1-1.
-                String toPut = i.toString() + "-" + i2.toString();
-
-                // All values are initialized the same value as the key
-                representatives.put(toPut, toPut);
-
+        for(Edge e: grid) {
+            
+            // Convert both vectors' positions into strings
+            toFind1 = e.from.x.toString() + "-" + e.from.y.toString();
+            toFind2 = e.to.x.toString() + "-" + e.to.y.toString();
+            
+            // If this next connection will create a cycle, discard it
+            // i.e. don't include it in the final list
+            if (this.cycle(representatives, toFind1, toFind2)) {
+                
+                blackList = blackList.addToFront(e);
+                
             }
-
+            // Otherwise, add it to the final list and adjust the hashmap.
+            // Adjusting the hashmap would mean changing the value associated
+            // with the key toFind2 to that of the key toFind1.
+            else {
+                
+                finalList.addToFront(e);
+                representatives.put(toFind2, representatives.get(toFind1));
+                
+            }
+            
         }
-
-        while(worklist.size() > 0) {
-
-
-
-        }
-
-        return grid; //THIS IS A STUB: TODO
+        
+        // Save the unused edge list for rendering purposes
+        this.unUsed = blackList;
+        
+        // Returns the list of actual edges.
+        return finalList;
     }
     // Draws the world TODO
     public WorldImage makeImage() {
@@ -1257,27 +1290,19 @@ class ExamplesMaze {
         IBST<Vertex> n3a = new BTNode<Vertex>(c1, n1, n2a);
         t.checkExpect(n3.insert(comp, c4), n3a);
     }
-    // tests accept for the interfaces IList<T> and IBST<T> 
+    // tests accept for the interfaces IList<T> and IBST<T> TODO
     void testAccept(Tester t) {
-        Vertex v1 = new Vertex(0, 0);
-        Vertex v2 = new Vertex(0, 1);
-        Vertex v3 = new Vertex(1, 0);
-        Vertex v4 = new Vertex(1, 1);
-        Edge e1 = new Edge(v1, v2, 0);
-        Edge e2 = new Edge(v1, v3, 0);
-        Edge e3 = new Edge(v3, v4, 0);
-        Mt<Edge> mT = new Mt<Edge>();
-        Cons<Edge> cons = new Cons<Edge>(e1, mT);
-        Leaf<Edge> leaf = new Leaf<Edge>();
-        BTNode<Edge> node1 = new BTNode<Edge>(e1, leaf, leaf);
-        BTNode<Edge> node2 = new BTNode<Edge>(e2, node1, leaf);
-        DisplayEdgeVisitor dEV = new DisplayEdgeVisitor(l1, true);
-        t.checkExpect(leaf.accept(dEV), dEV.visit(leaf));
-        t.checkExpect(node2.accept(dEV), dEV.visit(node2));
-        t.checkException(
-                new IllegalArgumentException("IList is not a valid argument"), cons, "accept", dEV);
-        t.checkException(
-                new IllegalArgumentException("IList is not a valid argument"), mT, "accept", dEV);
+        /*  Mt<Vertex> mT = new Mt<Vertex>();
+            Cons<Vertex> cons = new Cons<Vertex>(new Vertex(5, 7), mT);
+            Leaf<Vertex> leaf = new Leaf<Vertex>();
+            Node<Vertex> node = new Node<Vertex>(new Vertex(5, 7), leaf, leaf);
+            DisplayVertexsVisitor dCV = new DisplayVertexsVisitor(cons, 0);
+            t.checkExpect(leaf.accept(dCV), dCV.visit(leaf));
+            t.checkExpect(node.accept(dCV), dCV.visit(node));
+            t.checkException(
+                    new IllegalArgumentException("IList is not a valid argument"), cons, "accept", dCV);
+            t.checkException(
+                    new IllegalArgumentException("IList is not a valid argument"), mT, "accept", dCV);*/
     }
     // tests list2tree for the interface IList TODO
     void testList2Tree(Tester t) {
@@ -1395,17 +1420,31 @@ class ExamplesMaze {
         t.checkExpect(testList2.accept(rDV2), testList3);
         
     }
-    // runs the animation
-    void testRunMaze(Tester t) {
-        MazeWorld maze10 = new MazeWorld(100, 100);
-       /* MazeWorld maze10 = new MazeWorld(30, 30);
-        t.checkExpect(this.maze0.board.length(), 0);
-        t.checkExpect(this.maze2.board.length(), 4);
-        t.checkExpect(this.maze3.board.length(), 12);
-        t.checkExpect(maze10.board.length(), 2);
+    
+    // tests vertexToEdge in MazeWorld
+    void testVertexToEdge(Tester t) {
+        
         this.initialize();
         this.initializeV();
         
+        t.checkExpect(maze3.vertexToEdge(aVN).length(), 12);
+        
+        IList<Edge> testList = new Cons<Edge>(e4to1, new Cons<Edge>(
+                e2to1, new Cons<Edge>(e5to2, new Cons<Edge>(e3to2, 
+                        new Cons<Edge>(e6to3, new Cons<Edge>(e7to4,
+                                new Cons<Edge>(e5to4, new Cons<Edge>(e8to5,
+                                        new Cons<Edge>(e6to5, new Cons<Edge>(e9to6,
+                                                new Cons<Edge>(e8to7, new Cons<Edge>(
+                                                        e9to8, new Mt<Edge>()))))))))))));
+        
+        t.checkExpect(maze3.vertexToEdge(aVN), testList);
+        
+    }
+    
+    // runs the animation
+    void runMaze(Tester t) {
+        /*  this.initialize();
+        this.initializeV();
         IList<Edge> b = this.maze0.vertexToEdge(this.aVN);
         this.maze3.board = b;   
         this.maze3.bigBang(500, 500);*/
