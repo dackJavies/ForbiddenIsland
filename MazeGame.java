@@ -64,7 +64,7 @@ class RemDupsVisitor1<T> implements IVisitor<T, IList<T>> {
     public IList<T> visit(Cons<T> c) {
         this.visiteur = new RemDupsVisitor2<T>(c.first);
         c.rest = c.rest.accept(visiteur);
-        return c.rest.accept(this);
+        return new Cons<T>(c.first, c.rest.accept(this));
         
     }
     
@@ -1289,6 +1289,47 @@ class ExamplesMaze {
         t.checkExpect(this.aVNB.get(2).get(1).edges.length(), 3);
         t.checkExpect(this.aVNB.get(2).get(2).edges.length(), 2);
         t.checkExpect(this.aVNB, aVN);
+    }
+    
+    // tests RemDupsVisitor1
+    void testRemDupsVisitor1(Tester t) {
+        
+        Integer one = new Integer(1);
+        Integer two = new Integer(2);
+        Integer three = new Integer(3);
+        
+        IList<Integer> testList = new Cons<Integer>(one, new Cons<Integer>(
+                two, new Mt<Integer>()));
+        IList<Integer> testList2 = new Cons<Integer>(one, new Cons<Integer>(
+                three, new Cons<Integer>(three, new Mt<Integer>())));
+        IList<Integer> testList3 = new Cons<Integer>(one, new Cons<Integer>(
+                three, new Mt<Integer>()));
+        
+        RemDupsVisitor1<Integer> rDV1 = new RemDupsVisitor1<Integer>();
+        
+        t.checkExpect(testList.accept(rDV1), testList);
+        t.checkExpect(testList2.accept(rDV1), testList3);
+        
+    }
+    
+    // tests RemDupsVisitor2
+    void testRemDupsVisitor2(Tester t) {
+        
+        Integer one = new Integer(1);
+        Integer two = new Integer(2);
+        Integer three = new Integer(3);
+        
+        IList<Integer> testList = new Cons<Integer>(one, new Cons<Integer>(
+                two, new Mt<Integer>()));
+        IList<Integer> testList2 = new Cons<Integer>(one, new Cons<Integer>(
+                three, new Cons<Integer>(three, new Mt<Integer>())));
+        IList<Integer> testList3 = new Cons<Integer>(one, new Mt<Integer>());
+        
+        RemDupsVisitor2<Integer> rDV2 = new RemDupsVisitor2<Integer>(three);
+        
+        t.checkExpect(testList.accept(rDV2), testList);
+        t.checkExpect(testList2.accept(rDV2), testList3);
+        
     }
 
     // runs the animation
