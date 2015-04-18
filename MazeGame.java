@@ -822,7 +822,7 @@ class MazeWorld extends World {
             
         }
 
-        // Copy all Vertices' Edge lists in grid into listOfLists
+        // Copy all Vertices' Edge lists in grid into listOfListsl
         for(int i = 0; i < grid.size(); i += 1) {
 
             for(int i2 = 0; i2 < grid.get(i).size(); i2 += 1) {
