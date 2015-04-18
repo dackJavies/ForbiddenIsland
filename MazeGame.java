@@ -452,8 +452,8 @@ interface IComp<T> {
 }
 
 //this compares two Edges randomly
-class RandEdge implements IComp<Edge> {
-    public int compare(Edge e1, Edge e2) {
+class Rand<T> implements IComp<T> {
+    public int compare(T e1, T e2) {
         Random r = new Random();
         return r.nextInt();
     }
@@ -487,7 +487,7 @@ interface IVisitor<T, R> {
 class DisplayWallVisitor implements IVisitor<Edge, WorldImage> {
     IBST<Edge> board;
     DisplayWallVisitor(IList<Edge> board) {
-        IComp<Edge> ran = new RandEdge(); 
+        IComp<Edge> ran = new Rand<Edge>(); 
         this.board = board.list2Tree(ran);
     }
     // visits an empty
@@ -510,11 +510,11 @@ class DisplayWallVisitor implements IVisitor<Edge, WorldImage> {
     }    
 }
 
-//represents a visitor that displays the cells in a list
-class DisplayCellVisitor implements IVisitor<Edge, WorldImage> {
+//represents a visitor that displays the edges in a list
+class DisplayEdgeVisitor implements IVisitor<Edge, WorldImage> {
     IBST<Edge> board;
-    DisplayCellVisitor(IList<Edge> board) {
-        IComp<Edge> ran = new RandEdge(); 
+    DisplayEdgeVisitor(IList<Edge> board) {
+        IComp<Edge> ran = new Rand<Edge>(); 
         this.board = board.list2Tree(ran);
     }
     // visits an empty
@@ -536,6 +536,32 @@ class DisplayCellVisitor implements IVisitor<Edge, WorldImage> {
         return new LineImage(new Posn(-1, -1), new Posn(-1, -1), new Color(255, 255, 255));
     }    
 }
+
+//represents a visitor that displays the cells in a list
+/*class DisplayCellVisitor implements IVisitor<Vertex, WorldImage> {
+  IBST<Vertex> board;
+  DisplayCellVisitor(IList<Edge> board) {
+      IComp<Vertex> ran = new Rand<Vertex>(); 
+      this.board = board.list2Tree(ran);
+  }
+  // visits an empty
+  public WorldImage visit(Mt<Vertex> m) {
+      throw new IllegalArgumentException("IList is not a valid argument");
+  }
+  // visits a cons
+  public WorldImage visit(Cons<Vertex> c) {
+      throw new IllegalArgumentException("IList is not a valid argument");
+  }
+  // visits a BTNode
+  public WorldImage visit(BTNode<Vertex> n) {
+      return new RectangleImage(null, 0, 0, new Color(0, 0, 0));/* TODO 
+new OverlayImages(n.data.displayEdge(waterLevel), 
+        new OverlayImages(n.left.accept(this), n.right.accept(this)));
+}
+// visits a Leaf
+public WorldImage visit(Leaf<Vertex> n) {
+    return new LineImage(new Posn(-1, -1), new Posn(-1, -1), new Color(255, 255, 255));
+}    */
 
 // represents a maze cell
 class Vertex {
@@ -562,6 +588,17 @@ class Vertex {
         this.edges = this.edges.addToBack(toAdd);
         other.edges = other.edges.addToBack(toAdd);
     }
+    // displays the maze cell
+    WorldImage displayCell() {
+        Color c = new Color(205, 205, 205);
+        if (this.correctPath) {
+            c = new Color(65, 86, 197);
+        }
+        else if (this.wasSearched) {
+            c = new Color(56, 176, 222);
+        }
+        return new RectangleImage(new Posn(this.x, this.y), 10, 10, c);
+    }
 
 }
 
@@ -574,6 +611,33 @@ class Edge {
         this.from = from;
         this.to = to;
         this.weight = weight;
+    }
+    // displays this edge 
+    WorldImage displayEdge() {
+        return new LineImage(new Posn(this.from.x, this.from.y), 
+                new Posn(this.to.x, this.to.y), new Color(255, 0, 0));
+    }
+    // displays this edge's wall (because it is not used)
+    WorldImage displayWall() {
+        Color c = new Color(140, 140, 140);
+        // next to each other horizontally
+        Posn p1 = new Posn((this.to.x + this.from.x) / 2, this.to.y + 5);
+        Posn p2 = new Posn((this.to.x + this.from.x) / 2, this.to.y - 5);
+        // next to each other vertically
+        Posn p3 = new Posn(this.to.x + 5, (this.to.y + this.from.y) / 2);
+        Posn p4 = new Posn(this.to.x - 5, (this.to.y + this.from.y) / 2);
+        // connected horizontally
+        if (!(this.from.x == this.to.x) && (this.from.y == this.to.y)) {
+            return new LineImage(p1, p2, c);
+        }
+        // connected vertically
+        else if (!(this.from.y == this.to.y) && (this.from.x == this.to.x)) {
+            return new LineImage(p3, p4, c);
+        }
+        // connected otherwise
+        else {
+            throw new RuntimeException("There is an edge connecting two non-adjacent vertices");
+        }
     }
 }
 
