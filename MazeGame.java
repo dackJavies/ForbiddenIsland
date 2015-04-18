@@ -1258,8 +1258,10 @@ class ExamplesMaze {
         Edge eB = new Edge(vB, vC, 3);
         Edge eC = new Edge(vA, vC, 50935);
         // horizontally connected
-        //t.checkExpect(eA.displayEdge(true), null);
-        //t.checkExpect(eA.displayEdge(false), null);
+        t.checkExpect(eA.displayEdge(true), new OverlayImages(vA.displayCell(), 
+                new OverlayImages(vB.displayCell(), new LineImage(new Posn(5, 5), 
+                        new Posn(15, 5), new Color(255, 0, 0)))));
+        t.checkExpect(eA.displayEdge(false), new OverlayImages(vA.displayCell(), vB.displayCell()));
         // vertically connected
         //t.checkExpect(eB.displayEdge(true), null);
         //t.checkExpect(eB.displayEdge(false), null);
