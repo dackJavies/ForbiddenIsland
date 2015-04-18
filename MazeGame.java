@@ -1381,6 +1381,27 @@ class ExamplesMaze {
         t.checkExpect(testList2.accept(rDV2), testList3);
         
     }
+    
+    // tests vertexToEdge in MazeWorld
+    void testVertexToEdge(Tester t) {
+        
+        this.initialize();
+        this.initializeV();
+        
+        t.checkExpect(maze3.vertexToEdge(aVN).length(), 12);
+        
+        IList<Edge> testList = new Cons<Edge>(e4to1, new Cons<Edge>(
+                e2to1, new Cons<Edge>(e5to2, new Cons<Edge>(e3to2, 
+                        new Cons<Edge>(e6to3, new Cons<Edge>(e7to4,
+                                new Cons<Edge>(e5to4, new Cons<Edge>(e8to5,
+                                        new Cons<Edge>(e6to5, new Cons<Edge>(e9to6,
+                                                new Cons<Edge>(e8to7, new Cons<Edge>(
+                                                        e9to8, new Mt<Edge>()))))))))))));
+        
+        t.checkExpect(maze3.vertexToEdge(aVN), testList);
+        
+    }
+    
     // runs the animation
     void runMaze(Tester t) {
         /*  this.initialize();
