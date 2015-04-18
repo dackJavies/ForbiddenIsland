@@ -37,18 +37,14 @@ interface IList<T> extends Iterable<T> {
     IList<T> revT(IList<T> acc);
     // Is this list empty?
     boolean isEmpty();
+    // Accept the given Visitor
+    <R> R accept(IVisitor<T, R> v);
 }
 
 // represents a function object that takes an A and returns an R
 interface IFunc<A, R> {
     // Apply the function
     R apply(A a);
-}
-
-// represents a predicate object that operates on T's
-interface IPred<T> {
-    // Apply the function
-    boolean apply(T t);
 }
 
 // represents a function that returns the x of a posn
@@ -58,21 +54,67 @@ class ToString implements IFunc<Integer, String> {
     }
 }
 
-// represents a predicate that filters out duplicate Edges
-class NoDups<Edge> implements IPred<Edge> {
-
-    Edge toCompare;
-
-    NoDups(Edge toCompare) { this.toCompare = toCompare; }
-
-    public boolean apply(Edge e) {
-
-        return this.toCompare.equals(e);
-
+// Goes through an IList calling another duplicate-removing
+// visitor on each element.
+class RemDupsVisitor1<T> implements IVisitor<T, IList<T>> {
+    
+    RemDupsVisitor2<T> visiteur;
+    
+    // Delete all duplicates of c.first in c.rest recursively
+    public IList<T> visit(Cons<T> c) {
+        this.visiteur = new RemDupsVisitor2<T>(c.first);
+        c.rest = c.rest.accept(visiteur);
+        return new Cons<T>(c.first, c.rest.accept(this));
+        
+    }
+    
+    public IList<T> visit(Mt<T> m) {
+        return new Mt<T>();
     }
 
+    public IList<T> visit(BTNode<T> n) {
+        throw new RuntimeException("This visitor does not operate on trees");
+    }
+
+    public IList<T> visit(Leaf<T> n) {
+        throw new RuntimeException("This visitor does not operate on trees");
+    }
+    
 }
 
+// Compares the given T against all elements in an IList<T>
+class RemDupsVisitor2<T> implements IVisitor<T, IList<T>> {
+    
+    T toCompare;
+    
+    RemDupsVisitor2(T toCompare) {
+        this.toCompare = toCompare;
+    }
+
+    public IList<T> visit(Cons<T> c) {
+        if (c.first == this.toCompare) {
+            return c.rest.accept(this);
+        }
+        else {
+            return new Cons<T>(c.first, c.rest.accept(this));
+        }
+    }
+
+    public IList<T> visit(Mt<T> m) {
+        return new Mt<T>();
+    }
+
+    public IList<T> visit(BTNode<T> n) {
+        throw new RuntimeException("This visitor does not operate on trees");
+    }
+
+    public IList<T> visit(Leaf<T> n) {
+        throw new RuntimeException("This visitor does not operate on trees");
+    }
+    
+}
+
+// Iterator for IList<T>
 class IListIterator<T> implements Iterator<T> {
 
     IList<T> src;
@@ -153,6 +195,11 @@ class Cons<T> implements IList<T> {
     public Iterator<T> iterator() {
         return new IListIterator<T>(this);
     }
+    
+    public <R> R accept(IVisitor<T, R> v) {
+        return v.visit(this);
+    }
+    
 } 
 
 // represents an empty list
@@ -195,6 +242,10 @@ class Mt<T> implements IList<T> {
 
     public Iterator<T> iterator() {
         return new IListIterator<T>(this);
+    }
+    
+    public <R> R accept(IVisitor<T, R> v) {
+        return v.visit(this);
     }
 }
 
@@ -687,6 +738,7 @@ class MazeWorld extends World {
         return result;
 
     }
+
     // Add edges to the given ArrayList<ArrayList<Vertex>>
     void addEdges(ArrayList<ArrayList<Vertex>> grid) {
         Random randy = new Random();
@@ -697,7 +749,7 @@ class MazeWorld extends World {
             for(int i2 = 0; i2 < grid.get(i).size(); i2 += 1) {
 
                 grid.get(i).get(i2).addEdge(grid.get(i - 1).get(i2), 
-                        Math.abs(randy.nextInt() / 10000));
+                        randy.nextInt(10000));
 
             }
 
@@ -709,13 +761,12 @@ class MazeWorld extends World {
             for(int i4 = 1; i4 < grid.get(i3).size(); i4 += 1) {
 
                 grid.get(i3).get(i4).addEdge(grid.get(i3).get(i4 - 1), 
-                        Math.abs(randy.nextInt(10000)));
-
+                        randy.nextInt(10000));
             }
 
         }
 
-    } 
+    }
 
     // Add edges to the given ArrayList<ArrayList<Vertex>> (overloaded for testing)
     void addEdges(ArrayList<ArrayList<Vertex>> grid, int r) {
@@ -745,8 +796,8 @@ class MazeWorld extends World {
     }
 
 
-    /* // Convert a 2D ArrayList of Vertices to a 1D ArrayList of Edges
-    ArrayList<Edge> vertexToEdge(ArrayList<ArrayList<Vertex>> grid) {
+    // Convert a 2D ArrayList of Vertices to a 1D IList of Edges
+    IList<Edge> vertexToEdge(ArrayList<ArrayList<Vertex>> grid) {
 
         ArrayList<IList<Edge>> listOfLists = new ArrayList<IList<Edge>>();
         IList<Edge> edges = new Mt<Edge>();
@@ -762,6 +813,8 @@ class MazeWorld extends World {
         }
 
         edges = this.vertexToEdgeHelp(listOfLists);
+        
+        return edges.accept(new RemDupsVisitor1<Edge>());
 
     }
 
@@ -780,7 +833,7 @@ class MazeWorld extends World {
         return edges;
 
     }
-     */
+     
     // Implement Union/Find data structure while applying
     // Kruskel's algorithm.
     // EFFECT: mutates the edge lists in each Vertex in the given ArrayList
@@ -1280,6 +1333,46 @@ class ExamplesMaze {
         //t.checkExpect(eB.displayWall(), null);
         // falsely connected
         //t.checkExpect(eC.displayWall(), null);
+    }    
+    // tests RemDupsVisitor1
+    void testRemDupsVisitor1(Tester t) {
+        
+        Integer one = new Integer(1);
+        Integer two = new Integer(2);
+        Integer three = new Integer(3);
+        
+        IList<Integer> testList = new Cons<Integer>(one, new Cons<Integer>(
+                two, new Mt<Integer>()));
+        IList<Integer> testList2 = new Cons<Integer>(one, new Cons<Integer>(
+                three, new Cons<Integer>(three, new Mt<Integer>())));
+        IList<Integer> testList3 = new Cons<Integer>(one, new Cons<Integer>(
+                three, new Mt<Integer>()));
+        
+        RemDupsVisitor1<Integer> rDV1 = new RemDupsVisitor1<Integer>();
+        
+        t.checkExpect(testList.accept(rDV1), testList);
+        t.checkExpect(testList2.accept(rDV1), testList3);
+        
+    }
+    
+    // tests RemDupsVisitor2
+    void testRemDupsVisitor2(Tester t) {
+        
+        Integer one = new Integer(1);
+        Integer two = new Integer(2);
+        Integer three = new Integer(3);
+        
+        IList<Integer> testList = new Cons<Integer>(one, new Cons<Integer>(
+                two, new Mt<Integer>()));
+        IList<Integer> testList2 = new Cons<Integer>(one, new Cons<Integer>(
+                three, new Cons<Integer>(three, new Mt<Integer>())));
+        IList<Integer> testList3 = new Cons<Integer>(one, new Mt<Integer>());
+        
+        RemDupsVisitor2<Integer> rDV2 = new RemDupsVisitor2<Integer>(three);
+        
+        t.checkExpect(testList.accept(rDV2), testList);
+        t.checkExpect(testList2.accept(rDV2), testList3);
+        
     }
     // runs the animation
     void runMaze(Tester t) {
