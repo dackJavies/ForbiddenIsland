@@ -601,8 +601,8 @@ class Vertex {
     boolean wasSearched;
     boolean correctPath;
 
-    int x;
-    int y;
+    Integer x;
+    Integer y;
 
     Vertex(int x, int y) {
         this.edges = new Mt<Edge>();
@@ -704,14 +704,16 @@ class MazeWorld extends World {
     // 3 = displayEdges
     int gameMode;
     IList<Edge> board;
-    IList<Edge> workList;
+    HashMap<String, String> representatives;
+    IList<Edge> unUsed;
 
     MazeWorld(int gameSizeX, int gameSizeY) {
         this.gameSizeX = gameSizeX;
         this.gameSizeY = gameSizeY;
         this.gameMode = 0;
         this.board = new Mt<Edge>();
-        this.workList = new Mt<Edge>();
+        this.representatives = new HashMap<String, String>();
+        this.unUsed = new Mt<Edge>();
     }
 
     // Create a grid of blank Vertices
@@ -800,6 +802,25 @@ class MazeWorld extends World {
 
         ArrayList<IList<Edge>> listOfLists = new ArrayList<IList<Edge>>();
         IList<Edge> edges = new Mt<Edge>();
+        
+        // While we're still working with Vertices, populate the
+        // HashMap we need for Kruskel's alrgorithm
+        for(Integer i = 0; i < grid.size(); i += 1) {
+            
+            for(Integer i2 = 0; i2 < grid.get(i).size(); i2 += 1) {
+                
+                // In the HashMap, vertices are represented with their
+                // coordinates in the format: x-y
+                // i.e. (1, 1) => "1-1"
+                String toPut = i.toString() + "-" + i2.toString();
+                
+                // Each key's value is initialized to itself
+                // in accordance with the Union/Find data structure.
+                this.representatives.put(toPut, toPut);
+                
+            }
+            
+        }
 
         // Copy all Vertices' Edge lists in grid into listOfLists
         for(int i = 0; i < grid.size(); i += 1) {
@@ -842,33 +863,42 @@ class MazeWorld extends World {
     // Implement Union/Find data structure while applying
     // Kruskel's algorithm.
     // EFFECT: mutates the edge lists in each Vertex in the given ArrayList
-    ArrayList<ArrayList<Vertex>> kruskel(ArrayList<ArrayList<Vertex>> grid) {
-        HashMap<String, String> representatives = new HashMap<String, String>();
-        ArrayList<ArrayList<Vertex>> worklist = grid;
+    IList<Edge> kruskel(IList<Edge> grid, HashMap<String, String> representatives) {
+        IList<Edge> blackList = new Mt<Edge>();
+        IList<Edge> finalList = new Mt<Edge>();
+        String toFind1;
+        String toFind2;
 
-        // populate hashmap
-        for(Integer i = 0; i < grid.size(); i += 1) {
-
-            for(Integer i2 = 0; i2 < grid.get(i).size(); i2 += 1) {
-
-                // Vertices are represented as their coordinates separated
-                // by a dash. i.e. (1, 1) is represented as "1-1".
-                String toPut = i.toString() + "-" + i2.toString();
-
-                // All values are initialized the same value as the key
-                representatives.put(toPut, toPut);
-
+        for(Edge e: grid) {
+            
+            // Convert both vectors' positions into strings
+            toFind1 = e.from.x.toString() + "-" + e.from.y.toString();
+            toFind2 = e.to.x.toString() + "-" + e.to.y.toString();
+            
+            // If this next connection will create a cycle, discard it
+            // i.e. don't include it in the final list
+            if (this.cycle(representatives, toFind1, toFind2)) {
+                
+                blackList = blackList.addToFront(e);
+                
             }
-
+            // Otherwise, add it to the final list and adjust the hashmap.
+            // Adjusting the hashmap would mean changing the value associated
+            // with the key toFind2 to that of the key toFind1.
+            else {
+                
+                finalList.addToFront(e);
+                representatives.put(toFind2, representatives.get(toFind1));
+                
+            }
+            
         }
-
-        while(worklist.size() > 0) {
-
-
-
-        }
-
-        return grid; //THIS IS A STUB: TODO
+        
+        // Save the unused edge list for rendering purposes
+        this.unUsed = blackList;
+        
+        // Returns the list of actual edges.
+        return finalList;
     }
     // Draws the world TODO
     public WorldImage makeImage() {
