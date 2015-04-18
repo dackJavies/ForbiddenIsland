@@ -37,18 +37,14 @@ interface IList<T> extends Iterable<T> {
     IList<T> revT(IList<T> acc);
     // Is this list empty?
     boolean isEmpty();
+    // Accept the given Visitor
+    <R> R accept(IVisitor<T, R> v);
 }
 
 // represents a function object that takes an A and returns an R
 interface IFunc<A, R> {
     // Apply the function
     R apply(A a);
-}
-
-// represents a predicate object that operates on T's
-interface IPred<T> {
-    // Apply the function
-    boolean apply(T t);
 }
 
 // represents a function that returns the x of a posn
@@ -58,21 +54,67 @@ class ToString implements IFunc<Integer, String> {
     }
 }
 
-// represents a predicate that filters out duplicate Edges
-class NoDups<Edge> implements IPred<Edge> {
-
-    Edge toCompare;
-
-    NoDups(Edge toCompare) { this.toCompare = toCompare; }
-
-    public boolean apply(Edge e) {
-
-        return this.toCompare.equals(e);
-
+// Goes through an IList calling another duplicate-removing
+// visitor on each element.
+class RemDupsVisitor1<T> implements IVisitor<T, IList<T>> {
+    
+    RemDupsVisitor2<T> visiteur;
+    
+    // Delete all duplicates of c.first in c.rest recursively
+    public IList<T> visit(Cons<T> c) {
+        this.visiteur = new RemDupsVisitor2<T>(c.first);
+        c.rest = c.rest.accept(visiteur);
+        return c.rest.accept(this);
+        
+    }
+    
+    public IList<T> visit(Mt<T> m) {
+        return new Mt<T>();
     }
 
+    public IList<T> visit(BTNode<T> n) {
+        throw new RuntimeException("This visitor does not operate on trees");
+    }
+
+    public IList<T> visit(Leaf<T> n) {
+        throw new RuntimeException("This visitor does not operate on trees");
+    }
+    
 }
 
+// Compares the given T against all elements in an IList<T>
+class RemDupsVisitor2<T> implements IVisitor<T, IList<T>> {
+    
+    T toCompare;
+    
+    RemDupsVisitor2(T toCompare) {
+        this.toCompare = toCompare;
+    }
+
+    public IList<T> visit(Cons<T> c) {
+        if (c.first == this.toCompare) {
+            return c.rest.accept(this);
+        }
+        else {
+            return new Cons<T>(c.first, c.rest.accept(this));
+        }
+    }
+
+    public IList<T> visit(Mt<T> m) {
+        return new Mt<T>();
+    }
+
+    public IList<T> visit(BTNode<T> n) {
+        throw new RuntimeException("This visitor does not operate on trees");
+    }
+
+    public IList<T> visit(Leaf<T> n) {
+        throw new RuntimeException("This visitor does not operate on trees");
+    }
+    
+}
+
+// Iterator for IList<T>
 class IListIterator<T> implements Iterator<T> {
 
     IList<T> src;
@@ -153,6 +195,11 @@ class Cons<T> implements IList<T> {
     public Iterator<T> iterator() {
         return new IListIterator<T>(this);
     }
+    
+    public <R> R accept(IVisitor<T, R> v) {
+        return v.visit(this);
+    }
+    
 } 
 
 // represents an empty list
@@ -195,6 +242,10 @@ class Mt<T> implements IList<T> {
 
     public Iterator<T> iterator() {
         return new IListIterator<T>(this);
+    }
+    
+    public <R> R accept(IVisitor<T, R> v) {
+        return v.visit(this);
     }
 }
 
@@ -684,7 +735,7 @@ class MazeWorld extends World {
         return result;
 
     }
-    /* TODO edit the next method until tests work then fix this with those fixes
+    
     // Add edges to the given ArrayList<ArrayList<Vertex>>
     void addEdges(ArrayList<ArrayList<Vertex>> grid) {
         Random randy = new Random();
@@ -695,7 +746,7 @@ class MazeWorld extends World {
             for(int i2 = 0; i2 < grid.get(i).size(); i2 += 1) {
 
                 grid.get(i).get(i2).addEdge(grid.get(i - 1).get(i2), 
-                        Math.abs(randy.nextInt() / 10000));
+                        randy.nextInt(10000));
 
             }
 
@@ -704,17 +755,17 @@ class MazeWorld extends World {
         // Connections to the top/bottom
         for(int i3 = 0; i3 < grid.size(); i3 += 1) {
 
-            for(int i4 = 0; i4 < grid.get(i3).size(); i4 += 1) {
+            for(int i4 = 1; i4 < grid.get(i3).size(); i4 += 1) {
 
                 grid.get(i3).get(i4).addEdge(grid.get(i3).get(i4 - 1), 
-                        Math.abs(randy.nextInt() / 10000));
+                        randy.nextInt(10000));
 
             }
 
         }
 
     }
-     */ 
+    
 
     // Add edges to the given ArrayList<ArrayList<Vertex>> (overloaded for testing)
     void addEdges(ArrayList<ArrayList<Vertex>> grid, int r) {
@@ -744,8 +795,8 @@ class MazeWorld extends World {
     }
 
 
-    /* // Convert a 2D ArrayList of Vertices to a 1D ArrayList of Edges
-    ArrayList<Edge> vertexToEdge(ArrayList<ArrayList<Vertex>> grid) {
+    // Convert a 2D ArrayList of Vertices to a 1D IList of Edges
+    IList<Edge> vertexToEdge(ArrayList<ArrayList<Vertex>> grid) {
 
         ArrayList<IList<Edge>> listOfLists = new ArrayList<IList<Edge>>();
         IList<Edge> edges = new Mt<Edge>();
@@ -761,6 +812,8 @@ class MazeWorld extends World {
         }
 
         edges = this.vertexToEdgeHelp(listOfLists);
+        
+        return edges.accept(new RemDupsVisitor1<Edge>());
 
     }
 
@@ -779,7 +832,7 @@ class MazeWorld extends World {
         return edges;
 
     }
-     */
+     
     // Implement Union/Find data structure while applying
     // Kruskel's algorithm.
     // EFFECT: mutates the edge lists in each Vertex in the given ArrayList
