@@ -47,7 +47,7 @@ interface IFunc<A, R> {
     R apply(A a);
 }
 
-// represents a function that returns the x of a posn
+// represents a function that converts a number to a String
 class ToString implements IFunc<Integer, String> {
     public String apply(Integer i) {
         return (String)i.toString();
@@ -67,15 +67,15 @@ class RemDupsVisitor1<T> implements IVisitor<T, IList<T>> {
         return new Cons<T>(c.first, c.rest.accept(this));
         
     }
-    
+    // visits an Mt
     public IList<T> visit(Mt<T> m) {
         return new Mt<T>();
     }
-
+    // visits a BTNode
     public IList<T> visit(BTNode<T> n) {
         throw new RuntimeException("This visitor does not operate on trees");
     }
-
+    // visits a Leaf
     public IList<T> visit(Leaf<T> n) {
         throw new RuntimeException("This visitor does not operate on trees");
     }
@@ -90,7 +90,7 @@ class RemDupsVisitor2<T> implements IVisitor<T, IList<T>> {
     RemDupsVisitor2(T toCompare) {
         this.toCompare = toCompare;
     }
-
+    // visits a Cons
     public IList<T> visit(Cons<T> c) {
         if (c.first == this.toCompare) {
             return c.rest.accept(this);
@@ -99,15 +99,15 @@ class RemDupsVisitor2<T> implements IVisitor<T, IList<T>> {
             return new Cons<T>(c.first, c.rest.accept(this));
         }
     }
-
+    // visits an Mt
     public IList<T> visit(Mt<T> m) {
         return new Mt<T>();
     }
-
+    // visits a BTNode
     public IList<T> visit(BTNode<T> n) {
         throw new RuntimeException("This visitor does not operate on trees");
     }
-
+    // visits a leaf
     public IList<T> visit(Leaf<T> n) {
         throw new RuntimeException("This visitor does not operate on trees");
     }
@@ -120,13 +120,12 @@ class IListIterator<T> implements Iterator<T> {
     IList<T> src;
 
     IListIterator(IList<T> src) { this.src = src; }
-
+    // does this iterator have an iterator?
     public boolean hasNext() {
 
         return !this.src.isEmpty();
-
     }
-
+    // gets the next out of this Iterator
     public T next() {
 
         if (!this.hasNext()) {
@@ -139,10 +138,10 @@ class IListIterator<T> implements Iterator<T> {
         return result;
 
     }
-
+    // does nothing
     public void remove() {
 
-        throw new RuntimeException("What are you doing with your life?");
+        throw new RuntimeException("Do not use this method, please");
 
     }
 
@@ -184,18 +183,17 @@ class Cons<T> implements IList<T> {
     public IList<T> rev() {
         return this.revT(new Mt<T>());
     }
-
+    // helps reverse this list
     public IList<T> revT(IList<T> acc) {
         return this.rest.revT(new Cons<T>(this.first, acc));
     }
-
     // Is this list empty?
     public boolean isEmpty() { return false; }
-
+    // gets the iterator for this IList
     public Iterator<T> iterator() {
         return new IListIterator<T>(this);
     }
-    
+    // accepts a Visitor for this IList
     public <R> R accept(IVisitor<T, R> v) {
         return v.visit(this);
     }
@@ -674,11 +672,11 @@ class Edge {
         int fromX = (this.from.x * sideLength) + posnShift;
         int fromY = (this.from.y * sideLength) + posnShift;
         // next to each other horizontally
-        Posn p1 = new Posn((toX + fromX) / 2, toY + 5);
-        Posn p2 = new Posn((toX + fromX) / 2, toY - 5);
+        Posn p2 = new Posn((toX + fromX) / 2, toY + 5);
+        Posn p1 = new Posn((toX + fromX) / 2, toY - 5);
         // next to each other vertically
-        Posn p3 = new Posn(toX + 5, (toY + fromY) / 2);
-        Posn p4 = new Posn(toX - 5, (toY + fromY) / 2);
+        Posn p4 = new Posn(toX + 5, (toY + fromY) / 2);
+        Posn p3 = new Posn(toX - 5, (toY + fromY) / 2);
         // connected horizontally
         if (!(fromX == toX) && (fromX == toY)) {
             return new LineImage(p1, p2, c);
@@ -1243,8 +1241,6 @@ class ExamplesMaze {
     }
     // tests apply for the IFunc interface TODO
     // tests apply for the IPred interface TODO
-    // tests apply for the ToString class TODO
-    // tests apply for the NoDups class TODO
     // tests hasNext for the IListIterator TODO
     // tests next for the IListIterator TODO
     // tests remove for the IListIterator TODO
@@ -1323,8 +1319,10 @@ class ExamplesMaze {
                         new Posn(15, 5), new Color(255, 0, 0)))));
         t.checkExpect(eA.displayEdge(false), new OverlayImages(vA.displayCell(), vB.displayCell()));
         // vertically connected
-        //t.checkExpect(eB.displayEdge(true), null);
-        //t.checkExpect(eB.displayEdge(false), null);
+        t.checkExpect(eB.displayEdge(true), new OverlayImages(vB.displayCell(), 
+                new OverlayImages(vC.displayCell(), new LineImage(new Posn(15, 5), 
+                        new Posn(15, 15), new Color(255, 0, 0)))));
+        t.checkExpect(eB.displayEdge(false), new OverlayImages(vB.displayCell(), vC.displayCell()));
     }
     // tests displayWall TODO
     void testDisplayWall(Tester t) {
@@ -1335,12 +1333,23 @@ class ExamplesMaze {
         Edge eB = new Edge(vB, vC, 3);
         Edge eC = new Edge(vA, vC, 50935);
         // horizontally connected
-        //t.checkExpect(eA.displayWall(), null);
+        t.checkExpect(eA.displayWall(), new LineImage(new Posn(10, 0), new Posn(10, 10),
+                new Color(140, 140, 140)));
         // vertically connected
-        //t.checkExpect(eB.displayWall(), null);
+        t.checkExpect(eB.displayWall(), new LineImage(new Posn(10, 10), new Posn(20, 10),
+                new Color(140, 140, 140)));
         // falsely connected
-        //t.checkExpect(eC.displayWall(), null);
+        t.checkException(new RuntimeException("There is an edge connecting two non-adjacent vertices"),
+                eC, "displayWall");  
     }    
+    // tests DisplayEdgeVisitor TODO
+    void testDisplayEdgeVisitor(Tester t) {
+        
+    }
+    // tests DisplayWallVisitor TODO
+    void testDisplayWallVisitor(Tester t) {
+        
+    }
     // tests RemDupsVisitor1
     void testRemDupsVisitor1(Tester t) {
         
