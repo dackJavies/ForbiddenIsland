@@ -452,11 +452,19 @@ interface IComp<T> {
 }
 
 //this compares two Edges randomly
-class Rand<T> implements IComp<T> {
-    public int compare(T e1, T e2) {
+class RandEdge implements IComp<Edge> {
+    public int compare(Edge e1, Edge e2) {
         Random r = new Random();
         return r.nextInt();
     }
+}
+
+//this compares two Edges randomly
+class RandVert implements IComp<Vertex> {
+  public int compare(Vertex e1, Vertex e2) {
+      Random r = new Random();
+      return r.nextInt();
+  }
 }
 
 //this represents a comparator of Cells
@@ -487,7 +495,7 @@ interface IVisitor<T, R> {
 class DisplayWallVisitor implements IVisitor<Edge, WorldImage> {
     IBST<Edge> board;
     DisplayWallVisitor(IList<Edge> board) {
-        IComp<Edge> ran = new Rand<Edge>(); 
+        IComp<Edge> ran = new RandEdge(); 
         this.board = board.list2Tree(ran);
     }
     // visits an empty
@@ -500,9 +508,8 @@ class DisplayWallVisitor implements IVisitor<Edge, WorldImage> {
     }
     // visits a BTNode
     public WorldImage visit(BTNode<Edge> n) {
-        return new RectangleImage(null, 0, 0, new Color(0, 0, 0));/* TODO 
-    new OverlayImages(n.data.displayEdge(waterLevel), 
-            new OverlayImages(n.left.accept(this), n.right.accept(this)));*/
+        return new OverlayImages(n.data.displayWall(), 
+            new OverlayImages(n.left.accept(this), n.right.accept(this)));
     }
     // visits a Leaf
     public WorldImage visit(Leaf<Edge> n) {
@@ -512,10 +519,12 @@ class DisplayWallVisitor implements IVisitor<Edge, WorldImage> {
 
 //represents a visitor that displays the edges in a list
 class DisplayEdgeVisitor implements IVisitor<Edge, WorldImage> {
+    boolean visibleEdges;
     IBST<Edge> board;
-    DisplayEdgeVisitor(IList<Edge> board) {
-        IComp<Edge> ran = new Rand<Edge>(); 
+    DisplayEdgeVisitor(IList<Edge> board, boolean visibleEdges) {
+        IComp<Edge> ran = new RandEdge(); 
         this.board = board.list2Tree(ran);
+        this.visibleEdges = visibleEdges;
     }
     // visits an empty
     public WorldImage visit(Mt<Edge> m) {
@@ -527,41 +536,14 @@ class DisplayEdgeVisitor implements IVisitor<Edge, WorldImage> {
     }
     // visits a BTNode
     public WorldImage visit(BTNode<Edge> n) {
-        return new RectangleImage(null, 0, 0, new Color(0, 0, 0));/* TODO 
-  new OverlayImages(n.data.displayEdge(waterLevel), 
-          new OverlayImages(n.left.accept(this), n.right.accept(this)));*/
+        return new OverlayImages(n.data.displayEdge(visibleEdges),
+                new OverlayImages(n.left.accept(this), n.right.accept(this)));
     }
     // visits a Leaf
     public WorldImage visit(Leaf<Edge> n) {
         return new LineImage(new Posn(-1, -1), new Posn(-1, -1), new Color(255, 255, 255));
     }    
 }
-
-//represents a visitor that displays the cells in a list
-/*class DisplayCellVisitor implements IVisitor<Vertex, WorldImage> {
-  IBST<Vertex> board;
-  DisplayCellVisitor(IList<Edge> board) {
-      IComp<Vertex> ran = new Rand<Vertex>(); 
-      this.board = board.list2Tree(ran);
-  }
-  // visits an empty
-  public WorldImage visit(Mt<Vertex> m) {
-      throw new IllegalArgumentException("IList is not a valid argument");
-  }
-  // visits a cons
-  public WorldImage visit(Cons<Vertex> c) {
-      throw new IllegalArgumentException("IList is not a valid argument");
-  }
-  // visits a BTNode
-  public WorldImage visit(BTNode<Vertex> n) {
-      return new RectangleImage(null, 0, 0, new Color(0, 0, 0));/* TODO 
-new OverlayImages(n.data.displayEdge(waterLevel), 
-        new OverlayImages(n.left.accept(this), n.right.accept(this)));
-}
-// visits a Leaf
-public WorldImage visit(Leaf<Vertex> n) {
-    return new LineImage(new Posn(-1, -1), new Posn(-1, -1), new Color(255, 255, 255));
-}    */
 
 // represents a maze cell
 class Vertex {
@@ -590,6 +572,8 @@ class Vertex {
     }
     // displays the maze cell
     WorldImage displayCell() {
+        int sideLength = 10;
+        int posnShift = 5;
         Color c = new Color(205, 205, 205);
         if (this.correctPath) {
             c = new Color(65, 86, 197);
@@ -597,9 +581,9 @@ class Vertex {
         else if (this.wasSearched) {
             c = new Color(56, 176, 222);
         }
-        return new RectangleImage(new Posn(this.x, this.y), 10, 10, c);
+        return new RectangleImage(new Posn((this.x * sideLength) + posnShift, 
+                (this.y * sideLength) + posnShift), 10, 10, c);
     }
-
 }
 
 // represents an edge of the maze graph
@@ -613,25 +597,43 @@ class Edge {
         this.weight = weight;
     }
     // displays this edge 
-    WorldImage displayEdge() {
-        return new LineImage(new Posn(this.from.x, this.from.y), 
-                new Posn(this.to.x, this.to.y), new Color(255, 0, 0));
+    WorldImage displayEdge(boolean visibleLine) {
+        int sideLength = 10;
+        int posnShift = sideLength / 2;
+        int toX = (this.to.x * sideLength) + posnShift;
+        int toY = (this.to.y * sideLength) + posnShift;
+        int fromX = (this.from.x * sideLength) + posnShift;
+        int fromY = (this.from.y * sideLength) + posnShift;
+        if (visibleLine) {
+        return new OverlayImages(this.from.displayCell(), new OverlayImages(this.to.displayCell(),
+                new LineImage(new Posn(fromX, fromY), 
+                new Posn(toX, toY), new Color(255, 0, 0))));
+        }
+        else {
+            return new OverlayImages(this.from.displayCell(), this.to.displayCell());
+        }
     }
     // displays this edge's wall (because it is not used)
     WorldImage displayWall() {
         Color c = new Color(140, 140, 140);
+        int sideLength = 10;
+        int posnShift = sideLength / 2;
+        int toX = (this.to.x * sideLength) + posnShift;
+        int toY = (this.to.y * sideLength) + posnShift;
+        int fromX = (this.from.x * sideLength) + posnShift;
+        int fromY = (this.from.y * sideLength) + posnShift;
         // next to each other horizontally
-        Posn p1 = new Posn((this.to.x + this.from.x) / 2, this.to.y + 5);
-        Posn p2 = new Posn((this.to.x + this.from.x) / 2, this.to.y - 5);
+        Posn p1 = new Posn((toX + fromX) / 2, toY + 5);
+        Posn p2 = new Posn((toX + fromX) / 2, toY - 5);
         // next to each other vertically
-        Posn p3 = new Posn(this.to.x + 5, (this.to.y + this.from.y) / 2);
-        Posn p4 = new Posn(this.to.x - 5, (this.to.y + this.from.y) / 2);
+        Posn p3 = new Posn(toX + 5, (toY + fromY) / 2);
+        Posn p4 = new Posn(toX - 5, (toY + fromY) / 2);
         // connected horizontally
-        if (!(this.from.x == this.to.x) && (this.from.y == this.to.y)) {
+        if (!(fromX == toX) && (fromX == toY)) {
             return new LineImage(p1, p2, c);
         }
         // connected vertically
-        else if (!(this.from.y == this.to.y) && (this.from.x == this.to.x)) {
+        else if (!(fromY == toY) && (fromX == toX)) {
             return new LineImage(p3, p4, c);
         }
         // connected otherwise
@@ -649,6 +651,7 @@ class MazeWorld extends World {
     // 0 = manual
     // 1 = depth-first search
     // 2 = breadth-first search
+    // 3 = displayEdges
     int gameMode;
     IList<Edge> board;
     IList<Edge> workList;
@@ -684,7 +687,6 @@ class MazeWorld extends World {
         return result;
 
     }
-    /* TODO edit the next method until tests work then fix this with those fixes
     // Add edges to the given ArrayList<ArrayList<Vertex>>
     void addEdges(ArrayList<ArrayList<Vertex>> grid) {
         Random randy = new Random();
@@ -704,17 +706,16 @@ class MazeWorld extends World {
         // Connections to the top/bottom
         for(int i3 = 0; i3 < grid.size(); i3 += 1) {
 
-            for(int i4 = 0; i4 < grid.get(i3).size(); i4 += 1) {
+            for(int i4 = 1; i4 < grid.get(i3).size(); i4 += 1) {
 
                 grid.get(i3).get(i4).addEdge(grid.get(i3).get(i4 - 1), 
-                        Math.abs(randy.nextInt() / 10000));
+                        Math.abs(randy.nextInt(10000)));
 
             }
 
         }
 
-    }
-     */ 
+    } 
 
     // Add edges to the given ArrayList<ArrayList<Vertex>> (overloaded for testing)
     void addEdges(ArrayList<ArrayList<Vertex>> grid, int r) {
@@ -818,11 +819,11 @@ class MazeWorld extends World {
          * // Draws the World
     public WorldImage makeImage() {
         DisplayCellVisitor dCVisitor = 
-                new DisplayCellVisitor(this.board);
+                new DisplayEdgeVisitor(this.board);
         DisplayWallVisitor dWVisitor = 
-                new DisplayWallVisitor(this.board);
+                new DisplayWallVisitor(this.leftOvers, this.gameMode == 3);
         return new OverlayImages(dCVisitor.board.accept(dCVisitor),
-                     dWVisitor.accept(this.unusedVertices));
+                     dWVisitor.board.accept(dWVisitor));
     }
          */
 
@@ -1237,7 +1238,47 @@ class ExamplesMaze {
         t.checkExpect(this.aVNB.get(2).get(2).edges.length(), 2);
         t.checkExpect(this.aVNB, aVN);
     }
-
+    // tests displayCell TODO
+    void testDisplayCell(Tester t) {
+        Vertex vA = new Vertex(0, 0);
+        Vertex vB = new Vertex(0, 1);
+        vB.correctPath = true;
+        Vertex vC = new Vertex(1, 1);
+        vC.wasSearched = true;
+        t.checkExpect(vA.displayCell(), new RectangleImage(new Posn(5, 5), 10, 10, new Color(205, 205, 205)));
+        t.checkExpect(vB.displayCell(), new RectangleImage(new Posn(5, 15), 10, 10, new Color(65, 86, 197)));
+        t.checkExpect(vC.displayCell(), new RectangleImage(new Posn(15, 15), 10, 10, new Color(56, 176, 222)));
+    }
+    // tests displayEdge TODO
+    void testDisplayEdge(Tester t) {
+        Vertex vA = new Vertex(0, 0);
+        Vertex vB = new Vertex(1, 0);
+        Vertex vC = new Vertex(1, 1);
+        Edge eA = new Edge(vA, vB,  0);
+        Edge eB = new Edge(vB, vC, 3);
+        Edge eC = new Edge(vA, vC, 50935);
+        // horizontally connected
+        //t.checkExpect(eA.displayEdge(true), null);
+        //t.checkExpect(eA.displayEdge(false), null);
+        // vertically connected
+        //t.checkExpect(eB.displayEdge(true), null);
+        //t.checkExpect(eB.displayEdge(false), null);
+    }
+    // tests displayWall TODO
+    void testDisplayWall(Tester t) {
+        Vertex vA = new Vertex(0, 0);
+        Vertex vB = new Vertex(1, 0);
+        Vertex vC = new Vertex(1, 1);
+        Edge eA = new Edge(vA, vB,  0);
+        Edge eB = new Edge(vB, vC, 3);
+        Edge eC = new Edge(vA, vC, 50935);
+        // horizontally connected
+        //t.checkExpect(eA.displayWall(), null);
+        // vertically connected
+        //t.checkExpect(eB.displayWall(), null);
+        // falsely connected
+        //t.checkExpect(eC.displayWall(), null);
+    }
     // runs the animation
     void runMaze(Tester t) {
         /*  this.initialize();
