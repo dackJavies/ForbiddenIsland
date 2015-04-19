@@ -194,7 +194,7 @@ class Mt<T> implements IList<T> {
     // appends this list onto the given one
     public IList<T> append(IList<T> other) {
         return other;
-    } 
+    }
     // creates a new Tree from this IList
     public ITST<T> list2Tree(IComp<T> comp) {
         return new Leaf<T>();
@@ -1048,6 +1048,13 @@ class MazeWorld extends World {
             this.gameMode = 2;
         }
     }
+    
+    // Tick handler
+    public void onTick() {
+        
+        // TODO
+        
+    }
          
 }
 
@@ -1100,6 +1107,23 @@ class ArrayUtils<T> {
 
 // examples and tests for the MazeWorld
 class ExamplesMaze {
+    
+    Vertex A;
+    Vertex B;
+    Vertex C;
+    Vertex D;
+    Vertex E;
+    Vertex F;
+    
+    Edge ec;
+    Edge cd;
+    Edge ab;
+    Edge be;
+    Edge bc;
+    Edge fd;
+    Edge ae;
+    Edge bf;
+    
     MazeWorld maze0 = new MazeWorld(0, 0);
     MazeWorld maze5 = new MazeWorld(5, 5);
     MazeWorld maze3 = new MazeWorld(3, 3);
@@ -1609,6 +1633,49 @@ class ExamplesMaze {
         }
         
         t.checkExpect(maze0.iListToArr(testList), answer);
+        
+    }
+    
+    void initializeSearch() {
+        
+        Vertex A = new Vertex(0, 0);
+        Vertex B = new Vertex(1, 0);
+        Vertex C = new Vertex(2, 0);
+        Vertex D = new Vertex(0, 1);
+        Vertex E = new Vertex(1, 1);
+        Vertex F = new Vertex(2, 1);
+        
+        Edge ec = new Edge(E, C, 15);
+        Edge cd = new Edge(C, D, 25);
+        Edge ab = new Edge(A, B, 30);
+        Edge be = new Edge(B, E, 35);
+        Edge bc = new Edge(B, C, 40);
+        Edge fd = new Edge(F, D, 50);
+        Edge ae = new Edge(A, E, 50);
+        Edge bf = new Edge(B, F, 50);
+        
+        A.edges = new Cons<Edge>(ab, new Mt<Edge>());
+        B.edges = new Cons<Edge>(ab, new Cons<Edge>(be,
+                new Cons<Edge>(bc, new Cons<Edge>(bf,
+                        new Mt<Edge>()))));
+        C.edges = new Cons<Edge>(ec, new Cons<Edge>(cd,
+                new Cons<Edge>(bc, new Mt<Edge>())));
+        D.edges = new Cons<Edge>(cd, new Cons<Edge>(fd,
+                new Mt<Edge>()));
+        E.edges = new Cons<Edge>(ec, new Cons<Edge>(be,
+                new Cons<Edge>(ae, new Mt<Edge>())));
+        F.edges = new Cons<Edge>(fd, new Cons<Edge>(bf,
+                new Mt<Edge>()));
+        
+    }
+    
+    void testBreadthFirst(Tester t) {
+        
+        this.initializeSearch();
+        
+        IList<Vertex> answer = new Cons<Vertex>(B, new Mt<Vertex>());
+        
+        //t.checkExpect(this.A.breadthFirstSearch(), answer); WHYYYYY
         
     }
     
