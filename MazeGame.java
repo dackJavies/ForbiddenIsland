@@ -31,6 +31,8 @@ interface IList<T> extends Iterable<T> {
     IList<T> append(IList<T> other);
     // creates a new Tree from this IList
     IBST<T> list2Tree(IComp<T> comp);
+    // creates a new Tree from this IList
+    //public IBST<T> list2TreeH(boolean switcher); TODO
     // reverse this list
     IList<T> rev();
     // helps to reverse this list
@@ -183,6 +185,16 @@ class Cons<T> implements IList<T> {
     public IBST<T> list2Tree(IComp<T> comp) {
         return this.rest.list2Tree(comp).insert(comp, this.first);
     }
+    /*// creates a new Tree from this IList TODO
+    public IBST<T> list2Tree() {
+        IComp<T> switc = new SwitcherComp<T>(true);
+        return this.rest.list2TreeH(true).insert(switc, this.first);
+    }
+    // creates a new Tree from this IList
+    public IBST<T> list2TreeH(boolean switcher) {
+        IComp<T> switc = new SwitcherComp<T>(false);
+        return this.rest.list2Tree().insert(switc, this.first);
+    }*/
     // reverses this list
     public IList<T> rev() {
         return this.revT(new Mt<T>());
@@ -238,10 +250,17 @@ class Mt<T> implements IList<T> {
     public IList<T> append(IList<T> other) {
         return other;
     }
+    
     // creates a new Tree from this IList
     public IBST<T> list2Tree(IComp<T> comp) {
         return new Leaf<T>();
     }
+    /* TODO
+    // helps create a new Tree from this IList
+    public IBST<T> list2TreeH(boolean switcher) {
+        return new Leaf<T>();
+    }*/
+    
     // reverses this list
     public IList<T> rev() {
         return this;
@@ -268,6 +287,7 @@ class Mt<T> implements IList<T> {
     public IList<T> removeDups() {
         return this;
     }
+    
 }
 
 //represents the deque collection of items
@@ -525,6 +545,7 @@ interface IComp<T> {
 
 //this compares two Edges randomly
 class RandEdge implements IComp<Edge> {
+    // compares
     public int compare(Edge e1, Edge e2) {
         Random r = new Random();
         return r.nextInt();
@@ -533,10 +554,29 @@ class RandEdge implements IComp<Edge> {
 
 //this compares two Edges randomly
 class RandVert implements IComp<Vertex> {
+    // compares
   public int compare(Vertex e1, Vertex e2) {
       Random r = new Random();
       return r.nextInt();
   }
+}
+
+// this compares two items according to the given boolean
+class SwitcherComp<T> implements IComp<T> {
+    boolean switcher;
+    SwitcherComp(boolean switcher) {
+        this.switcher = switcher;
+    }
+    // compares
+    public int compare(T t1, T t2) {
+        if (this.switcher) {
+            return 1;
+        }
+        else {
+            return -1;
+        }
+    }
+    
 }
 
 //this represents a comparator of Cells
@@ -677,15 +717,13 @@ class Edge {
         int fromX = (this.from.x * sideLength) + posnShift;
         int fromY = (this.from.y * sideLength) + posnShift;
         if (visibleLine) {
-        return new OverlayImages(this.from.displayCell(), new OverlayImages(this.to.displayCell(),
-                new LineImage(new Posn(fromX, fromY), 
-                new Posn(toX, toY), new Color(255, 0, 0))));
+        return new LineImage(new Posn(fromX, fromY), new Posn(toX, toY), new Color(255, 0, 0));
         }
         else {
             return new OverlayImages(this.from.displayCell(), this.to.displayCell());
         }
     }
-    // displays this edge's wall (because it is not used)
+    // displays this edge's wall (because it is not used) TODO
     WorldImage displayWall() {
         Color c = new Color(140, 140, 140);
         int sideLength = 10;
@@ -701,11 +739,11 @@ class Edge {
         Posn p4 = new Posn(toX + 5, (toY + fromY) / 2);
         Posn p3 = new Posn(toX - 5, (toY + fromY) / 2);
         // connected horizontally
-        if (!(fromX == toX) && (fromX == toY)) {
+        if (fromY == toY) {
             return new LineImage(p1, p2, c);
         }
         // connected vertically
-        else if (!(fromY == toY) && (fromX == toX)) {
+        else if (fromX == toX) {
             return new LineImage(p3, p4, c);
         }
         // connected otherwise
@@ -736,12 +774,12 @@ class MazeWorld extends World {
         this.gameMode = 0;
         this.board = new Mt<Edge>();
         this.representatives = new HashMap<String, String>();
-        this.unUsed = new Mt<Edge>();
         
         ArrayList<ArrayList<Vertex>> blankCells = this.createGrid();
         this.addEdges(blankCells);
         IList<Edge> b = this.vertexToEdge(blankCells);
         this.board = b;
+        this.unUsed = this.board;
         
     }
 
@@ -919,12 +957,11 @@ class MazeWorld extends World {
     // Draws the World
     public WorldImage makeImage() {
         DisplayEdgeVisitor dEVisitor = 
-                new DisplayEdgeVisitor(this.board, true);//this.gameMode == 3); TODO
+                new DisplayEdgeVisitor(this.board, false);//this.gameMode == 3); TODO
         DisplayWallVisitor dWVisitor = 
-                new DisplayWallVisitor(this.board);
-        /*return new OverlayImages(dEVisitor.board.accept(dEVisitor),
-                    dWVisitor.board.accept(dWVisitor));*/
-        return dEVisitor.board.accept(dEVisitor);
+                new DisplayWallVisitor(this.unUsed);
+        return new OverlayImages(dEVisitor.board.accept(dEVisitor),
+                    dWVisitor.board.accept(dWVisitor));
     }
     
     // key handler TODO
@@ -1367,14 +1404,12 @@ class ExamplesMaze {
         Edge eB = new Edge(vB, vC, 3);
         Edge eC = new Edge(vA, vC, 50935);
         // horizontally connected
-        t.checkExpect(eA.displayEdge(true), new OverlayImages(vA.displayCell(), 
-                new OverlayImages(vB.displayCell(), new LineImage(new Posn(5, 5), 
-                        new Posn(15, 5), new Color(255, 0, 0)))));
+        t.checkExpect(eA.displayEdge(true), new LineImage(new Posn(5, 5), 
+                        new Posn(15, 5), new Color(255, 0, 0)));
         t.checkExpect(eA.displayEdge(false), new OverlayImages(vA.displayCell(), vB.displayCell()));
         // vertically connected
-        t.checkExpect(eB.displayEdge(true), new OverlayImages(vB.displayCell(), 
-                new OverlayImages(vC.displayCell(), new LineImage(new Posn(15, 5), 
-                        new Posn(15, 15), new Color(255, 0, 0)))));
+        t.checkExpect(eB.displayEdge(true), new LineImage(new Posn(15, 5), 
+                        new Posn(15, 15), new Color(255, 0, 0)));
         t.checkExpect(eB.displayEdge(false), new OverlayImages(vB.displayCell(), vC.displayCell()));
     }
     // tests displayWall TODO
@@ -1391,9 +1426,6 @@ class ExamplesMaze {
         // vertically connected
         t.checkExpect(eB.displayWall(), new LineImage(new Posn(10, 10), new Posn(20, 10),
                 new Color(140, 140, 140)));
-        // falsely connected
-        t.checkException(new RuntimeException("There is an edge connecting two non-adjacent vertices"),
-                eC, "displayWall");  
     }    
     // tests DisplayEdgeVisitor TODO
     void testDisplayEdgeVisitor(Tester t) {
@@ -1479,8 +1511,9 @@ class ExamplesMaze {
     
     // runs the animation
     void testRunMaze(Tester t) {
-        //t.checkExpect(maze10.board.length(), 3120);
-        maze10.bigBang(800, 800);
+        MazeWorld maze10 = new MazeWorld(100, 60);
+        t.checkExpect(maze2.board.length(), 4);
+        maze10.bigBang(1000, 600);
         /* MazeWorld maze10 = new MazeWorld(30, 30);
          t.checkExpect(this.maze0.board.length(), 0);
          t.checkExpect(this.maze2.board.length(), 4);
