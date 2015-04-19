@@ -147,7 +147,7 @@ class Mt<T> implements IList<T> {
     // appends this list onto the given one
     public IList<T> append(IList<T> other) {
         return other;
-    } 
+    }
     // creates a new Tree from this IList
     public ITST<T> list2Tree(IComp<T> comp) {
         return new Leaf<T>();
@@ -551,8 +551,7 @@ class CompEdge implements IComp<Edge> {
         }
     }
 }
-
-//represents a Cell Binary Tree
+//represents a Cell Tertiary Tree
 interface ITST<T> {
     // inserts the given item into this tree
     ITST<T> insert(IComp<T> comp, T t);
@@ -562,9 +561,11 @@ interface ITST<T> {
     <R> R accept(IVisitor<T, R> v);
     // converts this tree into an IList
     IList<T> tree2List();
+    // Is this ITST a Node?
+    boolean isNode();
 }
 
-//represents a known Cell Binary Tree
+//represents a known Cell Tertiary Tree
 class TTNode<T> implements ITST<T> {
     T data;
     ITST<T> left;
@@ -601,6 +602,7 @@ class TTNode<T> implements ITST<T> {
         return this.left.tree2List().append(this.middle.tree2List()).append(
                 this.right.tree2List().addToFront(this.data)); 
     }
+    public boolean isNode() { return true; }
 }
 
 //represents an empty Binary Tree
@@ -621,6 +623,7 @@ class Leaf<T> implements ITST<T> {
     public IList<T> tree2List() {
         return new Mt<T>();
     }
+    public boolean isNode() { return false; }
 }
 
 
@@ -640,7 +643,7 @@ class Vertex {
     boolean correctPath;
     boolean startVert;
     boolean endVert;
-    boolean searchHead;
+    boolean hasSearchHead;
 
     Integer x;
     Integer y;
@@ -651,7 +654,7 @@ class Vertex {
         this.correctPath = false;
         this.startVert = false;
         this.endVert= false;
-        this.searchHead = false;
+        this.hasSearchHead = false;
 
         this.x = x;
         this.y = y;
@@ -668,12 +671,13 @@ class Vertex {
         int sideLength = 10;
         int posnShift = 5;
         Color c = new Color(205, 205, 205);
-        if (this.correctPath || this.searchHead) {
+        if (this.startVert) {
+            c = new Color(0, 160, 0);
+        }
+        if (this.correctPath) {
             c = new Color(65, 86, 197);
         }
-        else if (this.startVert) {
-            c = new Color(0, 160, 0);
-        }       
+        
         else if (this.wasSearched) {
             c = new Color(56, 176, 222);
         }
@@ -691,6 +695,62 @@ class Vertex {
         return new RectangleImage(new Posn((this.x * sideLength) + posnShift, 
                 (this.y * sideLength) + posnShift), 10, 10, c);
     }
+    
+    // Search through the tree using the Breadth-First algorithm
+    // This method is called every tick, and therefore only advances
+    // the search by one increment per call.
+    IList<Vertex> breadthFirstSearch() {
+        this.wasSearched = true;
+        this.hasSearchHead = false;
+        IList<Vertex> result = new Mt<Vertex>();
+            
+        for(Edge e: this.edges) {
+            
+            if (e.from != this && !e.from.wasSearched) {
+                result.addToBack(e.from);
+            }
+            
+            if (e.to != this && !e.to.wasSearched) {
+                result.addToBack(e.to);
+            }
+            
+        }
+        
+        for(Vertex v: result) {
+            v.hasSearchHead = true;
+        }
+        
+        return result;
+    }
+    
+    // Search through the tree using the Depth-First algorithm
+    // This method is called every tick, and therefore only advances
+    // the search by one increment per call.
+    IList<Vertex> depthFirstSearch() {
+        
+        this.wasSearched = true;
+        IList<Vertex> result = new Mt<Vertex>();
+        
+        for(Edge e: this.edges) {
+            
+            if (e.from != this && !e.from.wasSearched) {
+                result.addToFront(e.from);
+            }
+            
+            if (e.to != this && !e.to.wasSearched) {
+                result.addToFront(e.to);
+            }
+            
+        }
+        
+        for(Vertex v: result) {
+            v.hasSearchHead = true;
+        }
+        
+        return result;
+        
+    }
+    
 }
 
 //represents an edge of the maze graph
@@ -997,10 +1057,33 @@ class MazeWorld extends World {
             this.gameMode = 2;
         }
     }
-
+    // Tick handler
+    public void onTick() {
+        
+        // TODO
+    }      
 }
+
+
 //examples and tests for the MazeWorld
 class ExamplesMaze {
+    
+    Vertex A;
+    Vertex B;
+    Vertex C;
+    Vertex D;
+    Vertex E;
+    Vertex F;
+    
+    Edge ec;
+    Edge cd;
+    Edge ab;
+    Edge be;
+    Edge bc;
+    Edge fd;
+    Edge ae;
+    Edge bf;
+    
     MazeWorld maze0 = new MazeWorld(0, 0);
     MazeWorld maze5 = new MazeWorld(5, 5);
     MazeWorld maze3 = new MazeWorld(3, 3);
@@ -1092,6 +1175,7 @@ class ExamplesMaze {
     IList<Edge> l9 = new Mt<Edge>();
 
 
+
     Edge edgy0 = new Edge(v1, v2, 0);
     Edge edgy1 = new Edge(v1, v2, 1);
     Edge edgy1a = new Edge(v1, v2, 1);
@@ -1116,6 +1200,7 @@ class ExamplesMaze {
     ITST<Edge> bot4 = new TTNode<Edge>(edgy1, bot1, bot2, lE);
     ITST<Edge> bot5 = new TTNode<Edge>(edgy4, lE, lE, bot3);
     ITST<Edge> bot6 = new TTNode<Edge>(edgy3, bot4, lE, bot5);
+
 
     void initialize() {
 
@@ -1537,7 +1622,48 @@ class ExamplesMaze {
 
         t.checkExpect(maze0.iListToArr(testList), answer);
     }
-
+    void initializeSearch() {
+        
+        Vertex A = new Vertex(0, 0);
+        Vertex B = new Vertex(1, 0);
+        Vertex C = new Vertex(2, 0);
+        Vertex D = new Vertex(0, 1);
+        Vertex E = new Vertex(1, 1);
+        Vertex F = new Vertex(2, 1);
+        
+        Edge ec = new Edge(E, C, 15);
+        Edge cd = new Edge(C, D, 25);
+        Edge ab = new Edge(A, B, 30);
+        Edge be = new Edge(B, E, 35);
+        Edge bc = new Edge(B, C, 40);
+        Edge fd = new Edge(F, D, 50);
+        Edge ae = new Edge(A, E, 50);
+        Edge bf = new Edge(B, F, 50);
+        
+        A.edges = new Cons<Edge>(ab, new Mt<Edge>());
+        B.edges = new Cons<Edge>(ab, new Cons<Edge>(be,
+                new Cons<Edge>(bc, new Cons<Edge>(bf,
+                        new Mt<Edge>()))));
+        C.edges = new Cons<Edge>(ec, new Cons<Edge>(cd,
+                new Cons<Edge>(bc, new Mt<Edge>())));
+        D.edges = new Cons<Edge>(cd, new Cons<Edge>(fd,
+                new Mt<Edge>()));
+        E.edges = new Cons<Edge>(ec, new Cons<Edge>(be,
+                new Cons<Edge>(ae, new Mt<Edge>())));
+        F.edges = new Cons<Edge>(fd, new Cons<Edge>(bf,
+                new Mt<Edge>()));
+        
+    }
+    
+    void testBreadthFirst(Tester t) {
+        
+        this.initializeSearch();
+        
+        IList<Vertex> answer = new Cons<Vertex>(B, new Mt<Vertex>());
+        
+        //t.checkExpect(this.A.breadthFirstSearch(), answer); WHYYYYY
+        
+    }
     void testCycle(Tester t) {
 
         HashMap<String, String> uf = new HashMap<String, String>();
@@ -1612,7 +1738,6 @@ class ExamplesMaze {
         //t.checkExpect(maze0.kruskel(edgeList, uf), answer);
 
     }
-
     // tests sort for the IList interfacce
     void testSort(Tester t) {
         t.checkExpect(this.unSorted.sort(new CompEdge()), this.sortedL);
@@ -1642,5 +1767,6 @@ class ExamplesMaze {
 
         //maze100x60Edge.bigBang(1000, 600);
         //maze100x60Wall.bigBang(1000, 600);
+
     }
 }
