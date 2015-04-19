@@ -430,7 +430,9 @@ interface ITST<T> {
     // accepts a visitor 
     <R> R accept(IVisitor<T, R> v);
     // converts this tree into an IList
-    //IList<T> list2tree();
+    IList<T> tree2List();
+    // helps convert this tree into an IList
+    IList<T> tree2ListHelp(IList<T> acc);
 }
 
 //represents a known Cell Binary Tree
@@ -465,6 +467,14 @@ class TTNode<T> implements ITST<T> {
     public <R> R accept(IVisitor<T, R> v) {
         return v.visit(this);
     }
+    // converts this tree into an IList
+    public IList<T> tree2List() {
+        return this.tree2ListHelp(new Mt<T>());
+    }
+    // helps convert this tree into an IList
+    public IList<T> tree2ListHelp(IList<T> acc) {
+        return acc.addToBack(this.data);
+    }
 }
 
 //represents an empty Binary Tree
@@ -480,6 +490,14 @@ class Leaf<T> implements ITST<T> {
     // accepts the given visitor
     public <R> R accept(IVisitor<T, R> v) {
         return v.visit(this);
+    }
+    // converts this tree into an IList
+    public IList<T> tree2List() {
+        return new Mt<T>();
+    }
+    // helps convert this tree into an IList
+    public IList<T> tree2ListHelp(IList<T> acc) {
+        return new Mt<T>();
     }
 }
 
@@ -580,7 +598,7 @@ class DisplayWallVisitor implements IVisitor<Edge, WorldImage> {
     public WorldImage visit(Cons<Edge> c) {
         throw new IllegalArgumentException("IList is not a valid argument");
     }
-    // visits a BTNode
+    // visits a TTNode
     public WorldImage visit(TTNode<Edge> n) {
         return new OverlayImages(n.data.displayWall(), 
             new OverlayImages(n.left.accept(this), 
@@ -606,7 +624,7 @@ class DisplayEdgeVisitor implements IVisitor<Edge, WorldImage> {
     public WorldImage visit(Cons<Edge> c) {
         throw new IllegalArgumentException("IList is not a valid argument");
     }
-    // visits a BTNode
+    // visits a TTNode
     public WorldImage visit(TTNode<Edge> n) {
         return new OverlayImages(n.data.displayEdge(visibleEdges),
                 new OverlayImages(n.left.accept(this), 
@@ -626,6 +644,7 @@ class Vertex {
     boolean correctPath;
     boolean startVert;
     boolean endVert;
+    boolean searchHead;
 
     Integer x;
     Integer y;
@@ -636,6 +655,7 @@ class Vertex {
         this.correctPath = false;
         this.startVert = false;
         this.endVert= false;
+        this.searchHead = false;
 
         this.x = x;
         this.y = y;
@@ -652,13 +672,12 @@ class Vertex {
         int sideLength = 10;
         int posnShift = 5;
         Color c = new Color(205, 205, 205);
-        if (this.startVert) {
-            c = new Color(0, 160, 0);
-        }
-        if (this.correctPath) {
+        if (this.correctPath || this.searchHead) {
             c = new Color(65, 86, 197);
         }
-        
+        else if (this.startVert) {
+            c = new Color(0, 160, 0);
+        }       
         else if (this.wasSearched) {
             c = new Color(56, 176, 222);
         }
@@ -1125,6 +1144,33 @@ class ExamplesMaze {
     IList<Edge> l8 = new Mt<Edge>();
     IList<Edge> l9 = new Mt<Edge>();
 
+    
+    Edge edgy0 = new Edge(v1, v2, 0);
+    Edge edgy1 = new Edge(v1, v2, 1);
+    Edge edgy1a = new Edge(v1, v2, 2);
+    Edge edgy3 = new Edge(v1, v2, 3);
+    Edge edgy4 = new Edge(v1, v2, 4);
+    Edge edgy5 = new Edge(v1, v2, 5);
+    
+    IList<Edge> unSorted = new Cons<Edge>(edgy3, 
+            new Cons<Edge>(edgy1, new Cons<Edge>(edgy0,
+                    new Cons<Edge>(edgy1a, new Cons<Edge>(edgy4,
+                            new Cons<Edge>(edgy5, new Mt<Edge>()))))));
+    
+    IList<Edge> sortedL = new Cons<Edge>(edgy0, 
+            new Cons<Edge>(edgy1, new Cons<Edge>(edgy1,
+                    new Cons<Edge>(edgy3, new Cons<Edge>(edgy4,
+                            new Cons<Edge>(edgy5, new Mt<Edge>()))))));
+    
+    ITST<Edge> lE = new Leaf<Edge>();
+    ITST<Edge> bot1 = new TTNode<Edge>(edgy0, lE, lE, lE); 
+    ITST<Edge> bot2 = new TTNode<Edge>(edgy1a, lE, lE, lE); 
+    ITST<Edge> bot3 = new TTNode<Edge>(edgy5, lE, lE, lE); 
+    ITST<Edge> bot4 = new TTNode<Edge>(edgy1, bot1, bot2, lE); 
+    ITST<Edge> bot5 = new TTNode<Edge>(edgy5, lE, lE, lE); 
+    ITST<Edge> bot6 = new TTNode<Edge>(edgy4, lE, lE, bot5);
+    ITST<Edge> bot7 = new TTNode<Edge>(edgy4, bot4, lE, bot6);
+    
     void initialize() {
 
         this.aV0.clear();
@@ -1621,7 +1667,14 @@ class ExamplesMaze {
         //t.checkExpect(maze0.kruskel(edgeList, uf), answer);
         
     }
-    
+    // tests tree2List
+    void testTree2(Tester t) {
+        
+    }
+    // tests tree2ListHelp
+    void testTree2Help(Tester t) {
+        t.checkExpect(this.bot7.tree2ListHelp(new Mt<Edge>()), this.sortedL);
+    }
     // runs the animation
     void testRunMaze(Tester t) {
         MazeWorld maze100x60Edge = new MazeWorld(100, 60);
@@ -1635,6 +1688,6 @@ class ExamplesMaze {
         
         //maze100x60Edge.bigBang(1000, 600);
         //maze100x60Wall.bigBang(1000, 600);
-        maze100x60Wall.bigBang(1000, 600);
+        //maze100x60Wall.bigBang(1000, 600);
     }
 }
