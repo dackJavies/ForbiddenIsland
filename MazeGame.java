@@ -486,6 +486,14 @@ class IListIterator<T> implements Iterator<T> {
 }
 
 
+//this represents a comparator
+interface IComp<T> {
+  // == 0 : t1 == t2
+  // < 0: t1 < t2
+  // > 0: t1 > t2
+  int compare(T t1, T t2);
+}
+
 //this compares two Edges randomly
 class RandEdge implements IComp<Edge> {
     // compares
@@ -624,15 +632,6 @@ class Leaf<T> implements ITST<T> {
         return new Mt<T>();
     }
     public boolean isNode() { return false; }
-}
-
-
-//this represents a comparator
-interface IComp<T> {
-    // == 0 : t1 == t2
-    // < 0: t1 < t2
-    // > 0: t1 > t2
-    int compare(T t1, T t2);
 }
 
 //represents a maze cell
