@@ -45,6 +45,12 @@ interface IList<T> extends Iterable<T> {
     IList<T> removeDups();
 }
 
+// represents a function object that compares two objects of type T
+interface IComparator<T> {
+    // Apply the comparator
+    boolean apply(T t1, T t2);
+}
+
 // represents a function object that takes an A and returns an R
 interface IFunc<A, R> {
     // Apply the function
@@ -944,6 +950,53 @@ class MazeWorld extends World {
          
 }
 
+// Extra methods for ArrayLists
+class ArrayUtils<T> {
+    
+    ArrayList<T> source;
+    
+    ArrayUtils(ArrayList<T> source) {
+        this.source = source;
+    }
+    
+    // Append two ArrayLists
+    ArrayList<T> append(ArrayList<T> l1, ArrayList<T> other) {
+        
+        for(T t: other) {
+            l1.add(t);
+        }
+        
+        return l1;
+        
+    }
+    
+    // Is the given ArrayList<Edge> sorted?
+    boolean isSorted(IComparator<T> comp) {
+        
+        // TODO
+        return true;
+        
+    }
+    
+    // Swap the elements at the specified index
+    void swap(int ind1, int ind2) {
+        
+        T temp = source.get(ind1);
+        
+        source.set(ind1, source.get(ind2));
+        source.set(ind2, temp);
+        
+    }
+    
+    ArrayList<T> mergeSort() {
+        
+        // TODO
+        return null;
+        
+    }
+    
+}
+
 // examples and tests for the MazeWorld
 class ExamplesMaze {
     MazeWorld maze0 = new MazeWorld(0, 0);
@@ -1456,6 +1509,24 @@ class ExamplesMaze {
         
     }
     
+    void testCycle(Tester t) {
+        
+        HashMap<String, String> uf = new HashMap<String, String>();
+        uf.put("0-0", "0-0");
+        uf.put("1-0", "1-0");
+        uf.put("2-0", "2-0");
+        uf.put("0-1", "0-1");
+        uf.put("1-1", "1-1");
+        uf.put("2-1", "2-1");
+        
+        t.checkExpect(maze0.cycle(uf, "0-0", "1-0"), false);
+        
+        uf.put("1-0", "0-0");
+        
+        t.checkExpect(maze0.cycle(uf, "1-0", "0-0"), true);
+        
+    }
+    
     void testKruskel(Tester t) {
         
         Vertex A = new Vertex(0, 0);
@@ -1510,7 +1581,7 @@ class ExamplesMaze {
                         new Cons<Edge>(fd, new Cons<Edge>(ae, new Cons<Edge>(
                                 bf, new Mt<Edge>()))))))));
         
-        t.checkExpect(maze0.kruskel(edgeList, uf), answer);
+        //t.checkExpect(maze0.kruskel(edgeList, uf), answer);
         
     }
     
@@ -1525,7 +1596,7 @@ class ExamplesMaze {
         t.checkExpect(this.maze3.board.length(), 12);
         //t.checkExpect(maze100x60Edge.board.length(), 11840);
         
-        maze100x60Edge.bigBang(1000, 600);
-        maze100x60Wall.bigBang(1000, 600);
+        //maze100x60Edge.bigBang(1000, 600);
+        //maze100x60Wall.bigBang(1000, 600);
     }
 }
