@@ -823,7 +823,7 @@ class MazeWorld extends World {
     // Convert a 2D ArrayList of Vertices to a 1D IList of Edges
     IList<Edge> vertexToEdge(ArrayList<ArrayList<Vertex>> grid) {
 
-        ArrayList<IList<Edge>> listOfLists = new ArrayList<IList<Edge>>();
+        //ArrayList<IList<Edge>> listOfLists = new ArrayList<IList<Edge>>();
         IList<Edge> edges = new Mt<Edge>();
         
         // While we're still working with Vertices, populate the
@@ -871,19 +871,6 @@ class MazeWorld extends World {
     boolean cycle(HashMap<String, String> uf, String v1, String v2) {
         return uf.get(v1).equals(uf.get(v2));
     }
-    
-    // Sort the ArrayList<Edge> in preparation for Kruskel's algorithm
-    /*ArrayList<Edge> mergeSort(ArrayList<Edge> toSort) {
-        
-        int low = 0;
-        int hi = toSort.size() - 1;
-        int mid = (int)Math.floor(toSort.size() / 2);
-        
-        if (hi - low > 1) {
-            
-        }
-        
-    }*/
      
     // Implement Union/Find data structure while applying
     // Kruskel's algorithm.
@@ -912,7 +899,7 @@ class MazeWorld extends World {
             // with the key toFind2 to that of the key toFind1.
             else {
                 
-                finalList.addToFront(e);
+                finalList.addToBack(e);
                 representatives.put(toFind2, representatives.get(toFind1));
                 
             }
@@ -1466,6 +1453,64 @@ class ExamplesMaze {
         }
         
         t.checkExpect(maze0.iListToArr(testList), answer);
+        
+    }
+    
+    void testKruskel(Tester t) {
+        
+        Vertex A = new Vertex(0, 0);
+        Vertex B = new Vertex(1, 0);
+        Vertex C = new Vertex(2, 0);
+        Vertex D = new Vertex(0, 1);
+        Vertex E = new Vertex(1, 1);
+        Vertex F = new Vertex(2, 1);
+        
+        Edge ec = new Edge(E, C, 15);
+        Edge cd = new Edge(C, D, 25);
+        Edge ab = new Edge(A, B, 30);
+        Edge be = new Edge(B, E, 35);
+        Edge bc = new Edge(B, C, 40);
+        Edge fd = new Edge(F, D, 50);
+        Edge ae = new Edge(A, E, 50);
+        Edge bf = new Edge(B, F, 50);
+        
+        A.edges = new Cons<Edge>(ab, new Mt<Edge>());
+        B.edges = new Cons<Edge>(ab, new Cons<Edge>(be,
+                new Cons<Edge>(bc, new Cons<Edge>(bf,
+                        new Mt<Edge>()))));
+        C.edges = new Cons<Edge>(ec, new Cons<Edge>(cd,
+                new Cons<Edge>(bc, new Mt<Edge>())));
+        D.edges = new Cons<Edge>(cd, new Cons<Edge>(fd,
+                new Mt<Edge>()));
+        E.edges = new Cons<Edge>(ec, new Cons<Edge>(be,
+                new Cons<Edge>(ae, new Mt<Edge>())));
+        F.edges = new Cons<Edge>(fd, new Cons<Edge>(bf,
+                new Mt<Edge>()));
+        
+        ArrayList<Edge> edgeList = new ArrayList<Edge>();
+        edgeList.add(ec);
+        edgeList.add(cd);
+        edgeList.add(ab);
+        edgeList.add(be);
+        edgeList.add(bc);
+        edgeList.add(fd);
+        edgeList.add(ae);
+        edgeList.add(bf);
+        
+        HashMap<String, String> uf = new HashMap<String, String>();
+        uf.put("0-0", "0-0");
+        uf.put("1-0", "1-0");
+        uf.put("2-0", "2-0");
+        uf.put("0-1", "0-1");
+        uf.put("1-1", "1-1");
+        uf.put("2-1", "2-1");
+        
+        IList<Edge> answer = new Cons<Edge>(ec, new Cons<Edge>(cd,
+                new Cons<Edge>(ab, new Cons<Edge>(be, new Cons<Edge>(bc,
+                        new Cons<Edge>(fd, new Cons<Edge>(ae, new Cons<Edge>(
+                                bf, new Mt<Edge>()))))))));
+        
+        t.checkExpect(maze0.kruskel(edgeList, uf), answer);
         
     }
     
