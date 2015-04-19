@@ -668,7 +668,7 @@ class Edge {
         }
     }
     WorldImage displayWall() {
-        Color c = new Color(140, 140, 140);
+        Color c = new Color(90, 100, 90);
         int sideLength = 10;
         int posnShift = sideLength / 2;
         int toX = (this.to.x * sideLength) + posnShift;
@@ -1525,7 +1525,7 @@ class ExamplesMaze {
         t.checkExpect(this.maze3.board.length(), 12);
         //t.checkExpect(maze100x60Edge.board.length(), 11840);
         
-        maze100x60Edge.bigBang(1000, 600);
-        maze100x60Wall.bigBang(1000, 600);
+        //maze100x60Edge.bigBang(1000, 600);
+        //maze100x60Wall.bigBang(1000, 600);
     }
 }
