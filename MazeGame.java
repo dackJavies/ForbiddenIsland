@@ -4,20 +4,21 @@
 // Davis Jack
 // jdavis
 
-import tester.*;
-
-import java.awt.Canvas;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Random;
 
-import javalib.colors.*;
-import javalib.impworld.*;
-import javalib.worldimages.*;
+import javalib.impworld.World;
+import javalib.worldimages.LineImage;
+import javalib.worldimages.OverlayImages;
+import javalib.worldimages.Posn;
+import javalib.worldimages.RectangleImage;
+import javalib.worldimages.WorldImage;
+import tester.*;
 
-// represents a list
+//represents a list
 interface IList<T> extends Iterable<T> {
     // Computes the size of this list
     int length();
@@ -47,60 +48,7 @@ interface IList<T> extends Iterable<T> {
     IList<T> removeDups();
 }
 
-// represents a function object that compares two objects of type T
-interface IComparator<T> {
-    // Apply the comparator
-    boolean apply(T t1, T t2);
-}
-
-// represents a function object that takes an A and returns an R
-interface IFunc<A, R> {
-    // Apply the function
-    R apply(A a);
-}
-
-// represents a function that converts a number to a String
-class ToString implements IFunc<Integer, String> {
-    public String apply(Integer i) {
-        return (String)i.toString();
-    }
-}
-
-
-// Iterator for IList<T>
-class IListIterator<T> implements Iterator<T> {
-
-    IList<T> src;
-
-    IListIterator(IList<T> src) { this.src = src; }
-    // does this iterator have an iterator?
-    public boolean hasNext() {
-
-        return !this.src.isEmpty();
-    }
-    // gets the next out of this Iterator
-    public T next() {
-
-        if (!this.hasNext()) {
-            throw new RuntimeException();
-        }
-
-        Cons<T> sourceAsCons = (Cons<T>)this.src;
-        T result = sourceAsCons.first;
-        this.src = sourceAsCons.rest;
-        return result;
-
-    }
-    // does nothing
-    public void remove() {
-
-        throw new RuntimeException("Do not use this method, please");
-
-    }
-
-}
-
-// represents a non-empty list
+//represents a non-empty list
 class Cons<T> implements IList<T> {
     T first;
     IList<T> rest;
@@ -126,7 +74,12 @@ class Cons<T> implements IList<T> {
     }
     // appends this list onto the given one
     public IList<T> append(IList<T> other) {
-        return new Cons<T>(this.first, this.rest.append(other));
+        //return new Cons<T>(this.first, this.rest.append(other));
+        IList<T> result = this;
+        for(T t: other) {
+            result = result.addToBack(t);
+        }
+        return result;
     }
     // creates a new Tree from this IList
     public ITST<T> list2Tree(IComp<T> comp) {
@@ -138,7 +91,7 @@ class Cons<T> implements IList<T> {
     }
     // sorts this list using the given comparator
     public IList<T> sort(IComp<T> comp) {
-        return this;//new Leaf<T>().list2tree(comp).tree2List(); TODO
+        return this.list2Tree(comp).tree2List(); 
     }
     // reverses this list
     public IList<T> rev() {
@@ -173,7 +126,7 @@ class Cons<T> implements IList<T> {
     }
 } 
 
-// represents an empty list
+//represents an empty list
 class Mt<T> implements IList<T> {
     // Computes the size of this list
     public int length() {
@@ -229,7 +182,7 @@ class Mt<T> implements IList<T> {
     public IList<T> removeDups() {
         return this;
     }
-    
+
 }
 
 //represents the deque collection of items
@@ -396,8 +349,8 @@ class Stack<T> {
     }
 }
 
-// represents a Queue
-// Used for Breadth First Search
+//represents a Queue
+//Used for Breadth First Search
 class Queue<T> {
 
     Deque<T> contents;
@@ -421,6 +374,184 @@ class Queue<T> {
     }
 }
 
+//represents a visitor object
+interface IVisitor<T, R> {
+    R visit(Cons<T> c);
+    R visit(Mt<T> m);
+    R visit(TTNode<T> n);
+    R visit(Leaf<T> n);
+}
+
+//represents a visitor that displays the cells in a list
+class DisplayWallVisitor implements IVisitor<Edge, WorldImage> {
+    DisplayWallVisitor() {
+    }
+    // visits an empty
+    public WorldImage visit(Mt<Edge> m) {
+        throw new IllegalArgumentException("IList is not a valid argument");
+    }
+    // visits a cons
+    public WorldImage visit(Cons<Edge> c) {
+        throw new IllegalArgumentException("IList is not a valid argument");
+    }
+    // visits a TTNode
+    public WorldImage visit(TTNode<Edge> n) {
+        return new OverlayImages(n.data.displayWall(), 
+                new OverlayImages(n.left.accept(this), 
+                        new OverlayImages(n.middle.accept(this), n.right.accept(this))));
+    }
+    // visits a Leaf
+    public WorldImage visit(Leaf<Edge> n) {
+        return new LineImage(new Posn(-1, -1), new Posn(-1, -1), new Color(255, 255, 255));
+    }    
+}
+
+//represents a visitor that displays the edges in a list
+class DisplayEdgeVisitor implements IVisitor<Edge, WorldImage> {
+    boolean visibleEdges;
+    DisplayEdgeVisitor(boolean visibleEdges) {
+        this.visibleEdges = visibleEdges;
+    }
+    // visits an empty
+    public WorldImage visit(Mt<Edge> m) {
+        throw new IllegalArgumentException("IList is not a valid argument");
+    }
+    // visits a cons
+    public WorldImage visit(Cons<Edge> c) {
+        throw new IllegalArgumentException("IList is not a valid argument");
+    }
+    // visits a TTNode
+    public WorldImage visit(TTNode<Edge> n) {
+        return new OverlayImages(n.data.displayEdge(visibleEdges),
+                new OverlayImages(n.left.accept(this), 
+                        new OverlayImages(n.middle.accept(this), n.right.accept(this))));
+    }
+    // visits a Leaf
+    public WorldImage visit(Leaf<Edge> n) {
+        return new LineImage(new Posn(-1, -1), new Posn(-1, -1), new Color(255, 255, 255));
+    }    
+}
+
+//represents a function object that compares two objects of type T
+interface IComparator<T> {
+    // Apply the comparator
+    boolean apply(T t1, T t2);
+}
+
+//represents a function object that takes an A and returns an R
+interface IFunc<A, R> {
+    // Apply the function
+    R apply(A a);
+}
+
+//represents a function that converts a number to a String
+class ToString implements IFunc<Integer, String> {
+    public String apply(Integer i) {
+        return (String)i.toString();
+    }
+}
+
+
+//Iterator for IList<T>
+class IListIterator<T> implements Iterator<T> {
+
+    IList<T> src;
+
+    IListIterator(IList<T> src) { this.src = src; }
+    // does this iterator have an iterator?
+    public boolean hasNext() {
+
+        return !this.src.isEmpty();
+    }
+    // gets the next out of this Iterator
+    public T next() {
+
+        if (!this.hasNext()) {
+            throw new RuntimeException();
+        }
+
+        Cons<T> sourceAsCons = (Cons<T>)this.src;
+        T result = sourceAsCons.first;
+        this.src = sourceAsCons.rest;
+        return result;
+
+    }
+    // does nothing
+    public void remove() {
+
+        throw new RuntimeException("Do not use this method, please");
+
+    }
+
+}
+
+
+//this compares two Edges randomly
+class RandEdge implements IComp<Edge> {
+    // compares
+    public int compare(Edge e1, Edge e2) {
+        Random r = new Random();
+        if (r.nextInt(1000) < 333) {
+            return -1;
+        }
+        else if (r.nextInt(1000) > 666) {
+            return 1;
+        }
+        else {
+            return 0;
+        }
+    }
+}
+
+//this compares two Edges randomly
+class RandVert implements IComp<Vertex> {
+    // compares
+    public int compare(Vertex e1, Vertex e2) {
+        Random r = new Random();
+        if (r.nextInt(1000) < 333) {
+            return -1;
+        }
+        else if (r.nextInt(1000) > 666) {
+            return 1;
+        }
+        else {
+            return 0;
+        }
+    }
+}
+
+//this represents a comparator of Cells
+class CompVert implements IComp<Vertex> {
+    // compares based on x and y (e.g. (0, 1) < (1, 1) < (1, 2) < (2,0))
+    public int compare(Vertex t1, Vertex t2) {
+        if (t1.x > t2.x || (t1.x == t2.x && t1.y > t2.y)) {
+            return 1;
+        }
+        else if (t1.x == t2.x && t1.y == t2.y) {
+            return 0; 
+        }
+        else {
+            return -1;
+        }
+    }
+}
+
+//this represents a comparator of Cells
+class CompEdge implements IComp<Edge> {
+    // compares based on x and y (e.g. (0, 1) < (1, 1) < (1, 2) < (2,0))
+    public int compare(Edge t1, Edge t2) {
+        if (t1.weight > t2.weight) {
+            return 1;
+        }
+        else if (t1.weight < t2.weight) {
+            return -1; 
+        }
+        else {
+            return 0;
+        }
+    }
+}
+
 //represents a Cell Binary Tree
 interface ITST<T> {
     // inserts the given item into this tree
@@ -431,8 +562,6 @@ interface ITST<T> {
     <R> R accept(IVisitor<T, R> v);
     // converts this tree into an IList
     IList<T> tree2List();
-    // helps convert this tree into an IList
-    IList<T> tree2ListHelp(IList<T> acc);
 }
 
 //represents a known Cell Binary Tree
@@ -469,11 +598,8 @@ class TTNode<T> implements ITST<T> {
     }
     // converts this tree into an IList
     public IList<T> tree2List() {
-        return this.tree2ListHelp(new Mt<T>());
-    }
-    // helps convert this tree into an IList
-    public IList<T> tree2ListHelp(IList<T> acc) {
-        return acc.addToBack(this.data);
+        return this.left.tree2List().append(this.middle.tree2List()).append(
+                this.right.tree2List().addToFront(this.data)); 
     }
 }
 
@@ -495,10 +621,6 @@ class Leaf<T> implements ITST<T> {
     public IList<T> tree2List() {
         return new Mt<T>();
     }
-    // helps convert this tree into an IList
-    public IList<T> tree2ListHelp(IList<T> acc) {
-        return new Mt<T>();
-    }
 }
 
 
@@ -510,133 +632,7 @@ interface IComp<T> {
     int compare(T t1, T t2);
 }
 
-//this compares two Edges randomly
-class RandEdge implements IComp<Edge> {
-    // compares
-    public int compare(Edge e1, Edge e2) {
-        Random r = new Random();
-        if (r.nextInt(1000) < 333) {
-            return -1;
-        }
-        else if (r.nextInt(1000) > 666) {
-            return 1;
-        }
-        else {
-            return 0;
-        }
-    }
-}
-
-//this compares two Edges randomly
-class RandVert implements IComp<Vertex> {
-    // compares
-  public int compare(Vertex e1, Vertex e2) {
-      Random r = new Random();
-      if (r.nextInt(1000) < 333) {
-          return -1;
-      }
-      else if (r.nextInt(1000) > 666) {
-          return 1;
-      }
-      else {
-          return 0;
-      }
-  }
-}
-
-// this compares two items according to the given boolean
-class SwitcherComp<T> implements IComp<T> {
-    boolean switcher;
-    SwitcherComp(boolean switcher) {
-        this.switcher = switcher;
-    }
-    // compares
-    public int compare(T t1, T t2) {
-        if (this.switcher) {
-            return 1;
-        }
-        else {
-            return -1;
-        }
-    }
-    
-}
-
-//this represents a comparator of Cells
-class CompVert implements IComp<Vertex> {
-    // compares based on x and y (e.g. (0, 1) < (1, 1) < (1, 2) < (2,0))
-    public int compare(Vertex t1, Vertex t2) {
-        if (t1.x > t2.x || (t1.x == t2.x && t1.y > t2.y)) {
-            return 1;
-        }
-        else if (t1.x == t2.x && t1.y == t2.y) {
-            return 0; 
-        }
-        else {
-            return -1;
-        }
-    }
-}
-
-//represents a visitor object
-interface IVisitor<T, R> {
-    R visit(Cons<T> c);
-    R visit(Mt<T> m);
-    R visit(TTNode<T> n);
-    R visit(Leaf<T> n);
-}
-
-//represents a visitor that displays the cells in a list
-class DisplayWallVisitor implements IVisitor<Edge, WorldImage> {
-    DisplayWallVisitor() {
-    }
-    // visits an empty
-    public WorldImage visit(Mt<Edge> m) {
-        throw new IllegalArgumentException("IList is not a valid argument");
-    }
-    // visits a cons
-    public WorldImage visit(Cons<Edge> c) {
-        throw new IllegalArgumentException("IList is not a valid argument");
-    }
-    // visits a TTNode
-    public WorldImage visit(TTNode<Edge> n) {
-        return new OverlayImages(n.data.displayWall(), 
-            new OverlayImages(n.left.accept(this), 
-                    new OverlayImages(n.middle.accept(this), n.right.accept(this))));
-    }
-    // visits a Leaf
-    public WorldImage visit(Leaf<Edge> n) {
-        return new LineImage(new Posn(-1, -1), new Posn(-1, -1), new Color(255, 255, 255));
-    }    
-}
-
-//represents a visitor that displays the edges in a list
-class DisplayEdgeVisitor implements IVisitor<Edge, WorldImage> {
-    boolean visibleEdges;
-    DisplayEdgeVisitor(boolean visibleEdges) {
-        this.visibleEdges = visibleEdges;
-    }
-    // visits an empty
-    public WorldImage visit(Mt<Edge> m) {
-        throw new IllegalArgumentException("IList is not a valid argument");
-    }
-    // visits a cons
-    public WorldImage visit(Cons<Edge> c) {
-        throw new IllegalArgumentException("IList is not a valid argument");
-    }
-    // visits a TTNode
-    public WorldImage visit(TTNode<Edge> n) {
-        return new OverlayImages(n.data.displayEdge(visibleEdges),
-                new OverlayImages(n.left.accept(this), 
-                        new OverlayImages(n.middle.accept(this), n.right.accept(this))));
-    }
-    // visits a Leaf
-    public WorldImage visit(Leaf<Edge> n) {
-        return new LineImage(new Posn(-1, -1), new Posn(-1, -1), new Color(255, 255, 255));
-    }    
-}
-
-// represents a maze cell
+//represents a maze cell
 class Vertex {
 
     IList<Edge> edges;
@@ -697,7 +693,7 @@ class Vertex {
     }
 }
 
-// represents an edge of the maze graph
+//represents an edge of the maze graph
 class Edge {
     Vertex from;
     Vertex to;
@@ -716,7 +712,7 @@ class Edge {
         int fromX = (this.from.x * sideLength) + posnShift;
         int fromY = (this.from.y * sideLength) + posnShift;
         if (visibleLine) {
-        return new LineImage(new Posn(fromX, fromY), new Posn(toX, toY), new Color(255, 0, 0));
+            return new LineImage(new Posn(fromX, fromY), new Posn(toX, toY), new Color(255, 0, 0));
         }
         else {
             return new OverlayImages(this.from.displayCell(), this.to.displayCell());
@@ -751,7 +747,7 @@ class Edge {
     }
 }
 
-// represents the gameWorld
+//represents the gameWorld
 class MazeWorld extends World {
     // Size of the game
     int gameSizeX;
@@ -774,26 +770,26 @@ class MazeWorld extends World {
         this.board = new Mt<Edge>();
         this.representatives = new HashMap<String, String>();
         IList<Vertex> searchHeads = new Mt<Vertex>();
-        
+        this.unUsed = this.board;
         ArrayList<ArrayList<Vertex>> blankCells = this.createGrid();
         this.addEdges(blankCells);
         IList<Edge> b = this.vertexToEdge(blankCells);
-        this.board = b;
-        this.unUsed = this.board;
-        
+        IList<Edge> b2 = b.sort(new CompEdge());
+        this.board = b2;
+        ArrayList<Edge> conv = this.iListToArr(this.board); 
     }
-    
+
     // Change an IList<T> into an ArrayList<T>
     <T> ArrayList<T> iListToArr(IList<T> toChange) {
-        
+
         ArrayList<T> result = new ArrayList<T>();
-        
+
         for(T t: toChange) {
             result.add(t);
         }
-        
+
         return result;
-        
+
     }
 
     // Create a grid of blank Vertices
@@ -816,9 +812,9 @@ class MazeWorld extends World {
 
         }
         if (result.size() > 0) {
-        result.get(0).get(0).startVert = true;
-        result.get(this.gameSizeX - 1).get(this.gameSizeY - 1).endVert = true;
-        this.searchHeads = new Cons<Vertex>(result.get(0).get(0), new Mt<Vertex>());
+            result.get(0).get(0).startVert = true;
+            result.get(this.gameSizeX - 1).get(this.gameSizeY - 1).endVert = true;
+            this.searchHeads = new Cons<Vertex>(result.get(0).get(0), new Mt<Vertex>());
         }
         return result;
 
@@ -886,53 +882,52 @@ class MazeWorld extends World {
 
         //ArrayList<IList<Edge>> listOfLists = new ArrayList<IList<Edge>>();
         IList<Edge> edges = new Mt<Edge>();
-        
+
         // While we're still working with Vertices, populate the
         // HashMap we need for Kruskel's alrgorithm
         for(Integer i = 0; i < grid.size(); i += 1) {
-            
+
             for(Integer i2 = 0; i2 < grid.get(i).size(); i2 += 1) {
-                
+
                 // In the HashMap, vertices are represented with their
                 // coordinates in the format: x-y
                 // i.e. (1, 1) => "1-1"
                 String toPut = i.toString() + "-" + i2.toString();
-                
+
                 // Each key's value is initialized to itself
                 // in accordance with the Union/Find data structure.
                 this.representatives.put(toPut, toPut);
-                
+
             }
-            
+
         }
 
-        
+
         for(int i = 0; i < grid.size(); i += 1) {
 
             for(int i2 = 0; i2 < grid.get(i).size(); i2 += 1) {
 
                 for (Edge e: grid.get(i).get(i2).edges) {
-                    
+
                     if (e.from == grid.get(i).get(i2)) {
                         edges = edges.addToFront(e);
                     }
-                    
+
                 }
 
             }
         }
-        
-        return edges;//.removeDups();
-        //return edges.accept(new RemDupsVisitor1<Edge>());
+
+        return edges;
 
     }
-    
+
     // Do two elements in the Union/Find hashmap have the same value?
     // i.e. Will the connection create a cycle in the tree?
     boolean cycle(HashMap<String, String> uf, String v1, String v2) {
         return uf.get(v1).equals(uf.get(v2));
     }
-     
+
     // Implement Union/Find data structure while applying
     // Kruskel's algorithm.
     // EFFECT: mutates the edge lists in each Vertex in the given ArrayList
@@ -943,33 +938,33 @@ class MazeWorld extends World {
         String toFind2;
 
         for(Edge e: grid) {
-            
+
             // Convert both vectors' positions into strings
             toFind1 = e.from.x.toString() + "-" + e.from.y.toString();
             toFind2 = e.to.x.toString() + "-" + e.to.y.toString();
-            
+
             // If this next connection will create a cycle, discard it
             // i.e. don't include it in the final list
             if (this.cycle(representatives, toFind1, toFind2)) {
-                
+
                 blackList = blackList.addToFront(e);
-                
+
             }
             // Otherwise, add it to the final list and adjust the hashmap.
             // Adjusting the hashmap would mean changing the value associated
             // with the key toFind2 to that of the key toFind1.
             else {
-                
+
                 finalList.addToBack(e);
                 representatives.put(toFind2, representatives.get(toFind1));
-                
+
             }
-            
+
         }
-        
+
         // Save the unused edge list for rendering purposes
         this.unUsed = blackList;
-        
+
         // Returns the list of actual edges.
         return finalList;
     }
@@ -982,11 +977,11 @@ class MazeWorld extends World {
                 new DisplayEdgeVisitor(this.gameMode == 3);
         DisplayWallVisitor dWVisitor = 
                 new DisplayWallVisitor();
-        
+
         return new OverlayImages(boardTree.accept(dEVisitor),
-                    unUsedTree.accept(dWVisitor));
+                unUsedTree.accept(dWVisitor));
     }
-    
+
     // key handler TODO
     public void onKeyEvent(String s) {
         if (s.equals("m") && !(this.gameMode == 0)) {
@@ -1002,57 +997,9 @@ class MazeWorld extends World {
             this.gameMode = 2;
         }
     }
-         
-}
 
-// Extra methods for ArrayLists
-class ArrayUtils<T> {
-    
-    ArrayList<T> source;
-    
-    ArrayUtils(ArrayList<T> source) {
-        this.source = source;
-    }
-    
-    // Append two ArrayLists
-    ArrayList<T> append(ArrayList<T> l1, ArrayList<T> other) {
-        
-        for(T t: other) {
-            l1.add(t);
-        }
-        
-        return l1;
-        
-    }
-    
-    // Is the given ArrayList<Edge> sorted?
-    boolean isSorted(IComparator<T> comp) {
-        
-        // TODO
-        return true;
-        
-    }
-    
-    // Swap the elements at the specified index
-    void swap(int ind1, int ind2) {
-        
-        T temp = source.get(ind1);
-        
-        source.set(ind1, source.get(ind2));
-        source.set(ind2, temp);
-        
-    }
-    
-    ArrayList<T> mergeSort() {
-        
-        // TODO
-        return null;
-        
-    }
-    
 }
-
-// examples and tests for the MazeWorld
+//examples and tests for the MazeWorld
 class ExamplesMaze {
     MazeWorld maze0 = new MazeWorld(0, 0);
     MazeWorld maze5 = new MazeWorld(5, 5);
@@ -1144,33 +1091,32 @@ class ExamplesMaze {
     IList<Edge> l8 = new Mt<Edge>();
     IList<Edge> l9 = new Mt<Edge>();
 
-    
+
     Edge edgy0 = new Edge(v1, v2, 0);
     Edge edgy1 = new Edge(v1, v2, 1);
-    Edge edgy1a = new Edge(v1, v2, 2);
+    Edge edgy1a = new Edge(v1, v2, 1);
     Edge edgy3 = new Edge(v1, v2, 3);
     Edge edgy4 = new Edge(v1, v2, 4);
     Edge edgy5 = new Edge(v1, v2, 5);
-    
+
     IList<Edge> unSorted = new Cons<Edge>(edgy3, 
             new Cons<Edge>(edgy1, new Cons<Edge>(edgy0,
                     new Cons<Edge>(edgy1a, new Cons<Edge>(edgy4,
                             new Cons<Edge>(edgy5, new Mt<Edge>()))))));
-    
+
     IList<Edge> sortedL = new Cons<Edge>(edgy0, 
-            new Cons<Edge>(edgy1, new Cons<Edge>(edgy1,
+            new Cons<Edge>(edgy1a, new Cons<Edge>(edgy1,
                     new Cons<Edge>(edgy3, new Cons<Edge>(edgy4,
                             new Cons<Edge>(edgy5, new Mt<Edge>()))))));
-    
+
     ITST<Edge> lE = new Leaf<Edge>();
     ITST<Edge> bot1 = new TTNode<Edge>(edgy0, lE, lE, lE); 
     ITST<Edge> bot2 = new TTNode<Edge>(edgy1a, lE, lE, lE); 
     ITST<Edge> bot3 = new TTNode<Edge>(edgy5, lE, lE, lE); 
-    ITST<Edge> bot4 = new TTNode<Edge>(edgy1, bot1, bot2, lE); 
-    ITST<Edge> bot5 = new TTNode<Edge>(edgy5, lE, lE, lE); 
-    ITST<Edge> bot6 = new TTNode<Edge>(edgy4, lE, lE, bot5);
-    ITST<Edge> bot7 = new TTNode<Edge>(edgy4, bot4, lE, bot6);
-    
+    ITST<Edge> bot4 = new TTNode<Edge>(edgy1, bot1, bot2, lE);
+    ITST<Edge> bot5 = new TTNode<Edge>(edgy4, lE, lE, bot3);
+    ITST<Edge> bot6 = new TTNode<Edge>(edgy3, bot4, lE, bot5);
+
     void initialize() {
 
         this.aV0.clear();
@@ -1218,7 +1164,7 @@ class ExamplesMaze {
         v2 = new Vertex(0, 1);
         v3 = new Vertex(0, 2);
         v4 = new Vertex(1, 0);
-        v5  = new Vertex(1, 1); // (1, 0)?
+        v5 = new Vertex(1, 1); 
         v6 = new Vertex(1, 2);
         v7 = new Vertex(2, 0);
         v8 = new Vertex(2, 1);
@@ -1247,7 +1193,7 @@ class ExamplesMaze {
         v03 = new Vertex(0, 2);
         v04 = new Vertex(1, 0);
         v05 = new Vertex(1, 1);
-        v06 = new Vertex(1, 2); // (1,1)?
+        v06 = new Vertex(1, 2); 
         v07 = new Vertex(2, 0);
         v08 = new Vertex(2, 1);
         v09 = new Vertex(2, 2);
@@ -1515,11 +1461,11 @@ class ExamplesMaze {
         Edge eC = new Edge(vA, vC, 50935);
         // horizontally connected
         t.checkExpect(eA.displayEdge(true), new LineImage(new Posn(5, 5), 
-                        new Posn(15, 5), new Color(255, 0, 0)));
+                new Posn(15, 5), new Color(255, 0, 0)));
         t.checkExpect(eA.displayEdge(false), new OverlayImages(vA.displayCell(), vB.displayCell()));
         // vertically connected
         t.checkExpect(eB.displayEdge(true), new LineImage(new Posn(15, 5), 
-                        new Posn(15, 15), new Color(255, 0, 0)));
+                new Posn(15, 15), new Color(255, 0, 0)));
         t.checkExpect(eB.displayEdge(false), new OverlayImages(vB.displayCell(), vC.displayCell()));
     }
     // tests displayWall TODO
@@ -1539,13 +1485,13 @@ class ExamplesMaze {
     }    
     // tests DisplayEdgeVisitor TODO
     void testDisplayEdgeVisitor(Tester t) {
-        
+
     }
     // tests DisplayWallVisitor TODO
     void testDisplayWallVisitor(Tester t) {
-        
+
     }
-    
+
     // tests removeDups for the IList interface
     void testRemoveDups(Tester t) {
         IList<Integer> emptyList = new Mt<Integer>();
@@ -1553,20 +1499,20 @@ class ExamplesMaze {
                 new Cons<Integer>(3, new Cons<Integer>(3, new Cons<Integer>(6,
                         new Cons<Integer>(7, new Cons<Integer>(2, emptyList)))))));
         IList<Integer> listy2 = new Cons<Integer>(3, new Cons<Integer>(6,
-                        new Cons<Integer>(7, new Cons<Integer>(2, emptyList))));
+                new Cons<Integer>(7, new Cons<Integer>(2, emptyList))));
         t.checkExpect(emptyList.removeDups(), emptyList);
         t.checkExpect(listy2.removeDups(), listy2);
         t.checkExpect(listy1.removeDups(), listy2);
     }
-    
+
     // tests vertexToEdge in MazeWorld TODO
     void testVertexToEdge(Tester t) {
-        
+
         this.initialize();
         this.initializeV();
-        
+
         //t.checkExpect(maze3.vertexToEdge(aVN).length(), 12);
-        
+
         IList<Edge> testList = new Cons<Edge>(e4to1, new Cons<Edge>(
                 e2to1, new Cons<Edge>(e5to2, new Cons<Edge>(e3to2, 
                         new Cons<Edge>(e6to3, new Cons<Edge>(e7to4,
@@ -1574,27 +1520,26 @@ class ExamplesMaze {
                                         new Cons<Edge>(e6to5, new Cons<Edge>(e9to6,
                                                 new Cons<Edge>(e8to7, new Cons<Edge>(
                                                         e9to8, new Mt<Edge>()))))))))))));
-        
+
         //t.checkExpect(maze3.vertexToEdge(aVN), testList);
-        
+
     }
-    
+
     void testIListToArr(Tester t) {
-        
+
         IList<Integer> testList = new Mt<Integer>();
         ArrayList<Integer> answer = new ArrayList<Integer>();
-        
+
         for(int i = 0; i < 6000; i += 1) {
             testList = testList.addToBack(i);
             answer.add(i);
         }
-        
+
         t.checkExpect(maze0.iListToArr(testList), answer);
-        
     }
-    
+
     void testCycle(Tester t) {
-        
+
         HashMap<String, String> uf = new HashMap<String, String>();
         uf.put("0-0", "0-0");
         uf.put("1-0", "1-0");
@@ -1602,23 +1547,23 @@ class ExamplesMaze {
         uf.put("0-1", "0-1");
         uf.put("1-1", "1-1");
         uf.put("2-1", "2-1");
-        
+
         t.checkExpect(maze0.cycle(uf, "0-0", "1-0"), false);
-        
+
         uf.put("1-0", "0-0");
-        
+
         t.checkExpect(maze0.cycle(uf, "1-0", "0-0"), true);
-        
+
     }
-    void donttestKruskel(Tester t) { // TODO
-        
+    void testKruskel(Tester t) { // TODO
+
         Vertex A = new Vertex(0, 0);
         Vertex B = new Vertex(1, 0);
         Vertex C = new Vertex(2, 0);
         Vertex D = new Vertex(0, 1);
         Vertex E = new Vertex(1, 1);
         Vertex F = new Vertex(2, 1);
-        
+
         Edge ec = new Edge(E, C, 15);
         Edge cd = new Edge(C, D, 25);
         Edge ab = new Edge(A, B, 30);
@@ -1627,7 +1572,7 @@ class ExamplesMaze {
         Edge fd = new Edge(F, D, 50);
         Edge ae = new Edge(A, E, 50);
         Edge bf = new Edge(B, F, 50);
-        
+
         A.edges = new Cons<Edge>(ab, new Mt<Edge>());
         B.edges = new Cons<Edge>(ab, new Cons<Edge>(be,
                 new Cons<Edge>(bc, new Cons<Edge>(bf,
@@ -1640,7 +1585,7 @@ class ExamplesMaze {
                 new Cons<Edge>(ae, new Mt<Edge>())));
         F.edges = new Cons<Edge>(fd, new Cons<Edge>(bf,
                 new Mt<Edge>()));
-        
+
         ArrayList<Edge> edgeList = new ArrayList<Edge>();
         edgeList.add(ec);
         edgeList.add(cd);
@@ -1650,7 +1595,7 @@ class ExamplesMaze {
         edgeList.add(fd);
         edgeList.add(ae);
         edgeList.add(bf);
-        
+
         HashMap<String, String> uf = new HashMap<String, String>();
         uf.put("0-0", "0-0");
         uf.put("1-0", "1-0");
@@ -1658,36 +1603,44 @@ class ExamplesMaze {
         uf.put("0-1", "0-1");
         uf.put("1-1", "1-1");
         uf.put("2-1", "2-1");
-        
+
         IList<Edge> answer = new Cons<Edge>(ec, new Cons<Edge>(cd,
                 new Cons<Edge>(ab, new Cons<Edge>(be, new Cons<Edge>(bc,
                         new Cons<Edge>(fd, new Cons<Edge>(ae, new Cons<Edge>(
                                 bf, new Mt<Edge>()))))))));
-        
+
         //t.checkExpect(maze0.kruskel(edgeList, uf), answer);
-        
+
     }
-    // tests tree2List
+
+    // tests sort for the IList interfacce
+    void testSort(Tester t) {
+        t.checkExpect(this.unSorted.sort(new CompEdge()), this.sortedL);
+    }
+    // tests tree2List for the IList interface
     void testTree2(Tester t) {
-        
-    }
-    // tests tree2ListHelp
-    void testTree2Help(Tester t) {
-        t.checkExpect(this.bot7.tree2ListHelp(new Mt<Edge>()), this.sortedL);
+        MazeWorld maze100x60Edge = new MazeWorld(60, 60);
+        //t.checkExpect(this.bot6.tree2List(), this.sortedL);
+        ITST<Edge> tree1 = maze100x60Edge.board.list2Tree(new RandEdge());
+        Cons<Edge> lister1 = (Cons<Edge>) tree1.tree2List();
+        t.checkExpect(lister1.first.from.x, lister1.first.from.x);
+        t.checkExpect(lister1.first.from.y, lister1.first.from.y);
+        t.checkExpect(lister1.first.to.x, lister1.first.to.x);
+        t.checkExpect(lister1.first.to.y, lister1.first.to.y);
+        t.checkExpect(this.bot6.tree2List(), this.sortedL);
     }
     // runs the animation
     void testRunMaze(Tester t) {
-        MazeWorld maze100x60Edge = new MazeWorld(100, 60);
-        maze100x60Edge.gameMode = 3;
-        MazeWorld maze100x60Wall = new MazeWorld(100, 60);
+        //MazeWorld maze100x60Edge = new MazeWorld(100, 60);
+        //maze100x60Edge.gameMode = 3;
+        //MazeWorld maze100x60Wall = new MazeWorld(100, 60);
         t.checkExpect(maze2.board.length(), 4);
         t.checkExpect(this.maze0.board.length(), 0);
         t.checkExpect(this.maze2.board.length(), 4);
         t.checkExpect(this.maze3.board.length(), 12);
         //t.checkExpect(maze100x60Edge.board.length(), 11840);
-        
+
         //maze100x60Edge.bigBang(1000, 600);
-        //maze100x60Wall.bigBang(1000, 600);
         //maze100x60Wall.bigBang(1000, 600);
     }
 }
