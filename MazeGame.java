@@ -857,13 +857,15 @@ class MazeWorld extends World {
             for(int i2 = 0; i2 < grid.get(i).size(); i2 += 1) {
 
                 for (Edge e: grid.get(i).get(i2).edges) {
+                    if (e.from == grid.get(i).get(i2)) {
                     edges = edges.addToFront(e);
+                    }
                 }
 
             }
         }
         
-        return edges.removeDups();
+        return edges;//.removeDups();
         //return edges.accept(new RemDupsVisitor1<Edge>());
 
     }
@@ -916,12 +918,13 @@ class MazeWorld extends World {
     }
     // Draws the World
     public WorldImage makeImage() {
-        DisplayEdgeVisitor dCVisitor = 
+        DisplayEdgeVisitor dEVisitor = 
                 new DisplayEdgeVisitor(this.board, true);//this.gameMode == 3); TODO
         DisplayWallVisitor dWVisitor = 
-                new DisplayWallVisitor(this.unUsed);
-        return new OverlayImages(dCVisitor.board.accept(dCVisitor),
-                    dWVisitor.board.accept(dWVisitor));
+                new DisplayWallVisitor(this.board);
+        /*return new OverlayImages(dEVisitor.board.accept(dEVisitor),
+                    dWVisitor.board.accept(dWVisitor));*/
+        return dEVisitor.board.accept(dEVisitor);
     }
     
     // key handler TODO
@@ -1476,8 +1479,7 @@ class ExamplesMaze {
     
     // runs the animation
     void testRunMaze(Tester t) {
-        MazeWorld maze10 = new MazeWorld(50, 40);
-        t.checkExpect(maze10.board.length(), 3120);
+        //t.checkExpect(maze10.board.length(), 3120);
         maze10.bigBang(800, 800);
         /* MazeWorld maze10 = new MazeWorld(30, 30);
          t.checkExpect(this.maze0.board.length(), 0);
