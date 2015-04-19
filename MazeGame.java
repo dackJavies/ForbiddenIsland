@@ -30,9 +30,7 @@ interface IList<T> extends Iterable<T> {
     // append this list onto the given one
     IList<T> append(IList<T> other);
     // creates a new Tree from this IList
-    IBST<T> list2Tree(IComp<T> comp);
-    // creates a new Tree from this IList
-    //public IBST<T> list2TreeH(boolean switcher); TODO
+    ITST<T> list2Tree(IComp<T> comp);
     // reverse this list
     IList<T> rev();
     // helps to reverse this list
@@ -60,65 +58,6 @@ class ToString implements IFunc<Integer, String> {
     }
 }
 
-// Goes through an IList calling another duplicate-removing
-// visitor on each element.
-class RemDupsVisitor1<T> implements IVisitor<T, IList<T>> {
-    
-    RemDupsVisitor2<T> visiteur;
-    
-    // Delete all duplicates of c.first in c.rest recursively
-    public IList<T> visit(Cons<T> c) {
-        this.visiteur = new RemDupsVisitor2<T>(c.first);
-        c.rest = c.rest.accept(visiteur);
-        return new Cons<T>(c.first, c.rest.accept(this));
-        
-    }
-    // visits an Mt
-    public IList<T> visit(Mt<T> m) {
-        return new Mt<T>();
-    }
-    // visits a BTNode
-    public IList<T> visit(BTNode<T> n) {
-        throw new RuntimeException("This visitor does not operate on trees");
-    }
-    // visits a Leaf
-    public IList<T> visit(Leaf<T> n) {
-        throw new RuntimeException("This visitor does not operate on trees");
-    }
-    
-}
-
-// Compares the given T against all elements in an IList<T>
-class RemDupsVisitor2<T> implements IVisitor<T, IList<T>> {
-    
-    T toCompare;
-    
-    RemDupsVisitor2(T toCompare) {
-        this.toCompare = toCompare;
-    }
-    // visits a Cons
-    public IList<T> visit(Cons<T> c) {
-        if (c.first == this.toCompare) {
-            return c.rest.accept(this);
-        }
-        else {
-            return new Cons<T>(c.first, c.rest.accept(this));
-        }
-    }
-    // visits an Mt
-    public IList<T> visit(Mt<T> m) {
-        return new Mt<T>();
-    }
-    // visits a BTNode
-    public IList<T> visit(BTNode<T> n) {
-        throw new RuntimeException("This visitor does not operate on trees");
-    }
-    // visits a leaf
-    public IList<T> visit(Leaf<T> n) {
-        throw new RuntimeException("This visitor does not operate on trees");
-    }
-    
-}
 
 // Iterator for IList<T>
 class IListIterator<T> implements Iterator<T> {
@@ -182,19 +121,13 @@ class Cons<T> implements IList<T> {
         return new Cons<T>(this.first, this.rest.append(other));
     }
     // creates a new Tree from this IList
-    public IBST<T> list2Tree(IComp<T> comp) {
-        return this.rest.list2Tree(comp).insert(comp, this.first);
+    public ITST<T> list2Tree(IComp<T> comp) {
+        ITST<T> result = new Leaf<T>();
+        for(T t: this) {
+            result = result.insert(comp, t);
+        }
+        return result;
     }
-    /*// creates a new Tree from this IList TODO
-    public IBST<T> list2Tree() {
-        IComp<T> switc = new SwitcherComp<T>(true);
-        return this.rest.list2TreeH(true).insert(switc, this.first);
-    }
-    // creates a new Tree from this IList
-    public IBST<T> list2TreeH(boolean switcher) {
-        IComp<T> switc = new SwitcherComp<T>(false);
-        return this.rest.list2Tree().insert(switc, this.first);
-    }*/
     // reverses this list
     public IList<T> rev() {
         return this.revT(new Mt<T>());
@@ -252,15 +185,9 @@ class Mt<T> implements IList<T> {
     }
     
     // creates a new Tree from this IList
-    public IBST<T> list2Tree(IComp<T> comp) {
+    public ITST<T> list2Tree(IComp<T> comp) {
         return new Leaf<T>();
-    }
-    /* TODO
-    // helps create a new Tree from this IList
-    public IBST<T> list2TreeH(boolean switcher) {
-        return new Leaf<T>();
-    }*/
-    
+    }    
     // reverses this list
     public IList<T> rev() {
         return this;
@@ -480,9 +407,9 @@ class Queue<T> {
 }
 
 //represents a Cell Binary Tree
-interface IBST<T> {
+interface ITST<T> {
     // inserts the given item into this tree
-    IBST<T> insert(IComp<T> comp, T t);
+    ITST<T> insert(IComp<T> comp, T t);
     // determines whether this is a leaf
     boolean isLeaf();
     // accepts a visitor 
@@ -490,22 +417,27 @@ interface IBST<T> {
 }
 
 //represents a known Cell Binary Tree
-class BTNode<T> implements IBST<T> {
+class TTNode<T> implements ITST<T> {
     T data;
-    IBST<T> left;
-    IBST<T> right;
-    BTNode(T data, IBST<T> left, IBST<T> right) {
+    ITST<T> left;
+    ITST<T> middle;
+    ITST<T> right;
+    TTNode(T data, ITST<T> left, ITST<T> middle, ITST<T> right) {
         this.data = data;
         this.left = left;
+        this.middle = middle;
         this.right = right;
     }
     // inserts an item into this tree according to the given comparator
-    public IBST<T> insert(IComp<T> comp, T t) {
-        if (comp.compare(this.data, t) >= 0) {
-            return new BTNode<T>(this.data, this.left.insert(comp, t), this.right);
+    public ITST<T> insert(IComp<T> comp, T t) {
+        if (comp.compare(this.data, t) > 0) {
+            return new TTNode<T>(this.data, this.left.insert(comp, t), this.middle, this.right);
+        }
+        else if (comp.compare(this.data, t) < 0) {
+            return new TTNode<T>(this.data, this.left, this.middle, this.right.insert(comp, t));
         }
         else {
-            return new BTNode<T>(this.data, this.left, this.right.insert(comp, t));
+            return new TTNode<T>(this.data, this.left, this.middle.insert(comp, t), this.right);
         }
     }
     // determines whether this is a leaf
@@ -519,10 +451,10 @@ class BTNode<T> implements IBST<T> {
 }
 
 //represents an empty Binary Tree
-class Leaf<T> implements IBST<T> {
+class Leaf<T> implements ITST<T> {
     // inserts an item into this tree according to the given comparator
-    public IBST<T> insert(IComp<T> comp, T t) {
-        return new BTNode<T>(t, this, this);        
+    public ITST<T> insert(IComp<T> comp, T t) {
+        return new TTNode<T>(t, this, this, this);        
     }
     // determines whether this is a leaf
     public boolean isLeaf() {
@@ -548,7 +480,15 @@ class RandEdge implements IComp<Edge> {
     // compares
     public int compare(Edge e1, Edge e2) {
         Random r = new Random();
-        return r.nextInt();
+        if (r.nextInt(1000) < 333) {
+            return -1;
+        }
+        else if (r.nextInt(1000) > 666) {
+            return 1;
+        }
+        else {
+            return 0;
+        }
     }
 }
 
@@ -557,7 +497,15 @@ class RandVert implements IComp<Vertex> {
     // compares
   public int compare(Vertex e1, Vertex e2) {
       Random r = new Random();
-      return r.nextInt();
+      if (r.nextInt(1000) < 333) {
+          return -1;
+      }
+      else if (r.nextInt(1000) > 666) {
+          return 1;
+      }
+      else {
+          return 0;
+      }
   }
 }
 
@@ -599,16 +547,13 @@ class CompVert implements IComp<Vertex> {
 interface IVisitor<T, R> {
     R visit(Cons<T> c);
     R visit(Mt<T> m);
-    R visit(BTNode<T> n);
+    R visit(TTNode<T> n);
     R visit(Leaf<T> n);
 }
 
 //represents a visitor that displays the cells in a list
 class DisplayWallVisitor implements IVisitor<Edge, WorldImage> {
-    IBST<Edge> board;
-    DisplayWallVisitor(IList<Edge> board) {
-        IComp<Edge> ran = new RandEdge(); 
-        this.board = board.list2Tree(ran);
+    DisplayWallVisitor() {
     }
     // visits an empty
     public WorldImage visit(Mt<Edge> m) {
@@ -619,9 +564,10 @@ class DisplayWallVisitor implements IVisitor<Edge, WorldImage> {
         throw new IllegalArgumentException("IList is not a valid argument");
     }
     // visits a BTNode
-    public WorldImage visit(BTNode<Edge> n) {
+    public WorldImage visit(TTNode<Edge> n) {
         return new OverlayImages(n.data.displayWall(), 
-            new OverlayImages(n.left.accept(this), n.right.accept(this)));
+            new OverlayImages(n.left.accept(this), 
+                    new OverlayImages(n.middle.accept(this), n.right.accept(this))));
     }
     // visits a Leaf
     public WorldImage visit(Leaf<Edge> n) {
@@ -632,10 +578,7 @@ class DisplayWallVisitor implements IVisitor<Edge, WorldImage> {
 //represents a visitor that displays the edges in a list
 class DisplayEdgeVisitor implements IVisitor<Edge, WorldImage> {
     boolean visibleEdges;
-    IBST<Edge> board;
-    DisplayEdgeVisitor(IList<Edge> board, boolean visibleEdges) {
-        IComp<Edge> ran = new RandEdge(); 
-        this.board = board.list2Tree(ran);
+    DisplayEdgeVisitor(boolean visibleEdges) {
         this.visibleEdges = visibleEdges;
     }
     // visits an empty
@@ -647,9 +590,10 @@ class DisplayEdgeVisitor implements IVisitor<Edge, WorldImage> {
         throw new IllegalArgumentException("IList is not a valid argument");
     }
     // visits a BTNode
-    public WorldImage visit(BTNode<Edge> n) {
+    public WorldImage visit(TTNode<Edge> n) {
         return new OverlayImages(n.data.displayEdge(visibleEdges),
-                new OverlayImages(n.left.accept(this), n.right.accept(this)));
+                new OverlayImages(n.left.accept(this), 
+                        new OverlayImages(n.middle.accept(this), n.right.accept(this))));
     }
     // visits a Leaf
     public WorldImage visit(Leaf<Edge> n) {
@@ -723,7 +667,6 @@ class Edge {
             return new OverlayImages(this.from.displayCell(), this.to.displayCell());
         }
     }
-    // displays this edge's wall (because it is not used) TODO
     WorldImage displayWall() {
         Color c = new Color(140, 140, 140);
         int sideLength = 10;
@@ -984,17 +927,32 @@ class MazeWorld extends World {
     }
     // Draws the World
     public WorldImage makeImage() {
+        IComp<Edge> ranE = new RandEdge(); 
+        ITST<Edge> boardTree = this.board.list2Tree(ranE);
+        ITST<Edge> unUsedTree = this.unUsed.list2Tree(ranE);
         DisplayEdgeVisitor dEVisitor = 
-                new DisplayEdgeVisitor(this.board, false);//this.gameMode == 3); TODO
+                new DisplayEdgeVisitor(this.gameMode == 3);
         DisplayWallVisitor dWVisitor = 
-                new DisplayWallVisitor(this.unUsed);
-        return new OverlayImages(dEVisitor.board.accept(dEVisitor),
-                    dWVisitor.board.accept(dWVisitor));
+                new DisplayWallVisitor();
+        
+        return new OverlayImages(boardTree.accept(dEVisitor),
+                    unUsedTree.accept(dWVisitor));
     }
     
     // key handler TODO
-    public void onKeyEvent(boolean s) {
-        
+    public void onKeyEvent(String s) {
+        if (s.equals("m") && !(this.gameMode == 0)) {
+            this.gameMode = 0;
+        }
+        else if (s.equals("e") && !(this.gameMode == 3)) {
+            this.gameMode = 3;
+        }
+        else if (s.equals("d") && !(this.gameMode == 1)) {
+            this.gameMode = 1;
+        }
+        else if (s.equals("b") && !(this.gameMode == 2)) {
+            this.gameMode = 2;
+        }
     }
          
 }
@@ -1340,10 +1298,10 @@ class ExamplesMaze {
     }
     // tests isLeaf in the IBST interface
     void testIsLeaf(Tester t) {
-        IBST<String> sL = new Leaf<String>();
-        IBST<String> n1 = new BTNode<String>("hi", sL, sL);
-        IBST<String> n2 = new BTNode<String>("bye", n1, sL);
-        IBST<String> n3 = new BTNode<String>("so", n1, sL);
+        ITST<String> sL = new Leaf<String>();
+        ITST<String> n1 = new TTNode<String>("hi", sL, sL, sL);
+        ITST<String> n2 = new TTNode<String>("bye", n1, sL, sL);
+        ITST<String> n3 = new TTNode<String>("so", n1, sL, sL);
         t.checkExpect(sL.isLeaf(), true);
         t.checkExpect(n1.isLeaf(), false);
         t.checkExpect(n2.isLeaf(), false);
@@ -1361,13 +1319,13 @@ class ExamplesMaze {
         Vertex c2 = new Vertex(0, 1);
         Vertex c3 = new Vertex(1, 0);
         Vertex c4 = new Vertex(1, 1);
-        IBST<Vertex> sC = new Leaf<Vertex>();
-        IBST<Vertex> n0 = new BTNode<Vertex>(c4, sC, sC);
-        IBST<Vertex> n1 = new BTNode<Vertex>(c2, sC, sC);
-        IBST<Vertex> n2 = new BTNode<Vertex>(c3, sC, sC);
-        IBST<Vertex> n3 = new BTNode<Vertex>(c1, n1, n2);
-        IBST<Vertex> n2a = new BTNode<Vertex>(c3, sC, n0);
-        IBST<Vertex> n3a = new BTNode<Vertex>(c1, n1, n2a);
+        ITST<Vertex> sC = new Leaf<Vertex>();
+        ITST<Vertex> n0 = new TTNode<Vertex>(c4, sC, sC, sC);
+        ITST<Vertex> n1 = new TTNode<Vertex>(c2, sC, sC, sC);
+        ITST<Vertex> n2 = new TTNode<Vertex>(c3, sC, sC, sC);
+        ITST<Vertex> n3 = new TTNode<Vertex>(c1, n1, sC, n2);
+        ITST<Vertex> n2a = new TTNode<Vertex>(c3, sC, sC, n0);
+        ITST<Vertex> n3a = new TTNode<Vertex>(c1, n1, sC, n2a);
         t.checkExpect(n3.insert(comp, c4), n3a);
     }
     // tests accept for the interfaces IList<T> and IBST<T> 
@@ -1382,9 +1340,9 @@ class ExamplesMaze {
         Mt<Edge> mT = new Mt<Edge>();
         Cons<Edge> cons = new Cons<Edge>(e1, mT);
         Leaf<Edge> leaf = new Leaf<Edge>();
-        BTNode<Edge> node1 = new BTNode<Edge>(e1, leaf, leaf);
-        BTNode<Edge> node2 = new BTNode<Edge>(e2, node1, leaf);
-        DisplayEdgeVisitor dEV = new DisplayEdgeVisitor(l1, true);
+        TTNode<Edge> node1 = new TTNode<Edge>(e1, leaf, leaf, leaf);
+        TTNode<Edge> node2 = new TTNode<Edge>(e2, node1, leaf, leaf);
+        DisplayEdgeVisitor dEV = new DisplayEdgeVisitor(true);
         t.checkExpect(leaf.accept(dEV), dEV.visit(leaf));
         t.checkExpect(node2.accept(dEV), dEV.visit(node2));
         t.checkException(
@@ -1463,46 +1421,6 @@ class ExamplesMaze {
     void testDisplayWallVisitor(Tester t) {
         
     }
-    // tests RemDupsVisitor1
-    void testRemDupsVisitor1(Tester t) {
-        
-        Integer one = new Integer(1);
-        Integer two = new Integer(2);
-        Integer three = new Integer(3);
-        
-        IList<Integer> testList = new Cons<Integer>(one, new Cons<Integer>(
-                two, new Mt<Integer>()));
-        IList<Integer> testList2 = new Cons<Integer>(one, new Cons<Integer>(
-                three, new Cons<Integer>(three, new Mt<Integer>())));
-        IList<Integer> testList3 = new Cons<Integer>(one, new Cons<Integer>(
-                three, new Mt<Integer>()));
-        
-        RemDupsVisitor1<Integer> rDV1 = new RemDupsVisitor1<Integer>();
-        
-        t.checkExpect(testList.accept(rDV1), testList);
-        t.checkExpect(testList2.accept(rDV1), testList3);
-        
-    }
-    
-    // tests RemDupsVisitor2
-    void testRemDupsVisitor2(Tester t) {
-        
-        Integer one = new Integer(1);
-        Integer two = new Integer(2);
-        Integer three = new Integer(3);
-        
-        IList<Integer> testList = new Cons<Integer>(one, new Cons<Integer>(
-                two, new Mt<Integer>()));
-        IList<Integer> testList2 = new Cons<Integer>(one, new Cons<Integer>(
-                three, new Cons<Integer>(three, new Mt<Integer>())));
-        IList<Integer> testList3 = new Cons<Integer>(one, new Mt<Integer>());
-        
-        RemDupsVisitor2<Integer> rDV2 = new RemDupsVisitor2<Integer>(three);
-        
-        t.checkExpect(testList.accept(rDV2), testList);
-        t.checkExpect(testList2.accept(rDV2), testList3);
-        
-    }
     
     // tests removeDups for the IList interface
     void testRemoveDups(Tester t) {
@@ -1553,19 +1471,16 @@ class ExamplesMaze {
     
     // runs the animation
     void testRunMaze(Tester t) {
-        MazeWorld maze10 = new MazeWorld(100, 60);
+        MazeWorld maze100x60Edge = new MazeWorld(100, 60);
+        maze100x60Edge.gameMode = 3;
+        MazeWorld maze100x60Wall = new MazeWorld(100, 60);
         t.checkExpect(maze2.board.length(), 4);
-        //maze10.bigBang(1000, 600);
-        /* MazeWorld maze10 = new MazeWorld(30, 30);
-         t.checkExpect(this.maze0.board.length(), 0);
-         t.checkExpect(this.maze2.board.length(), 4);
-         t.checkExpect(this.maze3.board.length(), 12);
-         t.checkExpect(maze10.board.length(), 2);
-         this.initialize();
-         this.initializeV();
-         
-         IList<Edge> b = this.maze0.vertexToEdge(this.aVN);
-         this.maze3.board = b;   
-         this.maze3.bigBang(500, 500);*/
+        t.checkExpect(this.maze0.board.length(), 0);
+        t.checkExpect(this.maze2.board.length(), 4);
+        t.checkExpect(this.maze3.board.length(), 12);
+        //t.checkExpect(maze100x60Edge.board.length(), 11840);
+        
+        maze100x60Edge.bigBang(1000, 600);
+        maze100x60Wall.bigBang(1000, 600);
     }
 }
