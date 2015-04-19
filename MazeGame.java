@@ -782,6 +782,19 @@ class MazeWorld extends World {
         this.unUsed = this.board;
         
     }
+    
+    // Change an IList<T> into an ArrayList<T>
+    <T> ArrayList<T> iListToArr(IList<T> toChange) {
+        
+        ArrayList<T> result = new ArrayList<T>();
+        
+        for(T t: toChange) {
+            result.add(t);
+        }
+        
+        return result;
+        
+    }
 
     // Create a grid of blank Vertices
     ArrayList<ArrayList<Vertex>> createGrid() {
@@ -889,15 +902,17 @@ class MazeWorld extends World {
             
         }
 
-        // Copy all Vertices' Edge lists in grid into listOfListsl
+        
         for(int i = 0; i < grid.size(); i += 1) {
 
             for(int i2 = 0; i2 < grid.get(i).size(); i2 += 1) {
 
                 for (Edge e: grid.get(i).get(i2).edges) {
+                    
                     if (e.from == grid.get(i).get(i2)) {
-                    edges = edges.addToFront(e);
+                        edges = edges.addToFront(e);
                     }
+                    
                 }
 
             }
@@ -913,11 +928,24 @@ class MazeWorld extends World {
     boolean cycle(HashMap<String, String> uf, String v1, String v2) {
         return uf.get(v1).equals(uf.get(v2));
     }
+    
+    // Sort the ArrayList<Edge> in preparation for Kruskel's algorithm
+    /*ArrayList<Edge> mergeSort(ArrayList<Edge> toSort) {
+        
+        int low = 0;
+        int hi = toSort.size() - 1;
+        int mid = (int)Math.floor(toSort.size() / 2);
+        
+        if (hi - low > 1) {
+            
+        }
+        
+    }*/
      
     // Implement Union/Find data structure while applying
     // Kruskel's algorithm.
     // EFFECT: mutates the edge lists in each Vertex in the given ArrayList
-    IList<Edge> kruskel(IList<Edge> grid, HashMap<String, String> representatives) {
+    IList<Edge> kruskel(ArrayList<Edge> grid, HashMap<String, String> representatives) {
         IList<Edge> blackList = new Mt<Edge>();
         IList<Edge> finalList = new Mt<Edge>();
         String toFind1;
@@ -1509,11 +1537,25 @@ class ExamplesMaze {
         
     }
     
+    void testIListToArr(Tester t) {
+        
+        IList<Integer> testList = new Mt<Integer>();
+        ArrayList<Integer> answer = new ArrayList<Integer>();
+        
+        for(int i = 0; i < 6000; i += 1) {
+            testList = testList.addToBack(i);
+            answer.add(i);
+        }
+        
+        t.checkExpect(maze0.iListToArr(testList), answer);
+        
+    }
+    
     // runs the animation
     void testRunMaze(Tester t) {
         MazeWorld maze10 = new MazeWorld(100, 60);
         t.checkExpect(maze2.board.length(), 4);
-        maze10.bigBang(1000, 600);
+        //maze10.bigBang(1000, 600);
         /* MazeWorld maze10 = new MazeWorld(30, 30);
          t.checkExpect(this.maze0.board.length(), 0);
          t.checkExpect(this.maze2.board.length(), 4);
