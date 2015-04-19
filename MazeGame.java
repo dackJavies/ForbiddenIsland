@@ -31,6 +31,8 @@ interface IList<T> extends Iterable<T> {
     IList<T> append(IList<T> other);
     // creates a new Tree from this IList
     ITST<T> list2Tree(IComp<T> comp);
+    // sorts this list using the given comparator
+    IList<T> sort(IComp<T> comp);
     // reverse this list
     IList<T> rev();
     // helps to reverse this list
@@ -128,6 +130,10 @@ class Cons<T> implements IList<T> {
         }
         return result;
     }
+    // sorts this list using the given comparator
+    public IList<T> sort(IComp<T> comp) {
+        return this;//new Leaf<T>().list2tree(comp).tree2List(); TODO
+    }
     // reverses this list
     public IList<T> rev() {
         return this.revT(new Mt<T>());
@@ -182,12 +188,15 @@ class Mt<T> implements IList<T> {
     // appends this list onto the given one
     public IList<T> append(IList<T> other) {
         return other;
-    }
-    
+    } 
     // creates a new Tree from this IList
     public ITST<T> list2Tree(IComp<T> comp) {
         return new Leaf<T>();
     }    
+    // sorts this list using the given comparator
+    public IList<T> sort(IComp<T> comp) {
+        return this;
+    }
     // reverses this list
     public IList<T> rev() {
         return this;
@@ -414,6 +423,8 @@ interface ITST<T> {
     boolean isLeaf();
     // accepts a visitor 
     <R> R accept(IVisitor<T, R> v);
+    // converts this tree into an IList
+    //IList<T> list2tree();
 }
 
 //represents a known Cell Binary Tree
