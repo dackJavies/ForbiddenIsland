@@ -803,19 +803,26 @@ class MazeWorld extends World {
     IList<Vertex> searchHeads;
 
     MazeWorld(int gameSizeX, int gameSizeY) {
+        // Basic construtor stuff
         this.gameSizeX = gameSizeX;
         this.gameSizeY = gameSizeY;
+        // Default game mode is 0, or manual
         this.gameMode = 0;
+        // Initialize lists and hashmaps to empty
         this.board = new Mt<Edge>();
         this.representatives = new HashMap<String, String>();
         this.searchHeads = new Mt<Vertex>();
-        this.unUsed = this.board;
+        this.unUsed = new Mt<Edge>();
+        // Create a basic grid of vertices
         ArrayList<ArrayList<Vertex>> blankCells = this.createGrid();
+        // Give the grid edges
         this.addEdges(blankCells);
+        // Convert the ArrayList<ArrayList<Vertex>> into an IList of Edges
         IList<Edge> b = this.vertexToEdge(blankCells);
+        // Sort the IList in preparation for Kruskel's algorithm
         IList<Edge> b2 = b.sort(new CompEdge());
-        this.board = b2;
-        ArrayList<Edge> conv = this.iListToArr(this.board); 
+        // Perform the algorithm
+        this.board = this.kruskel(b2, representatives);
     }
     
     // gives a Vertex a SearchHead
@@ -988,7 +995,7 @@ class MazeWorld extends World {
     // Implement Union/Find data structure while applying
     // Kruskel's algorithm.
     // EFFECT: mutates the edge lists in each Vertex in the given ArrayList
-    IList<Edge> kruskel(ArrayList<Edge> grid, HashMap<String, String> representatives) {
+    IList<Edge> kruskel(IList<Edge> grid, HashMap<String, String> representatives) {
         IList<Edge> blackList = new Mt<Edge>();
         IList<Edge> finalList = new Mt<Edge>();
         String toFind1;
