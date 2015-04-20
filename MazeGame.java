@@ -665,36 +665,26 @@ class Vertex {
         this.edges = this.edges.addToBack(toAdd);
         other.edges = other.edges.addToBack(toAdd);
     }
-    // displays the maze cell
+   // displays the maze cell
     WorldImage displayCell() {
         int sideLength = 10;
         int posnShift = 5;
         Color c = new Color(205, 205, 205);
-        if (this.startVert) {
-            c = new Color(0, 160, 0);
-        }
-        if (this.correctPath) {
+        if (this.correctPath || this.hasSearchHead) {
             c = new Color(65, 86, 197);
         }
-        
+        else if (this.startVert) {
+            c = new Color(0, 160, 0);
+        }
         else if (this.wasSearched) {
             c = new Color(56, 176, 222);
         }
-        if (this.endVert) {
+        else if (this.endVert) {
             c = new Color(160, 0, 160);
         }
         return new RectangleImage(new Posn((this.x * sideLength) + posnShift, 
                 (this.y * sideLength) + posnShift), 10, 10, c);
-    }
-    // displays the maze cell as a search head
-    WorldImage displayHead() {
-        int sideLength = 10;
-        int posnShift = 5;
-        Color c = new Color(65, 86, 197);
-        return new RectangleImage(new Posn((this.x * sideLength) + posnShift, 
-                (this.y * sideLength) + posnShift), 10, 10, c);
-    }
-    
+    }  
     // Search through the tree using the Breadth-First algorithm
     // This method is called every tick, and therefore only advances
     // the search by one increment per call.
