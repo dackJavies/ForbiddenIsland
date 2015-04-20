@@ -718,11 +718,11 @@ class Vertex {
         for(Edge e: this.edges) {
             
             if (e.from != this && !e.from.wasSearched) {
-                result.addToFront(e.from);
+                result.addToBack(e.from);
             }
             
             if (e.to != this && !e.to.wasSearched) {
-                result.addToFront(e.to);
+                result.addToBack(e.to);
             }
             
         }
@@ -1068,11 +1068,11 @@ class MazeWorld extends World {
                 this.searchHeads = result;
             }
             // breadth first
-            if (this.gameMode == 1) {
+            if (this.gameMode == 2) {
                 IList<Vertex> result = new Mt<Vertex>();
                 for (Vertex origV: sH) {
                     for (Vertex newV: origV.breadthFirstSearch())
-                    result = result.addToFront(this.addSearchHead(newV));
+                    result = result.addToBack(this.addSearchHead(newV));
                 }
                 this.searchHeads = result;
             }
