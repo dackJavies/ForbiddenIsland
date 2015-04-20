@@ -714,11 +714,6 @@ class Vertex {
             }
             
         }
-        
-        for(Vertex v: result) {
-            v.hasSearchHead = true;
-        }
-        
         return result;
     }
     
@@ -741,11 +736,6 @@ class Vertex {
             }
             
         }
-        
-        for(Vertex v: result) {
-            v.hasSearchHead = true;
-        }
-        
         return result;
         
     }
@@ -839,12 +829,14 @@ class MazeWorld extends World {
     }
     
     // gives a Vertex a SearchHead
-    void addSearchHead(Vertex v) {
-        this.searchHeads = this.searchHeads.addToFront(v);
+    // EFFECTS: Updates the hasSearchHead Field of the vertex
+    Vertex addSearchHead(Vertex v) {
         v.hasSearchHead = true;
+        return v;
     }
     // removes a SearchHead from a Vertex
-    void removeSearchHead(Vertex v) {
+    // EFFECTS: Updates the hasSearchHead Field of the vertex
+    IList<Vertex> removeSearchHead(Vertex v) {
         IList<Vertex> result = new Mt<Vertex>();
         for(Vertex v2: this.searchHeads) {
             if (!(v == v2)) {
@@ -852,6 +844,7 @@ class MazeWorld extends World {
             }
         }
         v.hasSearchHead = false;
+        return result;
     }
     // Change an IList<T> into an ArrayList<T>
     <T> ArrayList<T> iListToArr(IList<T> toChange) {
@@ -1073,11 +1066,29 @@ class MazeWorld extends World {
     }
     // Tick handler
     public void onTick() {
-        
-        // TODO
-    }      
+        if (this.searchHeads.length() > 0) {
+            Cons<Vertex> sH = ((Cons<Vertex>)(this.searchHeads));
+            // depth first
+            if (this.gameMode == 1) {
+                IList<Vertex> result = new Mt<Vertex>();
+                for (Vertex origV: sH) {
+                    for (Vertex newV: origV.depthFirstSearch())
+                    result = result.addToFront(this.addSearchHead(newV));
+                }
+                this.searchHeads = result;
+            }
+            // breadth first
+            if (this.gameMode == 1) {
+                IList<Vertex> result = new Mt<Vertex>();
+                for (Vertex origV: sH) {
+                    for (Vertex newV: origV.breadthFirstSearch())
+                    result = result.addToFront(this.addSearchHead(newV));
+                }
+                this.searchHeads = result;
+            }
+        }
+    }
 }
-
 
 //examples and tests for the MazeWorld
 class ExamplesMaze {
