@@ -828,7 +828,7 @@ class MazeWorld extends World {
         this.gameMode = 0;
         this.board = new Mt<Edge>();
         this.representatives = new HashMap<String, String>();
-        IList<Vertex> searchHeads = new Mt<Vertex>();
+        this.searchHeads = new Mt<Vertex>();
         this.unUsed = this.board;
         ArrayList<ArrayList<Vertex>> blankCells = this.createGrid();
         this.addEdges(blankCells);
@@ -837,7 +837,22 @@ class MazeWorld extends World {
         this.board = b2;
         ArrayList<Edge> conv = this.iListToArr(this.board); 
     }
-
+    
+    // gives a Vertex a SearchHead
+    void addSearchHead(Vertex v) {
+        this.searchHeads = this.searchHeads.addToFront(v);
+        v.hasSearchHead = true;
+    }
+    // removes a SearchHead from a Vertex
+    void removeSearchHead(Vertex v) {
+        IList<Vertex> result = new Mt<Vertex>();
+        for(Vertex v2: this.searchHeads) {
+            if (!(v == v2)) {
+                result = result.addToBack(v2);
+            }
+        }
+        v.hasSearchHead = false;
+    }
     // Change an IList<T> into an ArrayList<T>
     <T> ArrayList<T> iListToArr(IList<T> toChange) {
 
@@ -873,7 +888,7 @@ class MazeWorld extends World {
         if (result.size() > 0) {
             result.get(0).get(0).startVert = true;
             result.get(this.gameSizeX - 1).get(this.gameSizeY - 1).endVert = true;
-            this.searchHeads = new Cons<Vertex>(result.get(0).get(0), new Mt<Vertex>());
+            this.addSearchHead(result.get(0).get(0));
         }
         return result;
 
@@ -1206,6 +1221,7 @@ class ExamplesMaze {
         this.aV0.clear();
         this.aV0.add(new Vertex(0, 0));
         aV0.get(0).startVert = true;
+        aV0.get(0).hasSearchHead = true;
         this.aV0.add(new Vertex(0, 1));
         this.aV0.add(new Vertex(0, 2));
         this.aV0.add(new Vertex(0, 3));
