@@ -1097,6 +1097,42 @@ class MazeWorld extends World {
 }
 
 
+class UnionFind {
+    HashMap<Posn, Posn> reps;
+    ArrayList<Vertex> vertList;
+    IList<Edge> edgeList;
+    UnionFind(HashMap<Posn, Posn> reps, ArrayList<Vertex> vertList, IList<Edge> edgeList) {
+        this.reps = reps;
+        this.vertList = vertList;
+        this.edgeList = edgeList;
+        this.edgeList = this.edgeList.sort(new CompEdge());
+    }
+    // determines if two Posns are equal
+    boolean equalPosn(Posn p1, Posn p2) {
+        return p1.x == p2.x && p1.y == p2.y;
+    }
+    // initializes the representatives of a list of Vertices
+    void initializeHashMap() {
+        for(Vertex v: vertList) {
+            reps.put(v.posn, v.posn);
+        }
+    }
+    // find this Posn key's data
+    Posn find(Posn p) {
+        if (this.equalPosn(reps.get(p), p)) {
+            return p;
+        }
+        else {
+            return find(new Posn(reps.get(p).x, reps.get(p).y));
+        }
+    }
+    // union
+    void union(Posn p1, Posn p2) {
+        this.reps.put(this.find(p1), this.find(p2));
+    }
+}
+
+
 // examples and tests for the MazeWorld
 class ExamplesMaze {
 
