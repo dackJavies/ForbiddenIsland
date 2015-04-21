@@ -1067,11 +1067,8 @@ class MazeWorld extends World {
         
         if (!this.breadthList.isEmpty()) {
             Vertex next = this.breadthList.dequeue();
-            if (next.wasSearched) {
-                // DO NOTHING; dequeue() removed it
-            }
-            else if (next.endVert) {
-                // this.reconstruct(cameFromEdge, next);
+            if (!next.wasSearched && next.endVert) {
+                this.searchHeads =  reconstruct(next, new Mt<Vertex>());
             }
             else {
                 for(Edge e: next.edges) {
@@ -1093,7 +1090,7 @@ class MazeWorld extends World {
         if (!this.depthList.isEmpty()) {
             Vertex next = this.depthList.pop();
             if (!next.wasSearched && next.endVert) {
-                //do something with reconstruct(next, new Mt<Vertex>());
+                this.searchHeads =  reconstruct(next, new Mt<Vertex>());
             }
             else {
                 for(Edge e: next.edges) {
@@ -1107,6 +1104,7 @@ class MazeWorld extends World {
         
     }
     
+    // onTick is called at regular time intervals
     public void onTick() {
        
         // DF search
