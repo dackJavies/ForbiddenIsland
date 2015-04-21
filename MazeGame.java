@@ -436,12 +436,6 @@ class DisplayEdgeVisitor implements IVisitor<Edge, WorldImage> {
     }    
 }
 
-//represents a function object that compares two objects of type T
-interface IComparator<T> {
-    // Apply the comparator
-    boolean apply(T t1, T t2);
-}
-
 //represents a function object that takes an A and returns an R
 interface IFunc<A, R> {
     // Apply the function
@@ -563,6 +557,84 @@ class CompEdge implements IComp<Edge> {
         }
     }
 }
+
+class MoveVertex {
+    Vertex check;
+    boolean hasMove;
+    String dir;
+    MoveVertex(Vertex v, String s) {
+        this.check = v;
+        hasMove = false;
+    }
+    // if there is a possible Vertex to move to, returns that otherwise, removes 
+    // the check Vertex
+    // EFFECTS: updates this objects check, and hasMove fields 
+    Vertex move() {
+        Vertex result = this.check;
+        for (Edge e: this.check.edges) {
+            HasVertex hV = new HasVertex(e, this.check, this.dir);
+            if (hV.hasVert) {
+                result = hV.findVert();
+                this.hasMove = true;
+            }
+        }
+        return result;
+    }
+}
+
+class HasVertex {
+    Edge container;
+    Vertex check;
+    boolean hasVert;
+    String dir;
+    HasVertex(Edge e, Vertex v, String s) {
+        this.check = v;
+        hasVert = false;
+        this.check = this.findVert();
+    }
+    // checks to see if two Posn's are equal
+    boolean equalPosn(Posn p1, Posn p2) {
+        return p1.x == p2.x && p1.y == p2.y;
+    }
+    // checks if this vertex has a connecting vertex in the given direction
+    // EFFECTS: updates this objects check, and hasVert fields 
+    Vertex findVert() {
+        Vertex from = this.container.from;
+        Vertex to = this.container.to;
+        int pX = this.check.posn.x;
+        int pY = this.check.posn.y;
+        Posn comp = this.check.posn;
+        // picks the correct posn
+        if (dir.equals("up")) {
+            comp = new Posn(pX, pY - 1);
+        }
+        else if (dir.equals("down")) {
+            comp = new Posn(pX, pY + 1);
+        }
+        else if (dir.equals("left")) {
+            comp = new Posn(pX - 1, pY);
+        }
+        else if (dir.equals("right")) {
+            comp = new Posn(pX + 1, pY);
+        }
+        else {
+            throw new IllegalArgumentException("dir is not a direction");
+        }
+        // does the check
+        if (equalPosn(from.posn, comp)) {
+            this.hasVert = true;
+            return container.from; 
+        }
+        else if (equalPosn(to.posn, new Posn(pX, pY - 1))) {
+            this.hasVert = true;
+            return to; 
+        }
+        else {
+            return check;
+        }
+    }
+}
+
 //represents a Cell Tertiary Tree
 interface ITST<T> {
     // inserts the given item into this tree
@@ -730,93 +802,6 @@ class Vertex {
 
 }
 
-class MoveVertex {
-    Vertex check;
-    boolean hasMove;
-    Vertex newSearchHead;
-    String dir;
-    MoveVertex(Vertex v, String s) {
-        this.check = v;
-        hasMove = false;
-        newSearchHead = v;
-    }
-    // checks if this vertex has a connecting vertex in the given direction
-    boolean canMove() {
-        if (dir.equals("up")) {
-            return true;
-        }
-        else if (dir.equals("down")) {
-            return true;
-        }
-        else if (dir.equals("left")) {
-            return true;
-        }
-        else if (dir.equals("right")) {
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-    // returns the new SearchHead after moving
-    // EFFECTS: sets the check Vertex's hasSearchHead field to false
-    Vertex moveDir() {
-        if 
-    }
-}
-
-class hasVertex {
-    Edge container;
-    Vertex check;
-    boolean hasVert;
-    String dir;
-    hasVertex(Edge e, Vertex v, String s) {
-        this.check = v;
-        hasVert = false;
-    }
-    // checks to see if two Posn's are equal
-    boolean equalPosn(Posn p1, Posn p2) {
-        return p1.x == p2.x && p1.y == p2.y;
-    }
-    // checks if this vertex has a connecting vertex in the given direction
-    Vertex findVert() {
-        Vertex from = this.container.from;
-        Vertex to = this.container.to;
-        int pX = this.check.posn.x;
-        int pY = this.check.posn.y;
-        Posn comp = this.check.posn;
-        if (dir.equals("up")) {
-            comp = new Posn(pX, pY - 1);
-        }
-        else if (dir.equals("down")) {
-            comp = new Posn(pX, pY + 1);
-        }
-        else if (dir.equals("left")) {
-            comp = new Posn(pX - 1, pY);
-        }
-        else if (dir.equals("right")) {
-            comp = new Posn(pX + 1, pY);
-        }
-        
-        if (equalPosn(from.posn, comp)) {
-            this.hasVert = true;
-            return container.from; 
-        }
-        else if (equalPosn(to.posn, new Posn(pX, pY - 1))) {
-            this.hasVert = true;
-            return to; 
-        }
-        else {
-            return false;
-        }
-    }
-    // returns the new SearchHead after moving
-    // EFFECTS: sets the check Vertex's hasSearchHead field to false
-    Vertex moveDir() {
-        if 
-    }
-}
-
 //represents an edge of the maze graph
 class Edge {
     Vertex from;
@@ -912,9 +897,16 @@ class MazeWorld extends World {
 
     // gives a Vertex a SearchHead
     // EFFECTS: Updates the hasSearchHead Field of the vertex
-    Vertex addSearchHead(Vertex v) {
+    void addSearchHeadToFront(Vertex v) {
         v.hasSearchHead = true;
-        return v;
+        this.searchHeads = this.searchHeads.addToFront(v);
+
+    }
+    // gives a Vertex a SearchHead
+    // EFFECTS: Updates the hasSearchHead Field of the vertex
+    void addSearchHeadToBack(Vertex v) {
+        v.hasSearchHead = true;
+        this.searchHeads = this.searchHeads.addToBack(v);
     }
     // removes a SearchHead from a Vertex
     // EFFECTS: Updates the hasSearchHead Field of the vertex
@@ -963,7 +955,7 @@ class MazeWorld extends World {
         if (result.size() > 0) {
             result.get(0).get(0).startVert = true;
             result.get(this.gameSizeX - 1).get(this.gameSizeY - 1).endVert = true;
-            this.addSearchHead(result.get(0).get(0));
+            this.addSearchHeadToFront(result.get(0).get(0));
         }
         return result;
 
@@ -1050,9 +1042,11 @@ class MazeWorld extends World {
     // manually moves the SearchHead in a direction
     void moveSearchHead(String s) {
         Cons<Vertex> searchAsCons = (Cons<Vertex>)this.searchHeads;
-        if ((s.equals("up") || s.equals("down") || s.equals("left") || s.equals("right")) 
-                && searchAsCons.first.canMove(s)) {
-            this.searchHeads = new Cons<Vertex>(searchAsCons.first.moveDir(s), new Mt<Vertex>()); 
+        if (s.equals("up") || s.equals("down") || s.equals("left") || s.equals("right")) {
+            MoveVertex moveVertex = new MoveVertex(searchAsCons.first, s); 
+            if (moveVertex.hasMove) {
+                this.searchHeads = new Cons<Vertex>(moveVertex.move(), new Mt<Vertex>());
+            }
         }
     }
 
@@ -1106,6 +1100,9 @@ class MazeWorld extends World {
         else if (s.equals("b") && !(this.gameMode == 2)) {
             this.gameMode = 2;
         } 
+       // else if (this.gameMode == 0) {
+            //this.moveSearchHead(s);
+       // }
     }
     public void onTick() {
         if (this.searchHeads.length() > 0 && !this.searchComplete()) {
@@ -1114,7 +1111,7 @@ class MazeWorld extends World {
             if (this.gameMode == 1) {
                 for (Vertex origV: sH) {
                     for (Vertex newV: origV.search()) {
-                        searchHeads = searchHeads.addToFront(this.addSearchHead(newV));
+                        this.addSearchHeadToFront(newV);
                     }
                     this.removeSearchHead(origV);
                 }
@@ -1123,7 +1120,7 @@ class MazeWorld extends World {
             if (this.gameMode == 2) {
                 for (Vertex origV: sH) {
                     for (Vertex newV: origV.search()) {
-                        searchHeads = searchHeads.addToBack(this.addSearchHead(newV));
+                        this.addSearchHeadToBack(newV);
                     }
                     this.removeSearchHead(origV);
                 }
@@ -2048,7 +2045,7 @@ class ExamplesMaze {
     void testRunMaze(Tester t) {
         //MazeWorld maze100x60Edge = new MazeWorld(100, 60);
         //maze100x60Edge.gameMode = 3;
-        //MazeWorld maze100x60Wall = new MazeWorld(100, 60);
+        MazeWorld maze100x60Wall = new MazeWorld(100, 60);
         /* t.checkExpect(maze2.board.length(), 3);
         t.checkExpect(this.maze0.board.length(), 0);
         t.checkExpect(this.maze2.board.length(), 3);
@@ -2056,7 +2053,8 @@ class ExamplesMaze {
         t.checkExpect(maze100x60Edge.board.length(), 5999); */
 
         //maze100x60Edge.bigBang(1000, 600);
-        //maze100x60Wall.bigBang(1000, 600);
+        maze100x60Wall.bigBang(1000, 600);
+        t.checkExpect(maze100x60Wall.searchHeads.length(), 1);
 
     }
 }
