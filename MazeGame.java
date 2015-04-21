@@ -813,9 +813,9 @@ class MazeWorld extends World {
         IList<Edge> b = this.vertexToEdge(blankCells);
         // Perform the algorithm
         UnionFind kruskel = new UnionFind(blankCells, b);
-        this.board = b;
-        //this.board = kruskel.kruskel();
-        //this.unUsed = kruskel.unUsed;
+        //this.board = b;
+        this.board = kruskel.kruskel();
+        this.unUsed = kruskel.unUsed;
 
     }
 
@@ -954,54 +954,10 @@ class MazeWorld extends World {
 
             }
         }
+
         return edges;
+
     }
-    //Do two elements in the Union/Find hashmap have the same value?
-    // i.e. Will the connection create a cycle in the tree?
-    boolean cycle(HashMap<String, String> uf, String v1, String v2) {
-        return uf.get(v1).equals(uf.get(v2));
-    }
-
-    /*  // Implement Union/Find data structure while applying
-  // Kruskel's algorithm.
-  // EFFECT: mutates the edge lists in each Vertex in the given ArrayList
-  IList<Edge> kruskel(IList<Edge> grid) {
-      IList<Edge> blackList = new Mt<Edge>();
-      IList<Edge> finalList = new Mt<Edge>();
-      String toFind1;
-      String toFind2;
-
-      for(Edge e: grid) {
-
-          // Convert both vectors' positions into strings
-          toFind1 = e.from.getX().toString() + "-" + e.from.getY().toString();
-          toFind2 = e.to.getX().toString() + "-" + e.to.getY().toString();
-
-          // If this next connection will create a cycle, discard it
-          // i.e. don't include it in the final list
-          if (this.cycle(representatives, toFind1, toFind2)) {
-
-              blackList = blackList.addToFront(e);
-
-          }
-          // Otherwise, add it to the final list and adjust the hashmap.
-          // Adjusting the hashmap would mean changing the value associated
-          // with the key toFind2 to that of the key toFind1.
-          else {
-
-              finalList.addToBack(e);
-              representatives.put(toFind2, representatives.get(toFind1));
-
-          }
-
-      }
-
-      // Save the unused edge list for rendering purposes
-      this.unUsed = blackList;
-
-      // Returns the list of actual edges.
-      return finalList;
-  }*/
     // Draws the World
     public WorldImage makeImage() {
         IComp<Edge> ranE = new RandEdge(); 
@@ -1072,12 +1028,12 @@ class MazeWorld extends World {
 
 
 class UnionFind {
-    HashMap<Posn, Posn> reps;
+    HashMap<Vertex, Vertex> reps;
     ArrayList<ArrayList<Vertex>> vertList;
     IList<Edge> edgeList;
     IList<Edge> unUsed;
     UnionFind(ArrayList<ArrayList<Vertex>> vertList, IList<Edge> edgeList) {
-        this.reps = new HashMap<Posn, Posn>();
+        this.reps = new HashMap<Vertex, Vertex>();
         this.vertList = vertList;
         this.edgeList = edgeList;
         this.unUsed = new Mt<Edge>();
@@ -1087,36 +1043,40 @@ class UnionFind {
     }
     // determines if two Posns are equal
     boolean equalPosn(Posn p1, Posn p2) {
-        return p1.x == p2.x && p1.y == p2.y;
+        return (p1.x == p2.x) && (p1.y == p2.y);
     }
     // initializes the representatives of a list of Vertices
     void initializeHashMap() {
         for(ArrayList<Vertex> aV: vertList) {
             for(Vertex v: aV) {
-                reps.put(v.posn, v.posn);
+                reps.put(v, v);
             }
         }
     }
     // find this Posn key's data
-    Posn find(Posn p) {
-        if (this.equalPosn(reps.get(p), p)) {
-            return p;
+    Vertex find(Vertex v) {
+        if (reps.get(v) == v) {
+            return v;
         }
         else {
-            return find(new Posn(reps.get(p).x, reps.get(p).y));
+            return find(this.reps.get(v));
         }
     }
     // union
-    void union(Posn p1, Posn p2) {
-        this.reps.put(this.find(p1), this.find(p2));
+    void union(Vertex v1, Vertex v2) {
+        this.reps.put(this.find(v1), this.find(v2));
+    }
+    // Checks for a cycle
+    boolean formsCycle(Vertex v1, Vertex v2) {
+        return this.find(v1) == this.find(v2);
     }
     // Perform Kruskels algorithms on the list of edges
     IList<Edge> kruskel() {
         IList<Edge> result = new Mt<Edge>();
         for (Edge e: this.edgeList) {
-            if (!this.equalPosn(find(e.from.posn), find(e.to.posn))) {
+            if (!this.formsCycle(e.from, e.to)) {
                 result = result.addToFront(e);
-                this.union(e.from.posn, e.to.posn);
+                this.union(e.from, e.to);
             }
             else {
                 this.unUsed = this.unUsed.addToFront(e);
@@ -1126,7 +1086,7 @@ class UnionFind {
     }
 }
 
-// examples and tests for the MazeWorld
+//examples and tests for the MazeWorld
 class ExamplesMaze {
 
     Vertex A;
@@ -1518,14 +1478,14 @@ class ExamplesMaze {
     // tests tree2List for the IList interface
     void testTree2(Tester t) {
         /*MazeWorld maze100x60Edge = new MazeWorld(60, 60); TODO uncomment 
-    t.checkExpect(this.bot6.tree2List(), this.sortedL);
-    ITST<Edge> tree1 = maze100x60Edge.board.list2Tree(new RandEdge());
-    Cons<Edge> lister1 = (Cons<Edge>) tree1.tree2List();
-    t.checkExpect(lister1.first.from.x, lister1.first.from.x);
-    t.checkExpect(lister1.first.from.y, lister1.first.from.y);
-    t.checkExpect(lister1.first.to.x, lister1.first.to.x);
-    t.checkExpect(lister1.first.to.y, lister1.first.to.y);
-    t.checkExpect(this.bot6.tree2List(), this.sortedL);*/
+   t.checkExpect(this.bot6.tree2List(), this.sortedL);
+   ITST<Edge> tree1 = maze100x60Edge.board.list2Tree(new RandEdge());
+   Cons<Edge> lister1 = (Cons<Edge>) tree1.tree2List();
+   t.checkExpect(lister1.first.from.x, lister1.first.from.x);
+   t.checkExpect(lister1.first.from.y, lister1.first.from.y);
+   t.checkExpect(lister1.first.to.x, lister1.first.to.x);
+   t.checkExpect(lister1.first.to.y, lister1.first.to.y);
+   t.checkExpect(this.bot6.tree2List(), this.sortedL);*/
     }
     // tests apply for the function ToString
     void testToString(Tester t) {
@@ -1567,9 +1527,14 @@ class ExamplesMaze {
         t.checkException(new RuntimeException("Do not use this method, please"), iI2, "remove");
         t.checkException(new RuntimeException("Do not use this method, please"), iI, "remove");
     }
-    // tests iterator for the IList interface TODO
+    // tests iterator for the IList interface 
     void testIterator(Tester t) {
-
+        IList<Integer> mTTT = new Mt<Integer>();
+        IList<Integer> non = new Cons<Integer>(2, new Cons<Integer>(3, mTTT));
+        IListIterator<Integer> iII = new IListIterator<Integer>(mTTT);
+        IListIterator<Integer> iIII = new IListIterator<Integer>(non);
+        t.checkExpect(mTTT.iterator(), iII);
+        t.checkExpect(non.iterator(), iIII);
     }
     // tests the CompEdge Comparator TODO
     void testCompEdge(Tester t) {
@@ -1791,91 +1756,91 @@ class ExamplesMaze {
         }
 
         t.checkExpect(maze0.iListToArr(testList), answer);
-    } 
-    /*// tests Cycle for the class MazeWorld TODO
-    void testCycle(Tester t) {
-
-        HashMap<String, String> uf = new HashMap<String, String>();
-        uf.put("0-0", "0-0");
-        uf.put("1-0", "1-0");
-        uf.put("2-0", "2-0");
-        uf.put("0-1", "0-1");
-        uf.put("1-1", "1-1");
-        uf.put("2-1", "2-1");
-
-        t.checkExpect(maze0.cycle(uf, "0-0", "1-0"), false);
-
-        uf.put("1-0", "0-0");
-
-        t.checkExpect(maze0.cycle(uf, "1-0", "0-0"), true);
-
-        uf.put("2-0", "1-0");
-
-        t.checkExpect(maze0.cycle(uf, "2-0", "0-0"), false);
-
-        uf.put("2-0", "0-0");
-
-        t.checkExpect(maze0.cycle(uf, "2-0", "0-0"), true);
-
     }
-    // tests Kruskel for the class MazeWorld TODO
-    void testKruskel(Tester t) {
+    /* // tests Cycle for the class MazeWorld
+ void testCycle(Tester t) {
 
-        Vertex A = new Vertex(0, 0);
-        Vertex B = new Vertex(1, 0);
-        Vertex C = new Vertex(2, 0);
-        Vertex D = new Vertex(0, 1);
-        Vertex E = new Vertex(1, 1);
-        Vertex F = new Vertex(2, 1);
+     HashMap<String, String> uf = new HashMap<String, String>();
+     uf.put("0-0", "0-0");
+     uf.put("1-0", "1-0");
+     uf.put("2-0", "2-0");
+     uf.put("0-1", "0-1");
+     uf.put("1-1", "1-1");
+     uf.put("2-1", "2-1");
 
-        Edge ec = new Edge(E, C, 15);
-        Edge cd = new Edge(C, D, 25);
-        Edge ab = new Edge(A, B, 30);
-        Edge be = new Edge(B, E, 35);
-        Edge bc = new Edge(B, C, 40);
-        Edge fd = new Edge(F, D, 50);
-        Edge ae = new Edge(A, E, 50);
-        Edge bf = new Edge(B, F, 50);
+     t.checkExpect(maze0.cycle(uf, "0-0", "1-0"), false);
 
-        A.edges = new Cons<Edge>(ab, new Mt<Edge>());
-        B.edges = new Cons<Edge>(ab, new Cons<Edge>(be,
-                new Cons<Edge>(bc, new Cons<Edge>(bf,
-                        new Mt<Edge>()))));
-        C.edges = new Cons<Edge>(ec, new Cons<Edge>(cd,
-                new Cons<Edge>(bc, new Mt<Edge>())));
-        D.edges = new Cons<Edge>(cd, new Cons<Edge>(fd,
-                new Mt<Edge>()));
-        E.edges = new Cons<Edge>(ec, new Cons<Edge>(be,
-                new Cons<Edge>(ae, new Mt<Edge>())));
-        F.edges = new Cons<Edge>(fd, new Cons<Edge>(bf,
-                new Mt<Edge>()));
+     uf.put("1-0", "0-0");
 
-        IList<Edge> edgeList = new Mt<Edge>();
-        edgeList = edgeList.addToBack(ec);
-        edgeList = edgeList.addToBack(cd);
-        edgeList = edgeList.addToBack(ab);
-        edgeList = edgeList.addToBack(be);
-        edgeList = edgeList.addToBack(bc);
-        edgeList = edgeList.addToBack(fd);
-        edgeList = edgeList.addToBack(ae);
-        edgeList = edgeList.addToBack(bf);
+     t.checkExpect(maze0.cycle(uf, "1-0", "0-0"), true);
 
-        HashMap<String, String> uf = new HashMap<String, String>();
-        uf.put("0-0", "0-0");
-        uf.put("1-0", "1-0");
-        uf.put("2-0", "2-0");
-        uf.put("0-1", "0-1");
-        uf.put("1-1", "1-1");
-        uf.put("2-1", "2-1");
+     uf.put("2-0", "1-0");
 
-        IList<Edge> answer = new Cons<Edge>(ec, new Cons<Edge>(cd,
-                new Cons<Edge>(ab, new Cons<Edge>(be, new Cons<Edge>(bc,
-                        new Cons<Edge>(fd, new Cons<Edge>(ae, new Cons<Edge>(
-                                bf, new Mt<Edge>()))))))));
+     t.checkExpect(maze0.cycle(uf, "2-0", "0-0"), false);
 
-        //t.checkExpect(maze0.kruskel(edgeList), answer);
+     uf.put("2-0", "0-0");
 
-    }*/
+     t.checkExpect(maze0.cycle(uf, "2-0", "0-0"), true);
+
+ }
+ // tests Kruskel for the class MazeWorld TODO
+ void testKruskel(Tester t) {
+
+     Vertex A = new Vertex(0, 0);
+     Vertex B = new Vertex(1, 0);
+     Vertex C = new Vertex(2, 0);
+     Vertex D = new Vertex(0, 1);
+     Vertex E = new Vertex(1, 1);
+     Vertex F = new Vertex(2, 1);
+
+     Edge ec = new Edge(E, C, 15);
+     Edge cd = new Edge(C, D, 25);
+     Edge ab = new Edge(A, B, 30);
+     Edge be = new Edge(B, E, 35);
+     Edge bc = new Edge(B, C, 40);
+     Edge fd = new Edge(F, D, 50);
+     Edge ae = new Edge(A, E, 50);
+     Edge bf = new Edge(B, F, 50);
+
+     A.edges = new Cons<Edge>(ab, new Mt<Edge>());
+     B.edges = new Cons<Edge>(ab, new Cons<Edge>(be,
+             new Cons<Edge>(bc, new Cons<Edge>(bf,
+                     new Mt<Edge>()))));
+     C.edges = new Cons<Edge>(ec, new Cons<Edge>(cd,
+             new Cons<Edge>(bc, new Mt<Edge>())));
+     D.edges = new Cons<Edge>(cd, new Cons<Edge>(fd,
+             new Mt<Edge>()));
+     E.edges = new Cons<Edge>(ec, new Cons<Edge>(be,
+             new Cons<Edge>(ae, new Mt<Edge>())));
+     F.edges = new Cons<Edge>(fd, new Cons<Edge>(bf,
+             new Mt<Edge>()));
+
+     IList<Edge> edgeList = new Mt<Edge>();
+     edgeList = edgeList.addToBack(ec);
+     edgeList = edgeList.addToBack(cd);
+     edgeList = edgeList.addToBack(ab);
+     edgeList = edgeList.addToBack(be);
+     edgeList = edgeList.addToBack(bc);
+     edgeList = edgeList.addToBack(fd);
+     edgeList = edgeList.addToBack(ae);
+     edgeList = edgeList.addToBack(bf);
+
+     HashMap<String, String> uf = new HashMap<String, String>();
+     uf.put("0-0", "0-0");
+     uf.put("1-0", "1-0");
+     uf.put("2-0", "2-0");
+     uf.put("0-1", "0-1");
+     uf.put("1-1", "1-1");
+     uf.put("2-1", "2-1");
+
+     IList<Edge> answer = new Cons<Edge>(ec, new Cons<Edge>(cd,
+             new Cons<Edge>(ab, new Cons<Edge>(be, new Cons<Edge>(bc,
+                     new Cons<Edge>(fd, new Cons<Edge>(ae, new Cons<Edge>(
+                             bf, new Mt<Edge>()))))))));
+
+     //t.checkExpect(maze0.kruskel(edgeList), answer);
+
+ }*/
 
     // tests makeImage for the MazeWorld class TODO
     void testMakeImage(Tester t) {
@@ -1893,19 +1858,78 @@ class ExamplesMaze {
     void testSearchComplete(Tester t) {
 
     }
+    // tests equalPosn for the class UnionFind
+    void testEqualPosn(Tester t) {
+        Posn p1 = new Posn(0, 0);
+        Posn p2 = new Posn(0, 0);
+        Posn p3 = new Posn(0, 1);
+        Posn p4 = new Posn(1, 0);
+        Posn p5 = new Posn(1, 1);
+        UnionFind uF = new UnionFind(new ArrayList<ArrayList<Vertex>>(), new Mt<Edge>());
+        t.checkExpect(uF.equalPosn(p1, p2), true);
+        t.checkExpect(uF.equalPosn(p3, p3), true);
+        t.checkExpect(uF.equalPosn(p1, p3), false);
+        t.checkExpect(uF.equalPosn(p3, p5), false);
+        t.checkExpect(uF.equalPosn(p4, p5), false);
+        t.checkExpect(uF.equalPosn(p5, p5), true);
+    }
+    // tests find for the class UnionFind TODO
+    /* void testFind(Tester t) {
+     UnionFind uF = new UnionFind(new ArrayList<ArrayList<Vertex>>(), new Mt<Edge>());
+     HashMap<Posn, Posn> hash = uF.reps;
+     Posn p2 = new Posn(0, 0);
+     hash.put(p2, new Posn(0, 0));
+     hash.put(new Posn(1, 0), new Posn(1, 0));
+     hash.put(new Posn(2, 0), new Posn(0, 1));
+     hash.put(new Posn(0, 1), new Posn(1, 1));
+     hash.put(new Posn(1, 1), new Posn(1, 1));
+     hash.put(new Posn(2, 1), new Posn(2, 1));
+     t.checkExpect(hash.get(p2), new Posn(0, 0));
+     //t.checkExpect(uF.find(new Posn(0, 0)), new Posn(0, 0));
+ }*/
+    // tests union for the class UnionFind TODO
+    void testUnion(Tester t) {
+
+    }
+    // tests formsCycle for the class UnionFind TODO
+    /*void testformsCycle(Tester t) {
+     UnionFind uF = new UnionFind(new ArrayList<ArrayList<Vertex>>(), new Mt<Edge>());
+     HashMap<Posn, Posn> uf = new HashMap<Posn, Posn>();
+     uf.put(new Posn(0, 0), new Posn(0, 0));
+     uf.put(new Posn(1, 0), new Posn(1, 0));
+     uf.put(new Posn(2, 0), new Posn(2, 0));
+     uf.put(new Posn(0, 1), new Posn(0, 1));
+     uf.put(new Posn(1, 1), new Posn(1, 1));
+     uf.put(new Posn(2, 1), new Posn(2, 1));
+     uF.reps = uf;
+
+     //t.checkExpect(uF.formsCycle(new Posn(0, 0), new Posn(1, 0)), false);
+
+     uF.reps.put(new Posn(1, 0), new Posn(0, 0));
+
+     //t.checkExpect(uF.formsCycle(new Posn(1, 0), new Posn(0, 0)), true);
+
+     uF.reps.put(new Posn(2, 0), new Posn(1, 0));
+
+     //t.checkExpect(uF.formsCycle(new Posn(2, 0), new Posn(0, 0)), false);
+
+     uF.reps.put(new Posn(2, 0), new Posn(0, 0));
+
+    // t.checkExpect(uF.formsCycle(new Posn(2, 0), new Posn(0, 0)), true);
+ }*/
     // runs the animation
     void testRunMaze(Tester t) {
-        //MazeWorld maze100x60Edge = new MazeWorld(100, 60);
-        //maze100x60Edge.gameMode = 3;
-        //MazeWorld maze100x60Wall = new MazeWorld(100, 60);
+        MazeWorld maze100x60Edge = new MazeWorld(100, 60);
+        maze100x60Edge.gameMode = 3;
+        MazeWorld maze100x60Wall = new MazeWorld(100, 60);
         //t.checkExpect(maze2.board.length(), 4);
         //t.checkExpect(this.maze0.board.length(), 0);
         //t.checkExpect(this.maze2.board.length(), 4);
         //t.checkExpect(this.maze3.board.length(), 12);
         //t.checkExpect(maze100x60Edge.board.length(), 11840);
 
-        // maze100x60Edge.bigBang(1000, 600);
-        // maze100x60Wall.bigBang(1000, 600);
+        maze100x60Edge.bigBang(1000, 600);
+        maze100x60Wall.bigBang(1000, 600);
 
     }
 }
