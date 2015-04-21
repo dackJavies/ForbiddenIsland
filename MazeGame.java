@@ -1994,17 +1994,53 @@ class ExamplesMaze {
     void testMakeImage(Tester t) {
 
     }
-    // tests onKeyEvent for the MazeWorld class TODO
+    // tests onKeyEvent for the MazeWorld class
     void testOnKeyEvent(Tester t) {
-
+        
+        MazeWorld testMaze = new MazeWorld(0, 0);
+        
+        testMaze.onKeyEvent("r");
+        t.checkExpect(testMaze, new MazeWorld(0, 0));
+        
+        testMaze.onKeyEvent("m");
+        t.checkExpect(testMaze.gameMode == 0);
+        
+        testMaze.onKeyEvent("e");
+        t.checkExpect(testMaze.gameMode == 3);
+        
+        testMaze.onKeyEvent("d");
+        t.checkExpect(testMaze.gameMode == 1);
+        
+        testMaze.onKeyEvent("b");
+        t.checkExpect(testMaze.gameMode == 2);
+        
     }
     // tests onTick for the MazeWorld class TODO
     void testOnTick(Tester t) {
 
     }
-    // tests searchComplete for the MazeWorld class TODO
+    // tests searchComplete for the MazeWorld class 
     void testSearchComplete(Tester t) {
-
+        
+        MazeWorld testMaze = new MazeWorld(0, 0);
+        
+        Vertex v = new Vertex(0, 0);
+        v.endVert = true;
+        
+        IList<Vertex> searchHead = new Cons<Vertex>(v, new Mt<Vertex>());
+        testMaze.searchHeads = searchHead;
+        
+        t.checkExpect(testMaze.searchComplete(), true);
+        
+        testMaze.searchHeads = new Mt<Vertex>();
+        t.checkExpect(testMaze.searchComplete(), false);
+        
+        Vertex v2 = new Vertex(1, 1);
+        searchHead = new Cons<Vertex>(v2, new Mt<Vertex>());
+        testMaze.searchHeads = searchHead;
+        
+        t.checkExpect(testMaze.searchComplete(), false);
+        
     }
     // tests find for the class UnionFind TODO
     void testFind(Tester t) {
