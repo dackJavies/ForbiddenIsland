@@ -1757,33 +1757,7 @@ class ExamplesMaze {
 
         t.checkExpect(maze0.iListToArr(testList), answer);
     }
-    /* // tests Cycle for the class MazeWorld
- void testCycle(Tester t) {
-
-     HashMap<String, String> uf = new HashMap<String, String>();
-     uf.put("0-0", "0-0");
-     uf.put("1-0", "1-0");
-     uf.put("2-0", "2-0");
-     uf.put("0-1", "0-1");
-     uf.put("1-1", "1-1");
-     uf.put("2-1", "2-1");
-
-     t.checkExpect(maze0.cycle(uf, "0-0", "1-0"), false);
-
-     uf.put("1-0", "0-0");
-
-     t.checkExpect(maze0.cycle(uf, "1-0", "0-0"), true);
-
-     uf.put("2-0", "1-0");
-
-     t.checkExpect(maze0.cycle(uf, "2-0", "0-0"), false);
-
-     uf.put("2-0", "0-0");
-
-     t.checkExpect(maze0.cycle(uf, "2-0", "0-0"), true);
-
- }
- // tests Kruskel for the class MazeWorld TODO
+    /*// tests Kruskel for the class MazeWorld TODO
  void testKruskel(Tester t) {
 
      Vertex A = new Vertex(0, 0);
