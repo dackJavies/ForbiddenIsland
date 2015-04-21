@@ -798,38 +798,13 @@ class hasVertex {
             comp = new Posn(pX + 1, pY);
         }
         
-        if (dir.equals("up")) {
-            
+        if (equalPosn(from.posn, comp)) {
+            this.hasVert = true;
+            return container.from; 
         }
-        else if (dir.equals("down")) {
-            if (equalPosn(from.posn, new Posn(pX, pY + 1))) {
-                this.hasVert = true;
-                return from; 
-            }
-            else if (equalPosn(to.posn, new Posn(pX, pY + 1))) {
-                this.hasVert = true;
-                return to; 
-            }
-        }
-        else if (dir.equals("left")) {
-            if (equalPosn(from.posn, new Posn(pX - 1, pY))) {
-                this.hasVert = true;
-                return from; 
-            }
-            else if (equalPosn(to.posn, new Posn(pX - 1, pY))) {
-                this.hasVert = true;
-                return to; 
-            }
-        }
-        else if (dir.equals("right")) {
-            if (equalPosn(from.posn, new Posn(pX + 1, pY))) {
-                this.hasVert = true;
-                return from; 
-            }
-            else if (equalPosn(to.posn, new Posn(pX + 1, pY))) {
-                this.hasVert = true;
-                return to; 
-            }
+        else if (equalPosn(to.posn, new Posn(pX, pY - 1))) {
+            this.hasVert = true;
+            return to; 
         }
         else {
             return false;
