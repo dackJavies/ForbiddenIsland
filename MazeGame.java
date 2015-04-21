@@ -488,10 +488,10 @@ class IListIterator<T> implements Iterator<T> {
 
 //this represents a comparator
 interface IComp<T> {
-  // == 0 : t1 == t2
-  // < 0: t1 < t2
-  // > 0: t1 > t2
-  int compare(T t1, T t2);
+    //== 0 : t1 == t2
+    //< 0: t1 < t2
+    //> 0: t1 > t2
+    int compare(T t1, T t2);
 }
 
 //this compares two Edges randomly
@@ -563,14 +563,10 @@ class CompEdge implements IComp<Edge> {
 interface ITST<T> {
     // inserts the given item into this tree
     ITST<T> insert(IComp<T> comp, T t);
-    // determines whether this is a leaf
-    boolean isLeaf();
     // accepts a visitor 
     <R> R accept(IVisitor<T, R> v);
     // converts this tree into an IList
     IList<T> tree2List();
-    // Is this ITST a Node?
-    boolean isNode();
 }
 
 //represents a known Cell Tertiary Tree
@@ -597,10 +593,6 @@ class TTNode<T> implements ITST<T> {
             return new TTNode<T>(this.data, this.left, this.middle.insert(comp, t), this.right);
         }
     }
-    // determines whether this is a leaf
-    public boolean isLeaf() {
-        return false;
-    }
     // accepts the given visitor
     public <R> R accept(IVisitor<T, R> v) {
         return v.visit(this);
@@ -610,7 +602,6 @@ class TTNode<T> implements ITST<T> {
         return this.left.tree2List().append(this.middle.tree2List()).append(
                 this.right.tree2List().addToFront(this.data)); 
     }
-    public boolean isNode() { return true; }
 }
 
 //represents an empty Binary Tree
@@ -618,10 +609,6 @@ class Leaf<T> implements ITST<T> {
     // inserts an item into this tree according to the given comparator
     public ITST<T> insert(IComp<T> comp, T t) {
         return new TTNode<T>(t, this, this, this);        
-    }
-    // determines whether this is a leaf
-    public boolean isLeaf() {
-        return true;
     }
     // accepts the given visitor
     public <R> R accept(IVisitor<T, R> v) {
@@ -631,7 +618,6 @@ class Leaf<T> implements ITST<T> {
     public IList<T> tree2List() {
         return new Mt<T>();
     }
-    public boolean isNode() { return false; }
 }
 
 //represents a maze cell
@@ -665,7 +651,7 @@ class Vertex {
         this.edges = this.edges.addToBack(toAdd);
         other.edges = other.edges.addToBack(toAdd);
     }
-   // displays the maze cell
+    // displays the maze cell
     WorldImage displayCell() {
         int sideLength = 10;
         int posnShift = 5;
@@ -692,44 +678,44 @@ class Vertex {
         this.wasSearched = true;
 
         IList<Vertex> result = new Mt<Vertex>();
-            
+
         for(Edge e: this.edges) {
-            
+
             if (e.from != this && !e.from.wasSearched) {
                 result = result.addToBack(e.from);
             }
-            
+
             if (e.to != this && !e.to.wasSearched) {
                 result = result.addToBack(e.to);
             }
-            
+
         }
         return result;
     }
-    
+
     // Search through the tree using the Depth-First algorithm
     // This method is called every tick, and therefore only advances
     // the search by one increment per call.
     /*IList<Vertex> depthFirstSearch() {
-        
-        this.wasSearched = true;
-        IList<Vertex> result = new Mt<Vertex>();
-        
-        for(Edge e: this.edges) {
-            
-            if (e.from != this && !e.from.wasSearched) {
-                result = result.addToBack(e.from);
-            }
-            
-            if (e.to != this && !e.to.wasSearched) {
-                result = result.addToBack(e.to);
-            }
-            
+
+    this.wasSearched = true;
+    IList<Vertex> result = new Mt<Vertex>();
+
+    for(Edge e: this.edges) {
+
+        if (e.from != this && !e.from.wasSearched) {
+            result = result.addToBack(e.from);
         }
-        return result;
-        
-    }*/
-    
+
+        if (e.to != this && !e.to.wasSearched) {
+            result = result.addToBack(e.to);
+        }
+
+    }
+    return result;
+
+}*/
+
 }
 
 //represents an edge of the maze graph
@@ -822,9 +808,11 @@ class MazeWorld extends World {
         // Sort the IList in preparation for Kruskel's algorithm
         IList<Edge> b2 = b.sort(new CompEdge());
         // Perform the algorithm
-        this.board = this.kruskel(b2);
+        this.board = b;
+        //this.board = this.kruskel(b2);
+
     }
-    
+
     // gives a Vertex a SearchHead
     // EFFECTS: Updates the hasSearchHead Field of the vertex
     Vertex addSearchHead(Vertex v) {
@@ -1086,30 +1074,30 @@ class MazeWorld extends World {
             }
         }
     }
-    
+
     // Is one of the search heads at the end?
     boolean searchComplete() {
-        
+
         for(Vertex v: this.searchHeads) {
             if (v.endVert) { return true; }
         }
-        
+
         return false;
-        
+
     }
-    
+
 }
 
 //examples and tests for the MazeWorld
 class ExamplesMaze {
-    
+
     Vertex A;
     Vertex B;
     Vertex C;
     Vertex D;
     Vertex E;
     Vertex F;
-    
+
     Edge ec;
     Edge cd;
     Edge ab;
@@ -1118,7 +1106,7 @@ class ExamplesMaze {
     Edge fd;
     Edge ae;
     Edge bf;
-    
+
     MazeWorld maze0 = new MazeWorld(0, 0);
     MazeWorld maze5 = new MazeWorld(5, 5);
     MazeWorld maze3 = new MazeWorld(3, 3);
@@ -1437,12 +1425,6 @@ class ExamplesMaze {
         t.checkExpect(this.mTI.isEmpty(), true);
         t.checkExpect(this.listI1.isEmpty(), false);
     }
-    // tests apply for the function ToString
-    void testToString(Tester t) {
-
-        t.checkExpect(tS.apply(2), "2");
-        t.checkExpect(tS.apply(-3), "-3");
-    }
     // tests map
     void testMap(Tester t) {
         t.checkExpect(listI1.map(tS), new Cons<String>("1",
@@ -1450,11 +1432,198 @@ class ExamplesMaze {
                         new Cons<String>("4", new Mt<String>())))));
         t.checkExpect(mTI.map(tS), new Mt<String>());
     }
-    // tests createGrid for the class MazeWorld
-    void testCreateGrid(Tester t) {
-        this.initialize();
-        t.checkExpect(maze5.createGrid(), this.aVFinal);
-        t.checkExpect(maze0.createGrid(), new ArrayList<ArrayList<Vertex>>());
+    // tests contains for the IList interface TODO
+    void testContains(Tester t) {
+
+    }
+    // tests list2tree for the interface IList
+    void testList2Tree(Tester t) {
+        IList<Edge> mTV = new Mt<Edge>();
+        Vertex ver1 = new Vertex(0, 0);
+        Vertex ver2 = new Vertex(0, 1);
+        Edge edy1 = new Edge(ver1, ver2, 2);
+        Edge edy2 = new Edge(ver1, ver2, 2);
+        Edge edy3 = new Edge(ver1, ver2, 1);
+        Edge edy4 = new Edge(ver1, ver2, 3);
+        IList<Edge> listest1 = new Cons<Edge>(edy1, new Cons<Edge>(edy2, 
+                new Cons<Edge>(edy3, new Cons<Edge>(edy4, mTV))));
+        ITST<Edge> l = new Leaf<Edge>();
+        ITST<Edge> n1 = new TTNode<Edge>(edy2, l, l, l);
+        ITST<Edge> n2 = new TTNode<Edge>(edy3, l, l, l);
+        ITST<Edge> n3 = new TTNode<Edge>(edy4, l, l, l);
+        ITST<Edge> n4 = new TTNode<Edge>(edy1, n2, n1, n3);
+        t.checkExpect(mTV.list2Tree(new CompEdge()), l);
+        t.checkExpect(listest1.list2Tree(new CompEdge()), n4);
+    }
+    // tests removeDups for the IList interface
+    void testRemoveDups(Tester t) {
+        IList<Integer> emptyList = new Mt<Integer>();
+        IList<Integer> listy1 = new Cons<Integer>(2, new Cons<Integer>(3,
+                new Cons<Integer>(3, new Cons<Integer>(3, new Cons<Integer>(6,
+                        new Cons<Integer>(7, new Cons<Integer>(2, emptyList)))))));
+        IList<Integer> listy2 = new Cons<Integer>(3, new Cons<Integer>(6,
+                new Cons<Integer>(7, new Cons<Integer>(2, emptyList))));
+        t.checkExpect(emptyList.removeDups(), emptyList);
+        t.checkExpect(listy2.removeDups(), listy2);
+        t.checkExpect(listy1.removeDups(), listy2);
+    }
+    // tests sort for the IList interface
+    void testSort(Tester t) {
+        t.checkExpect(this.unSorted.sort(new CompEdge()), this.sortedL);
+    }
+    // tests tree2List for the IList interface
+    void testTree2(Tester t) {
+        /*MazeWorld maze100x60Edge = new MazeWorld(60, 60); TODO uncomment 
+    t.checkExpect(this.bot6.tree2List(), this.sortedL);
+    ITST<Edge> tree1 = maze100x60Edge.board.list2Tree(new RandEdge());
+    Cons<Edge> lister1 = (Cons<Edge>) tree1.tree2List();
+    t.checkExpect(lister1.first.from.x, lister1.first.from.x);
+    t.checkExpect(lister1.first.from.y, lister1.first.from.y);
+    t.checkExpect(lister1.first.to.x, lister1.first.to.x);
+    t.checkExpect(lister1.first.to.y, lister1.first.to.y);
+    t.checkExpect(this.bot6.tree2List(), this.sortedL);*/
+    }
+    // tests apply for the function ToString
+    void testToString(Tester t) {
+
+        t.checkExpect(tS.apply(2), "2");
+        t.checkExpect(tS.apply(-3), "-3");
+    }
+    // tests hasNext for the IListIterator TODO
+
+    // tests next for the IListIterator TODO
+
+    // tests remove for the IListIterator TODO
+
+    // tests iterator for the IList interface TODO
+
+    // tests the CompEdge Comparator TODO
+
+    // tests the CompVert Comparator TODO
+
+    // tests the RandVert Comparator TODO
+
+    // tests the RandEdge Comparator TODO
+
+    // tests DisplayEdgeVisitor TODO
+    void testDisplayEdgeVisitor(Tester t) {
+
+    }
+    // tests DisplayWallVisitor TODO
+    void testDisplayWallVisitor(Tester t) {
+
+    }
+    // tests insert in the ITST interface
+    void testInsert(Tester t) {
+        IComp<Vertex> comp = new CompVert();
+        Vertex c1 = new Vertex(0, 0);
+        Vertex c2 = new Vertex(0, 1);
+        Vertex c3 = new Vertex(1, 0);
+        Vertex c4 = new Vertex(1, 1);
+        ITST<Vertex> sC = new Leaf<Vertex>();
+        ITST<Vertex> n0 = new TTNode<Vertex>(c4, sC, sC, sC);
+        ITST<Vertex> n1 = new TTNode<Vertex>(c2, sC, sC, sC);
+        ITST<Vertex> n2 = new TTNode<Vertex>(c3, sC, sC, sC);
+        ITST<Vertex> n3 = new TTNode<Vertex>(c1, n1, sC, n2);
+        ITST<Vertex> n2a = new TTNode<Vertex>(c3, sC, sC, n0);
+        ITST<Vertex> n3a = new TTNode<Vertex>(c1, n1, sC, n2a);
+        t.checkExpect(n3.insert(comp, c4), n3a);
+    }
+    // tests accept for the interfaces IList<T> and ITST<T> 
+    void testAccept(Tester t) {
+        Vertex v1 = new Vertex(0, 0);
+        Vertex v2 = new Vertex(0, 1);
+        Vertex v3 = new Vertex(1, 0);
+        Vertex v4 = new Vertex(1, 1);
+        Edge e1 = new Edge(v1, v2, 0);
+        Edge e2 = new Edge(v1, v3, 0);
+        Edge e3 = new Edge(v3, v4, 0);
+        Mt<Edge> mT = new Mt<Edge>();
+        Cons<Edge> cons = new Cons<Edge>(e1, mT);
+        Leaf<Edge> leaf = new Leaf<Edge>();
+        TTNode<Edge> node1 = new TTNode<Edge>(e1, leaf, leaf, leaf);
+        TTNode<Edge> node2 = new TTNode<Edge>(e2, node1, leaf, leaf);
+        DisplayEdgeVisitor dEV = new DisplayEdgeVisitor(true);
+        t.checkExpect(leaf.accept(dEV), dEV.visit(leaf));
+        t.checkExpect(node2.accept(dEV), dEV.visit(node2));
+        t.checkException(
+                new IllegalArgumentException("IList is not a valid argument"), cons, "accept", dEV);
+        t.checkException(
+                new IllegalArgumentException("IList is not a valid argument"), mT, "accept", dEV);
+    }  
+    // tests displayEdge in the class Edge 
+    void testDisplayEdge(Tester t) {
+        Vertex vA = new Vertex(0, 0);
+        Vertex vB = new Vertex(1, 0);
+        Vertex vC = new Vertex(1, 1);
+        Edge eA = new Edge(vA, vB,  0);
+        Edge eB = new Edge(vB, vC, 3);
+        Edge eC = new Edge(vA, vC, 50935);
+        // horizontally connected
+        t.checkExpect(eA.displayEdge(true), new LineImage(new Posn(5, 5), 
+                new Posn(15, 5), new Color(255, 0, 0)));
+        t.checkExpect(eA.displayEdge(false), new OverlayImages(vA.displayCell(), vB.displayCell()));
+        // vertically connected
+        t.checkExpect(eB.displayEdge(true), new LineImage(new Posn(15, 5), 
+                new Posn(15, 15), new Color(255, 0, 0)));
+        t.checkExpect(eB.displayEdge(false), new OverlayImages(vB.displayCell(), vC.displayCell()));
+    }
+    // tests displayWall in the class Edge 
+    void testDisplayWall(Tester t) {
+        Vertex vA = new Vertex(0, 0);
+        Vertex vB = new Vertex(1, 0);
+        Vertex vC = new Vertex(1, 1);
+        Edge eA = new Edge(vA, vB,  0);
+        Edge eB = new Edge(vB, vC, 3);
+        Edge eC = new Edge(vA, vC, 50935);
+        // horizontally connected
+        t.checkExpect(eA.displayWall(), new LineImage(new Posn(10, 0), new Posn(10, 10),
+                new Color(90, 100, 90)));
+        // vertically connected
+        t.checkExpect(eB.displayWall(), new LineImage(new Posn(10, 10), new Posn(20, 10),
+                new Color(90, 100, 90)));
+    }  
+    // tests displayCell in the class Vertex
+    void testDisplayCell(Tester t) {
+        Vertex vA = new Vertex(0, 0);
+        Vertex vB = new Vertex(0, 1);
+        vB.correctPath = true;
+        Vertex vC = new Vertex(1, 1);
+        vC.wasSearched = true;
+        t.checkExpect(vA.displayCell(), new RectangleImage(new Posn(5, 5), 10, 10, new Color(205, 205, 205)));
+        t.checkExpect(vB.displayCell(), new RectangleImage(new Posn(5, 15), 10, 10, new Color(65, 86, 197)));
+        t.checkExpect(vC.displayCell(), new RectangleImage(new Posn(15, 15), 10, 10, new Color(56, 176, 222)));
+    }
+    // initializes the testSearch method
+    void initializeSearch() {
+
+        this.A = new Vertex(0, 0);
+        this.B = new Vertex(1, 0);
+        this.C = new Vertex(2, 0);
+        this.D = new Vertex(0, 1);
+        this.E = new Vertex(1, 1);
+        this.F = new Vertex(2, 1);
+
+        this.E.addEdge(C, 15);
+        this.C.addEdge(D, 25);
+        this.A.addEdge(B, 30);
+        this.B.addEdge(E, 35);
+        this.B.addEdge(C, 40);
+        this.F.addEdge(D, 50);
+        this.A.addEdge(E, 50);
+        this.B.addEdge(F, 50);
+
+    }
+    //tests Search in the class vertex
+    void testSearch(Tester t) {
+
+        this.initializeSearch();
+
+        IList<Vertex> answerA = new Cons<Vertex>(B, new Cons<Vertex>(E,
+                new Mt<Vertex>()));
+
+        t.checkExpect(A.search(), answerA);
+
     }
     // tests addEdge for the class Vertex
     void testAddEdge(Tester t) {
@@ -1487,63 +1656,11 @@ class ExamplesMaze {
         t.checkExpect(v01.edges.length(), 2);
         t.checkExpect(v01.edges.length(), 2);
     }
-    // tests isLeaf in the IBST interface
-    void testIsLeaf(Tester t) {
-        ITST<String> sL = new Leaf<String>();
-        ITST<String> n1 = new TTNode<String>("hi", sL, sL, sL);
-        ITST<String> n2 = new TTNode<String>("bye", n1, sL, sL);
-        ITST<String> n3 = new TTNode<String>("so", n1, sL, sL);
-        t.checkExpect(sL.isLeaf(), true);
-        t.checkExpect(n1.isLeaf(), false);
-        t.checkExpect(n2.isLeaf(), false);
-        t.checkExpect(n3.isLeaf(), false);
-    }
-    // tests apply for the IFunc interface TODO
-    // tests apply for the IPred interface TODO
-    // tests hasNext for the IListIterator TODO
-    // tests next for the IListIterator TODO
-    // tests remove for the IListIterator TODO
-    // tests insert in the IBST interface
-    void testInsert(Tester t) {
-        IComp<Vertex> comp = new CompVert();
-        Vertex c1 = new Vertex(0, 0);
-        Vertex c2 = new Vertex(0, 1);
-        Vertex c3 = new Vertex(1, 0);
-        Vertex c4 = new Vertex(1, 1);
-        ITST<Vertex> sC = new Leaf<Vertex>();
-        ITST<Vertex> n0 = new TTNode<Vertex>(c4, sC, sC, sC);
-        ITST<Vertex> n1 = new TTNode<Vertex>(c2, sC, sC, sC);
-        ITST<Vertex> n2 = new TTNode<Vertex>(c3, sC, sC, sC);
-        ITST<Vertex> n3 = new TTNode<Vertex>(c1, n1, sC, n2);
-        ITST<Vertex> n2a = new TTNode<Vertex>(c3, sC, sC, n0);
-        ITST<Vertex> n3a = new TTNode<Vertex>(c1, n1, sC, n2a);
-        t.checkExpect(n3.insert(comp, c4), n3a);
-    }
-    // tests accept for the interfaces IList<T> and IBST<T> 
-    void testAccept(Tester t) {
-        Vertex v1 = new Vertex(0, 0);
-        Vertex v2 = new Vertex(0, 1);
-        Vertex v3 = new Vertex(1, 0);
-        Vertex v4 = new Vertex(1, 1);
-        Edge e1 = new Edge(v1, v2, 0);
-        Edge e2 = new Edge(v1, v3, 0);
-        Edge e3 = new Edge(v3, v4, 0);
-        Mt<Edge> mT = new Mt<Edge>();
-        Cons<Edge> cons = new Cons<Edge>(e1, mT);
-        Leaf<Edge> leaf = new Leaf<Edge>();
-        TTNode<Edge> node1 = new TTNode<Edge>(e1, leaf, leaf, leaf);
-        TTNode<Edge> node2 = new TTNode<Edge>(e2, node1, leaf, leaf);
-        DisplayEdgeVisitor dEV = new DisplayEdgeVisitor(true);
-        t.checkExpect(leaf.accept(dEV), dEV.visit(leaf));
-        t.checkExpect(node2.accept(dEV), dEV.visit(node2));
-        t.checkException(
-                new IllegalArgumentException("IList is not a valid argument"), cons, "accept", dEV);
-        t.checkException(
-                new IllegalArgumentException("IList is not a valid argument"), mT, "accept", dEV);
-    }
-    // tests list2tree for the interface IList TODO
-    void testList2Tree(Tester t) {
-
+    // tests createGrid for the class MazeWorld
+    void testCreateGrid(Tester t) {
+        this.initialize();
+        t.checkExpect(maze5.createGrid(), this.aVFinal);
+        t.checkExpect(maze0.createGrid(), new ArrayList<ArrayList<Vertex>>());
     }
     // tests addEdges for the class MazeWorld 
     void testAddEdges(Tester t) {
@@ -1561,72 +1678,7 @@ class ExamplesMaze {
         t.checkExpect(this.aVNB.get(2).get(2).edges.length(), 2);
         t.checkExpect(this.aVNB, aVN);
     }
-    // tests displayCell 
-    void testDisplayCell(Tester t) {
-        Vertex vA = new Vertex(0, 0);
-        Vertex vB = new Vertex(0, 1);
-        vB.correctPath = true;
-        Vertex vC = new Vertex(1, 1);
-        vC.wasSearched = true;
-        t.checkExpect(vA.displayCell(), new RectangleImage(new Posn(5, 5), 10, 10, new Color(205, 205, 205)));
-        t.checkExpect(vB.displayCell(), new RectangleImage(new Posn(5, 15), 10, 10, new Color(65, 86, 197)));
-        t.checkExpect(vC.displayCell(), new RectangleImage(new Posn(15, 15), 10, 10, new Color(56, 176, 222)));
-    }
-    // tests displayEdge 
-    void testDisplayEdge(Tester t) {
-        Vertex vA = new Vertex(0, 0);
-        Vertex vB = new Vertex(1, 0);
-        Vertex vC = new Vertex(1, 1);
-        Edge eA = new Edge(vA, vB,  0);
-        Edge eB = new Edge(vB, vC, 3);
-        Edge eC = new Edge(vA, vC, 50935);
-        // horizontally connected
-        t.checkExpect(eA.displayEdge(true), new LineImage(new Posn(5, 5), 
-                new Posn(15, 5), new Color(255, 0, 0)));
-        t.checkExpect(eA.displayEdge(false), new OverlayImages(vA.displayCell(), vB.displayCell()));
-        // vertically connected
-        t.checkExpect(eB.displayEdge(true), new LineImage(new Posn(15, 5), 
-                new Posn(15, 15), new Color(255, 0, 0)));
-        t.checkExpect(eB.displayEdge(false), new OverlayImages(vB.displayCell(), vC.displayCell()));
-    }
-    // tests displayWall 
-    void testDisplayWall(Tester t) {
-        Vertex vA = new Vertex(0, 0);
-        Vertex vB = new Vertex(1, 0);
-        Vertex vC = new Vertex(1, 1);
-        Edge eA = new Edge(vA, vB,  0);
-        Edge eB = new Edge(vB, vC, 3);
-        Edge eC = new Edge(vA, vC, 50935);
-        // horizontally connected
-        t.checkExpect(eA.displayWall(), new LineImage(new Posn(10, 0), new Posn(10, 10),
-                new Color(90, 100, 90)));
-        // vertically connected
-        t.checkExpect(eB.displayWall(), new LineImage(new Posn(10, 10), new Posn(20, 10),
-                new Color(90, 100, 90)));
-    }    
-    // tests DisplayEdgeVisitor TODO
-    void testDisplayEdgeVisitor(Tester t) {
-
-    }
-    // tests DisplayWallVisitor TODO
-    void testDisplayWallVisitor(Tester t) {
-
-    }
-
-    // tests removeDups for the IList interface
-    void testRemoveDups(Tester t) {
-        IList<Integer> emptyList = new Mt<Integer>();
-        IList<Integer> listy1 = new Cons<Integer>(2, new Cons<Integer>(3,
-                new Cons<Integer>(3, new Cons<Integer>(3, new Cons<Integer>(6,
-                        new Cons<Integer>(7, new Cons<Integer>(2, emptyList)))))));
-        IList<Integer> listy2 = new Cons<Integer>(3, new Cons<Integer>(6,
-                new Cons<Integer>(7, new Cons<Integer>(2, emptyList))));
-        t.checkExpect(emptyList.removeDups(), emptyList);
-        t.checkExpect(listy2.removeDups(), listy2);
-        t.checkExpect(listy1.removeDups(), listy2);
-    }
-
-    // tests vertexToEdge in MazeWorld 
+    // tests vertexToEdge in MazeWorld  TODO
     void testVertexToEdge(Tester t) {
 
         this.initialize();
@@ -1645,7 +1697,7 @@ class ExamplesMaze {
         //t.checkExpect(maze3.vertexToEdge(aVN), testList);
 
     }
-
+    // tests IListToArr in the class MazeWorld
     void testIListToArr(Tester t) {
 
         IList<Integer> testList = new Mt<Integer>();
@@ -1658,37 +1710,7 @@ class ExamplesMaze {
 
         t.checkExpect(maze0.iListToArr(testList), answer);
     }
-    void initializeSearch() {
-        
-        this.A = new Vertex(0, 0);
-        this.B = new Vertex(1, 0);
-        this.C = new Vertex(2, 0);
-        this.D = new Vertex(0, 1);
-        this.E = new Vertex(1, 1);
-        this.F = new Vertex(2, 1);
-        
-        this.E.addEdge(C, 15);
-        this.C.addEdge(D, 25);
-        this.A.addEdge(B, 30);
-        this.B.addEdge(E, 35);
-        this.B.addEdge(C, 40);
-        this.F.addEdge(D, 50);
-        this.A.addEdge(E, 50);
-        this.B.addEdge(F, 50);
-        
-    }
-    
-    void testBreadthFirst(Tester t) {
-        
-        this.initializeSearch();
-        
-        IList<Vertex> answerA = new Cons<Vertex>(B, new Cons<Vertex>(E,
-                new Mt<Vertex>()));
-        
-        t.checkExpect(A.search(), answerA);
-        
-    }
-    
+    // tests Cycle for the class MazeWorld
     void testCycle(Tester t) {
 
         HashMap<String, String> uf = new HashMap<String, String>();
@@ -1704,12 +1726,17 @@ class ExamplesMaze {
         uf.put("1-0", "0-0");
 
         t.checkExpect(maze0.cycle(uf, "1-0", "0-0"), true);
-        
+
         uf.put("2-0", "1-0");
-        
-        //t.checkExpect(maze0.cycle(uf, "2-0", "0-0"), true);
+
+        t.checkExpect(maze0.cycle(uf, "2-0", "0-0"), false);
+
+        uf.put("2-0", "0-0");
+
+        t.checkExpect(maze0.cycle(uf, "2-0", "0-0"), true);
 
     }
+    // tests Kruskel for the class MazeWorld TODO
     void testKruskel(Tester t) {
 
         Vertex A = new Vertex(0, 0);
@@ -1742,14 +1769,14 @@ class ExamplesMaze {
                 new Mt<Edge>()));
 
         IList<Edge> edgeList = new Mt<Edge>();
-        edgeList.addToBack(ec);
-        edgeList.addToBack(cd);
-        edgeList.addToBack(ab);
-        edgeList.addToBack(be);
-        edgeList.addToBack(bc);
-        edgeList.addToBack(fd);
-        edgeList.addToBack(ae);
-        edgeList.addToBack(bf);
+        edgeList = edgeList.addToBack(ec);
+        edgeList = edgeList.addToBack(cd);
+        edgeList = edgeList.addToBack(ab);
+        edgeList = edgeList.addToBack(be);
+        edgeList = edgeList.addToBack(bc);
+        edgeList = edgeList.addToBack(fd);
+        edgeList = edgeList.addToBack(ae);
+        edgeList = edgeList.addToBack(bf);
 
         HashMap<String, String> uf = new HashMap<String, String>();
         uf.put("0-0", "0-0");
@@ -1767,35 +1794,30 @@ class ExamplesMaze {
         //t.checkExpect(maze0.kruskel(edgeList), answer);
 
     }
-    // tests sort for the IList interface
-    void testSort(Tester t) {
-        t.checkExpect(this.unSorted.sort(new CompEdge()), this.sortedL);
-    }
-    // tests tree2List for the IList interface
-    void testTree2(Tester t) {
-        MazeWorld maze100x60Edge = new MazeWorld(60, 60);
-        //t.checkExpect(this.bot6.tree2List(), this.sortedL);
-        /*ITST<Edge> tree1 = maze100x60Edge.board.list2Tree(new RandEdge());
-        Cons<Edge> lister1 = (Cons<Edge>) tree1.tree2List();
-        t.checkExpect(lister1.first.from.x, lister1.first.from.x);
-        t.checkExpect(lister1.first.from.y, lister1.first.from.y);
-        t.checkExpect(lister1.first.to.x, lister1.first.to.x);
-        t.checkExpect(lister1.first.to.y, lister1.first.to.y);
-        t.checkExpect(this.bot6.tree2List(), this.sortedL);*/
-    }
+
+    // tests makeImage for the MazeWorld class TODO
+
+    // tests onKeyEvent for the MazeWorld class TODO
+
+    // tests onTick for the MazeWorld class TODO
+
+    // tests searchComplete for the MazeWorld class TODO
+
+
+
     // runs the animation
     void testRunMaze(Tester t) {
-        MazeWorld maze100x60Edge = new MazeWorld(100, 60);
-        maze100x60Edge.gameMode = 3;
-        MazeWorld maze100x60Wall = new MazeWorld(100, 60);
+        //MazeWorld maze100x60Edge = new MazeWorld(100, 60);
+        //maze100x60Edge.gameMode = 3;
+        //MazeWorld maze100x60Wall = new MazeWorld(100, 60);
         //t.checkExpect(maze2.board.length(), 4);
         //t.checkExpect(this.maze0.board.length(), 0);
         //t.checkExpect(this.maze2.board.length(), 4);
         //t.checkExpect(this.maze3.board.length(), 12);
         //t.checkExpect(maze100x60Edge.board.length(), 11840);
 
-        //maze100x60Edge.bigBang(1000, 600);
-        //maze100x60Wall.bigBang(1000, 600);
+        // maze100x60Edge.bigBang(1000, 600);
+        // maze100x60Wall.bigBang(1000, 600);
 
     }
 }
