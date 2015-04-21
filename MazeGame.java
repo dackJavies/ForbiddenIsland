@@ -26,26 +26,18 @@ interface IList<T> extends Iterable<T> {
     IList<T> addToFront(T item);
     // creates a new list with the given item added to the front
     IList<T> addToBack(T item);
-    // map the given IFunc over the entire list
-    <R> IList<R> map(IFunc<T,R> func);
     // append this list onto the given one
     IList<T> append(IList<T> other);
     // creates a new Tree from this IList
     ITST<T> list2Tree(IComp<T> comp);
     // sorts this list using the given comparator
     IList<T> sort(IComp<T> comp);
-    // reverse this list
-    IList<T> rev();
-    // helps to reverse this list
-    IList<T> revT(IList<T> acc);
     // Is this list empty?
     boolean isEmpty();
     // Accept the given Visitor
     <R> R accept(IVisitor<T, R> v);
     // determines whether the given item is in this list
     boolean contains(T t);
-    // returns a copy of this list without any duplicate items
-    IList<T> removeDups();
 }
 
 //represents a non-empty list
@@ -59,8 +51,8 @@ class Cons<T> implements IList<T> {
     // Computes the size of this list
     public int length() {
         int result = 0;
-        for(T t: this) {
-            result = result += 1;
+        for(@SuppressWarnings("unused") T t: this) {
+            result += 1;
         }
         return result;
     }
@@ -71,10 +63,6 @@ class Cons<T> implements IList<T> {
     // creates a new list with the given item added to the back
     public IList<T> addToBack(T item) {
         return new Cons<T>(this.first, this.rest.addToBack(item));
-    }
-    // map the given function over the entire list
-    public <R> IList<R> map(IFunc<T, R> func) {
-        return new Cons<R>(func.apply(this.first), this.rest.map(func));
     }
     // appends this list onto the given one
     public IList<T> append(IList<T> other) {
@@ -97,14 +85,6 @@ class Cons<T> implements IList<T> {
     public IList<T> sort(IComp<T> comp) {
         return this.list2Tree(comp).tree2List(); 
     }
-    // reverses this list
-    public IList<T> rev() {
-        return this.revT(new Mt<T>());
-    }
-    // helps reverse this list
-    public IList<T> revT(IList<T> acc) {
-        return this.rest.revT(new Cons<T>(this.first, acc));
-    }
     // Is this list empty?
     public boolean isEmpty() { return false; }
     // gets the iterator for this IList
@@ -118,15 +98,6 @@ class Cons<T> implements IList<T> {
     // determines whether the given item is in this list
     public boolean contains(T t) {
         return this.first == t || this.rest.contains(t);
-    }
-    // returns a copy of this list without any duplicate items
-    public IList<T> removeDups() {
-        if(this.rest.contains(this.first)) {
-            return this.rest.removeDups();
-        }
-        else {
-            return new Cons<T>(this.first, this.rest.removeDups());
-        }
     }
 } 
 
@@ -144,10 +115,6 @@ class Mt<T> implements IList<T> {
     public IList<T> addToBack(T item) {
         return new Cons<T>(item, this);
     }
-    // map the given function over the entire list
-    public <R> IList<R> map(IFunc<T, R> func) {
-        return new Mt<R>();
-    }
     // appends this list onto the given one
     public IList<T> append(IList<T> other) {
         return other;
@@ -159,14 +126,6 @@ class Mt<T> implements IList<T> {
     // sorts this list using the given comparator
     public IList<T> sort(IComp<T> comp) {
         return this;
-    }
-    // reverses this list
-    public IList<T> rev() {
-        return this;
-    }
-    // helps reverse this list
-    public IList<T> revT(IList<T> acc) {
-        return acc;
     }
     // Is this list empty?
     public boolean isEmpty() { return true; }
@@ -181,10 +140,6 @@ class Mt<T> implements IList<T> {
     // determines whether the given item is in this list
     public boolean contains(T t) {
         return false;
-    }
-    // returns a copy of this list without any duplicate items
-    public IList<T> removeDups() {
-        return this;
     }
 
 }
@@ -786,50 +741,6 @@ class Vertex {
         return new RectangleImage(new Posn((this.getX() * sideLength) + posnShift, 
                 (this.getY() * sideLength) + posnShift), 10, 10, c);
     }  
-    // Search through the tree using the Breadth-First algorithm
-    // This method is called every tick, and therefore only advances
-    // the search by one increment per call.
-    IList<Vertex> search() {
-        this.wasSearched = true;
-
-        IList<Vertex> result = new Mt<Vertex>();
-
-        for(Edge e: this.edges) {
-
-            if (e.from != this && !e.from.wasSearched) {
-                result = result.addToBack(e.from);
-            }
-
-            if (e.to != this && !e.to.wasSearched) {
-                result = result.addToBack(e.to);
-            }
-
-        }
-        return result;
-    }
-
-    // Search through the tree using the Depth-First algorithm
-    // This method is called every tick, and therefore only advances
-    // the search by one increment per call.
-    /*IList<Vertex> depthFirstSearch() {
-
-    this.wasSearched = true;
-    IList<Vertex> result = new Mt<Vertex>();
-
-    for(Edge e: this.edges) {
-
-        if (e.from != this && !e.from.wasSearched) {
-            result = result.addToBack(e.from);
-        }
-
-        if (e.to != this && !e.to.wasSearched) {
-            result = result.addToBack(e.to);
-        }
-
-    }
-    return result;
-
-}*/
 
 }
 
@@ -901,6 +812,10 @@ class MazeWorld extends World {
     IList<Edge> board;
     IList<Edge> unUsed;
     IList<Vertex> searchHeads;
+    
+    Stack<Vertex> depthList;
+    Queue<Vertex> breadthList;
+    HashMap<Vertex, Edge> cameFromEdge;
 
     MazeWorld(int gameSizeX, int gameSizeY) {
         // Basic constructor stuff
@@ -923,6 +838,16 @@ class MazeWorld extends World {
         //this.board = b;
         this.board = kruskel.kruskel();
         this.unUsed = kruskel.unUsed;
+        
+        depthList = new Stack<Vertex>(new Deque<Vertex>());
+        breadthList = new Queue<Vertex>(new Deque<Vertex>());
+        cameFromEdge = new HashMap<Vertex, Edge>();
+        
+        if (!this.searchHeads.isEmpty()) {
+            Vertex first = ((Cons<Vertex>)this.searchHeads).first;
+            depthList.push(first);
+            breadthList.enqueue(first);
+        }
 
     }
 
@@ -1135,39 +1060,75 @@ class MazeWorld extends World {
        // }
     }
     
-    public void onTick() {
-        if (this.searchHeads.length() > 0 && !this.searchComplete()) {
-            Cons<Vertex> sH = ((Cons<Vertex>)(this.searchHeads));
-            // depth first
-            if (this.gameMode == 1) {
-                for (Vertex origV: sH) {
-                    for (Vertex newV: origV.search()) {
-                        this.addSearchHeadToFront(newV);
-                    }
-                    this.removeSearchHead(origV);
-                }
+    // Search through the tree using the Breadth-First algorithm
+    // This method is called every tick, and therefore only advances
+    // the search by one increment per call.
+    void breadthFirstSearch() {
+        
+        if (!this.breadthList.isEmpty()) {
+            Vertex next = this.breadthList.dequeue();
+            if (next.wasSearched) {
+                // DO NOTHING; dequeue() removed it
             }
-            // breadth first
-            if (this.gameMode == 2) {
-                for (Vertex origV: sH) {
-                    for (Vertex newV: origV.search()) {
-                        this.addSearchHeadToBack(newV);
+            else if (next.endVert) {
+                // this.reconstruct(cameFromEdge, next);
+            }
+            else {
+                for(Edge e: next.edges) {
+                    if (e.from == next) {
+                        this.breadthList.enqueue(e.to);
+                        this.cameFromEdge.put(e.to, e);
                     }
-                    this.removeSearchHead(origV);
                 }
             }
         }
+        
     }
 
-    // Is one of the search heads at the end?
-    boolean searchComplete() {
-
-        for(Vertex v: this.searchHeads) {
-            if (v.endVert) { return true; }
+    // Search through the tree using the Depth-First algorithm
+    // This method is called every tick, and therefore only advances
+    // the search by one increment per call.
+    void depthFirstSearch() {
+        
+        if (!this.depthList.isEmpty()) {
+            Vertex next = this.depthList.pop();
+            if (!next.wasSearched && next.endVert) {
+                //do something with reconstruct(next, new Mt<Vertex>());
+            }
+            else {
+                for(Edge e: next.edges) {
+                    if (e.from == next) {
+                        this.depthList.push(e.to);
+                        this.cameFromEdge.put(e.to, e);
+                    }
+                }
+            }
         }
-
-        return false;
-
+        
+    }
+    
+    public void onTick() {
+       
+        // DF search
+        if (this.gameMode == 1) {
+            this.depthFirstSearch();
+        }
+        // BF search
+        else if (this.gameMode == 2) {
+            this.breadthFirstSearch();
+        }
+        
+    }
+    
+    // reconstruct the path from the end to the beginning
+    IList<Vertex> reconstruct(Vertex end, IList<Vertex> finalPath) {
+        if (end.startVert) {
+            return finalPath;
+        }
+        else {
+            finalPath.addToFront(end);
+            return reconstruct(this.cameFromEdge.get(end).from, finalPath);
+        }
     }
 
 }
@@ -1545,32 +1506,10 @@ class ExamplesMaze {
         t.checkExpect(listI1.append(iz), new Cons<Integer>(1, new Cons<Integer>(2,
                 new Cons<Integer>(3, new Cons<Integer>(4, iz)))));
     }
-    // tests revT for the interface IList<T>
-    void testRevT(Tester t) {
-        IList<Integer> iA = new Cons<Integer>(4, new Cons<Integer>(3,
-                new Cons<Integer>(2, new Cons<Integer>(1, new Mt<Integer>()))));
-        t.checkExpect(this.mTI.revT(mTI), this.mTI);
-        t.checkExpect(this.mTI.revT(iA), iA);
-        t.checkExpect(iA.revT(mTI), this.listI1);
-    }
-    // tests rev for the interface IList<T>
-    void testRev(Tester t) {
-        IList<Integer> iA = new Cons<Integer>(4, new Cons<Integer>(3,
-                new Cons<Integer>(2, new Cons<Integer>(1, new Mt<Integer>()))));
-        t.checkExpect(this.mTI.rev(), this.mTI);
-        t.checkExpect(iA.rev(), this.listI1);
-    }
     // tests isEmpty for the interface IList<T>
     void isEmpty(Tester t) {
         t.checkExpect(this.mTI.isEmpty(), true);
         t.checkExpect(this.listI1.isEmpty(), false);
-    }
-    // tests map
-    void testMap(Tester t) {
-        t.checkExpect(listI1.map(tS), new Cons<String>("1",
-                new Cons<String>("2", new Cons<String>("3", 
-                        new Cons<String>("4", new Mt<String>())))));
-        t.checkExpect(mTI.map(tS), new Mt<String>());
     }
     // tests contains for the IList interface 
     void testContains(Tester t) {
@@ -1600,18 +1539,6 @@ class ExamplesMaze {
         ITST<Edge> n4 = new TTNode<Edge>(edy1, n2, n1, n3);
         t.checkExpect(mTV.list2Tree(new CompEdge()), l);
         t.checkExpect(listest1.list2Tree(new CompEdge()), n4);
-    }
-    // tests removeDups for the IList interface
-    void testRemoveDups(Tester t) {
-        IList<Integer> emptyList = new Mt<Integer>();
-        IList<Integer> listy1 = new Cons<Integer>(2, new Cons<Integer>(3,
-                new Cons<Integer>(3, new Cons<Integer>(3, new Cons<Integer>(6,
-                        new Cons<Integer>(7, new Cons<Integer>(2, emptyList)))))));
-        IList<Integer> listy2 = new Cons<Integer>(3, new Cons<Integer>(6,
-                new Cons<Integer>(7, new Cons<Integer>(2, emptyList))));
-        t.checkExpect(emptyList.removeDups(), emptyList);
-        t.checkExpect(listy2.removeDups(), listy2);
-        t.checkExpect(listy1.removeDups(), listy2);
     }
     // tests sort for the IList interface
     void testSort(Tester t) {
@@ -1924,17 +1851,6 @@ class ExamplesMaze {
         this.B.addEdge(F, 50);
 
     }
-    //tests Search in the class vertex
-    void testSearch(Tester t) {
-
-        this.initializeSearch();
-
-        IList<Vertex> answerA = new Cons<Vertex>(B, new Cons<Vertex>(E,
-                new Mt<Vertex>()));
-
-        t.checkExpect(A.search(), answerA);
-
-    }
     // tests addEdge for the class Vertex
     void testAddEdge(Tester t) {
         this.initialize();
@@ -2048,29 +1964,6 @@ class ExamplesMaze {
     void testOnTick(Tester t) {
         
     }
-    // tests searchComplete for the MazeWorld class 
-    void testSearchComplete(Tester t) {
-        
-        MazeWorld testMaze = new MazeWorld(0, 0);
-        
-        Vertex v = new Vertex(0, 0);
-        v.endVert = true;
-        
-        IList<Vertex> searchHead = new Cons<Vertex>(v, new Mt<Vertex>());
-        testMaze.searchHeads = searchHead;
-        
-        t.checkExpect(testMaze.searchComplete(), true);
-        
-        testMaze.searchHeads = new Mt<Vertex>();
-        t.checkExpect(testMaze.searchComplete(), false);
-        
-        Vertex v2 = new Vertex(1, 1);
-        searchHead = new Cons<Vertex>(v2, new Mt<Vertex>());
-        testMaze.searchHeads = searchHead;
-        
-        t.checkExpect(testMaze.searchComplete(), false);
-        
-    }
     // tests initializeHashMap for the class UnionFind 
     void testInitializeHashMap(Tester t) {
         HashMap<Vertex, Vertex> hashy = new HashMap<Vertex, Vertex>();
@@ -2140,7 +2033,6 @@ class ExamplesMaze {
     }
     // tests formsCycle for the class UnionFind 
     void testformsCycle(Tester t) {
-        HashMap<Posn, Posn> uf = new HashMap<Posn, Posn>();
         Vertex vertA = new Vertex(0, 0);
         Vertex vertB = new Vertex(0, 1);
         Vertex vertC = new Vertex(1, 0);
@@ -2168,8 +2060,7 @@ class ExamplesMaze {
     }
     // tests Kruskel for the class UnionFind TODO
     void testKruskel(Tester t) {
-
-        MazeWorld m1 = new MazeWorld(3, 3);
+        
         Vertex A = new Vertex(0, 0);
         Vertex B = new Vertex(1, 0);
         Vertex C = new Vertex(2, 0);
@@ -2178,15 +2069,18 @@ class ExamplesMaze {
         Vertex F = new Vertex(2, 1);
         ArrayList<Vertex> aV = new ArrayList<Vertex>();
         ArrayList<Vertex> aV2 = new ArrayList<Vertex>();
+        ArrayList<Vertex> aV3 = new ArrayList<Vertex>();
         aV.add(A);
         aV.add(B);
-        aV.add(C);
+        aV2.add(C);
         aV2.add(D);
-        aV2.add(E);
-        aV2.add(F);
+        aV3.add(E);
+        aV3.add(F);
         ArrayList<ArrayList<Vertex>> aAV = new ArrayList<ArrayList<Vertex>>();
         aAV.add(aV);
         aAV.add(aV2);
+        aAV.add(aV3);
+        
         Edge ec = new Edge(E, C, 15);
         Edge cd = new Edge(C, D, 25);
         Edge ab = new Edge(A, B, 30);
@@ -2225,7 +2119,7 @@ class ExamplesMaze {
                         new Cons<Edge>(fd, new Cons<Edge>(ae, new Cons<Edge>(
                                 bf, new Mt<Edge>()))))))));
         UnionFind uF = new UnionFind(aAV, edgeList);
-        // t.checkExpect(uF.kruskel(), answer);// TODO
+        //t.checkExpect(uF.kruskel(), answer);
 
     }
     // runs the animation
@@ -2241,7 +2135,7 @@ class ExamplesMaze {
         t.checkExpect(maze100x60Edge.board.length(), 5999); */
 
         //maze100x60Edge.bigBang(1000, 600);
-        maze100x60Wall.bigBang(1000, 600);
+        //maze100x60Wall.bigBang(1000, 600);
         t.checkExpect(maze100x60Wall.searchHeads.length(), 1);
 
     }
