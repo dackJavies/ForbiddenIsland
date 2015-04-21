@@ -58,7 +58,11 @@ class Cons<T> implements IList<T> {
     }
     // Computes the size of this list
     public int length() {
-        return 1 + this.rest.length();
+        int result = 0;
+        for(T t: this) {
+            result = result += 1;
+        }
+        return result;
     }
     // creates a new list with the given item added to the front
     public IList<T> addToFront(T item) {
@@ -967,6 +971,7 @@ class MazeWorld extends World {
                 new DisplayEdgeVisitor(this.gameMode == 3);
         DisplayWallVisitor dWVisitor = 
                 new DisplayWallVisitor();
+
         if (this.gameMode == 3) {
             return boardTree.accept(dEVisitor);
         } 
@@ -1006,9 +1011,8 @@ class MazeWorld extends World {
         // breadth-first search mode
         else if (s.equals("b") && !(this.gameMode == 2)) {
             this.gameMode = 2;
-        }
+        } 
     }
-    // Tick handler
     public void onTick() {
         if (this.searchHeads.length() > 0 && !this.searchComplete()) {
             Cons<Vertex> sH = ((Cons<Vertex>)(this.searchHeads));
@@ -1046,8 +1050,7 @@ class MazeWorld extends World {
 
 }
 
-
-
+// represents the function that performs Kruskels algorithm
 class UnionFind {
     HashMap<Vertex, Vertex> reps;
     ArrayList<ArrayList<Vertex>> vertList;
@@ -1854,23 +1857,23 @@ class ExamplesMaze {
 
     }
     // tests find for the class UnionFind TODO
-     void testFind(Tester t) {
-     UnionFind uF = new UnionFind(new ArrayList<ArrayList<Vertex>>(), new Mt<Edge>());
-     HashMap<Vertex, Vertex> hash = uF.reps;
-     Vertex v1 = new Vertex(0, 0);
-     Vertex v2 = new Vertex(0, 0);
-     Vertex v3 = new Vertex(0, 0);
-     Vertex v4 = new Vertex(0, 0);
-     Vertex v5 = new Vertex(0, 0);
-     /*hash.put(p2, new Posn(0, 0));
+    void testFind(Tester t) {
+        UnionFind uF = new UnionFind(new ArrayList<ArrayList<Vertex>>(), new Mt<Edge>());
+        HashMap<Vertex, Vertex> hash = uF.reps;
+        Vertex v1 = new Vertex(0, 0);
+        Vertex v2 = new Vertex(0, 0);
+        Vertex v3 = new Vertex(0, 0);
+        Vertex v4 = new Vertex(0, 0);
+        Vertex v5 = new Vertex(0, 0);
+        /*hash.put(p2, new Posn(0, 0));
      hash.put(new Posn(1, 0), new Posn(1, 0));
      hash.put(new Posn(2, 0), new Posn(0, 1));
      hash.put(new Posn(0, 1), new Posn(1, 1));
      hash.put(new Posn(1, 1), new Posn(1, 1));
      hash.put(new Posn(2, 1), new Posn(2, 1));
      t.checkExpect(hash.get(p2), new Posn(0, 0));*/
-     //t.checkExpect(uF.find(new Posn(0, 0)), new Posn(0, 0));
-     }
+        //t.checkExpect(uF.find(new Posn(0, 0)), new Posn(0, 0));
+    }
     // tests union for the class UnionFind TODO
     void testUnion(Tester t) {
 
@@ -1906,14 +1909,14 @@ class ExamplesMaze {
         MazeWorld maze100x60Edge = new MazeWorld(100, 60);
         maze100x60Edge.gameMode = 3;
         MazeWorld maze100x60Wall = new MazeWorld(100, 60);
-        //t.checkExpect(maze2.board.length(), 4);
-        //t.checkExpect(this.maze0.board.length(), 0);
-        //t.checkExpect(this.maze2.board.length(), 4);
-        //t.checkExpect(this.maze3.board.length(), 12);
-        //t.checkExpect(maze100x60Edge.board.length(), 11840);
+        /* t.checkExpect(maze2.board.length(), 3);
+        t.checkExpect(this.maze0.board.length(), 0);
+        t.checkExpect(this.maze2.board.length(), 3);
+        t.checkExpect(this.maze3.board.length(), 8);
+        t.checkExpect(maze100x60Edge.board.length(), 5999); */
 
-        maze100x60Edge.bigBang(1000, 600);
-        maze100x60Wall.bigBang(1000, 600);
+        //maze100x60Edge.bigBang(1000, 600);
+        //maze100x60Wall.bigBang(1000, 600);
 
     }
 }
