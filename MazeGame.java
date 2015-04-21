@@ -967,22 +967,43 @@ class MazeWorld extends World {
                 new DisplayEdgeVisitor(this.gameMode == 3);
         DisplayWallVisitor dWVisitor = 
                 new DisplayWallVisitor();
-
-        return new OverlayImages(boardTree.accept(dEVisitor),
-                unUsedTree.accept(dWVisitor));
+        if (this.gameMode == 3) {
+            return boardTree.accept(dEVisitor);
+        } 
+        else {
+            return new OverlayImages(boardTree.accept(dEVisitor),
+                    unUsedTree.accept(dWVisitor));
+        }
     }
 
     // key handler TODO
     public void onKeyEvent(String s) {
-        if (s.equals("m") && !(this.gameMode == 0)) {
+        // reset the game
+        if (s.equals("r")) {
+            this.gameMode = 0;
+            this.board = new Mt<Edge>();
+            this.searchHeads = new Mt<Vertex>();
+            this.unUsed = new Mt<Edge>();
+            ArrayList<ArrayList<Vertex>> blankCells = this.createGrid();
+            this.addEdges(blankCells);
+            IList<Edge> b = this.vertexToEdge(blankCells);
+            UnionFind kruskel = new UnionFind(blankCells, b);
+            this.board = kruskel.kruskel();
+            this.unUsed = kruskel.unUsed;
+        }
+        // manual mode
+        else if (s.equals("m") && !(this.gameMode == 0)) {
             this.gameMode = 0;
         }
+        // display edges mode
         else if (s.equals("e") && !(this.gameMode == 3)) {
             this.gameMode = 3;
         }
+        // depth-first search mode
         else if (s.equals("d") && !(this.gameMode == 1)) {
             this.gameMode = 1;
         }
+        // breadth-first search mode
         else if (s.equals("b") && !(this.gameMode == 2)) {
             this.gameMode = 2;
         }
@@ -1832,35 +1853,24 @@ class ExamplesMaze {
     void testSearchComplete(Tester t) {
 
     }
-    // tests equalPosn for the class UnionFind
-    void testEqualPosn(Tester t) {
-        Posn p1 = new Posn(0, 0);
-        Posn p2 = new Posn(0, 0);
-        Posn p3 = new Posn(0, 1);
-        Posn p4 = new Posn(1, 0);
-        Posn p5 = new Posn(1, 1);
-        UnionFind uF = new UnionFind(new ArrayList<ArrayList<Vertex>>(), new Mt<Edge>());
-        t.checkExpect(uF.equalPosn(p1, p2), true);
-        t.checkExpect(uF.equalPosn(p3, p3), true);
-        t.checkExpect(uF.equalPosn(p1, p3), false);
-        t.checkExpect(uF.equalPosn(p3, p5), false);
-        t.checkExpect(uF.equalPosn(p4, p5), false);
-        t.checkExpect(uF.equalPosn(p5, p5), true);
-    }
     // tests find for the class UnionFind TODO
-    /* void testFind(Tester t) {
+     void testFind(Tester t) {
      UnionFind uF = new UnionFind(new ArrayList<ArrayList<Vertex>>(), new Mt<Edge>());
-     HashMap<Posn, Posn> hash = uF.reps;
-     Posn p2 = new Posn(0, 0);
-     hash.put(p2, new Posn(0, 0));
+     HashMap<Vertex, Vertex> hash = uF.reps;
+     Vertex v1 = new Vertex(0, 0);
+     Vertex v2 = new Vertex(0, 0);
+     Vertex v3 = new Vertex(0, 0);
+     Vertex v4 = new Vertex(0, 0);
+     Vertex v5 = new Vertex(0, 0);
+     /*hash.put(p2, new Posn(0, 0));
      hash.put(new Posn(1, 0), new Posn(1, 0));
      hash.put(new Posn(2, 0), new Posn(0, 1));
      hash.put(new Posn(0, 1), new Posn(1, 1));
      hash.put(new Posn(1, 1), new Posn(1, 1));
      hash.put(new Posn(2, 1), new Posn(2, 1));
-     t.checkExpect(hash.get(p2), new Posn(0, 0));
+     t.checkExpect(hash.get(p2), new Posn(0, 0));*/
      //t.checkExpect(uF.find(new Posn(0, 0)), new Posn(0, 0));
- }*/
+     }
     // tests union for the class UnionFind TODO
     void testUnion(Tester t) {
 
