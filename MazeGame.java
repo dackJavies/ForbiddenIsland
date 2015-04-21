@@ -467,7 +467,7 @@ class IListIterator<T> implements Iterator<T> {
     public T next() {
 
         if (!this.hasNext()) {
-            throw new RuntimeException();
+            throw new RuntimeException("there is no next");
         }
 
         Cons<T> sourceAsCons = (Cons<T>)this.src;
@@ -1088,7 +1088,7 @@ class MazeWorld extends World {
 
 }
 
-//examples and tests for the MazeWorld
+// examples and tests for the MazeWorld
 class ExamplesMaze {
 
     Vertex A;
@@ -1432,9 +1432,15 @@ class ExamplesMaze {
                         new Cons<String>("4", new Mt<String>())))));
         t.checkExpect(mTI.map(tS), new Mt<String>());
     }
-    // tests contains for the IList interface TODO
+    // tests contains for the IList interface 
     void testContains(Tester t) {
-
+        IList<Integer> lII = new Cons<Integer>(10, new Cons<Integer>(3, new Cons<Integer>(5, 
+                new Cons<Integer>(6, new Cons<Integer>(8, new Cons<Integer>(9, new Mt<Integer>()))))));
+        t.checkExpect(new Mt<Integer>().contains(2), false);
+        t.checkExpect(lII.contains(11), false);
+        t.checkExpect(lII.contains(8), true);
+        t.checkExpect(lII.contains(6), true);
+        t.checkExpect(lII.contains(9), true);
     }
     // tests list2tree for the interface IList
     void testList2Tree(Tester t) {
@@ -1489,22 +1495,60 @@ class ExamplesMaze {
         t.checkExpect(tS.apply(2), "2");
         t.checkExpect(tS.apply(-3), "-3");
     }
-    // tests hasNext for the IListIterator TODO
+    // tests next for the IListIterator 
+    void testNext(Tester t) {
+        IList<Integer> eM = new Mt<Integer>();
+        IList<Integer> nonEm = new Cons<Integer>(2, new Cons<Integer>(3, eM));
+        IListIterator<Integer> iI = new IListIterator<Integer>(eM);
+        IListIterator<Integer> iI2 = new IListIterator<Integer>(nonEm);
+        t.checkException(new RuntimeException("there is no next"), iI, "next");
+        t.checkExpect(iI2.next(), 2);
+        t.checkExpect(iI2.next(), 3);
+        t.checkException(new RuntimeException("there is no next"), iI2, "next");
+    }
+    // tests hasNext for the IListIterator 
+    void testHasNext(Tester t) {
+        IList<Integer> eM = new Mt<Integer>();
+        IList<Integer> nonEm = new Cons<Integer>(2, new Cons<Integer>(3, eM));
+        IListIterator<Integer> iI = new IListIterator<Integer>(eM);
+        IListIterator<Integer> iI2 = new IListIterator<Integer>(nonEm);
+        t.checkExpect(iI.hasNext(), false);
+        t.checkExpect(iI2.hasNext(), true);
+        iI2.next();
+        t.checkExpect(iI2.hasNext(), true);
+        iI2.next();
+        t.checkExpect(iI2.hasNext(), false);
+    }
 
-    // tests next for the IListIterator TODO
-
-    // tests remove for the IListIterator TODO
-
+    // tests remove for the IListIterator 
+    void testRemove(Tester t) {
+        IList<Integer> eM = new Mt<Integer>();
+        IList<Integer> nonEm = new Cons<Integer>(2, new Cons<Integer>(3, eM));
+        IListIterator<Integer> iI = new IListIterator<Integer>(eM);
+        IListIterator<Integer> iI2 = new IListIterator<Integer>(nonEm);
+        t.checkException(new RuntimeException("Do not use this method, please"), iI2, "remove");
+        t.checkException(new RuntimeException("Do not use this method, please"), iI, "remove");
+    }
     // tests iterator for the IList interface TODO
+    void testIterator(Tester t) {
 
+    }
     // tests the CompEdge Comparator TODO
+    void testCompEdge(Tester t) {
 
+    }
     // tests the CompVert Comparator TODO
+    void testCompVert(Tester t) {
 
+    }
     // tests the RandVert Comparator TODO
+    void testRandVert(Tester t) {
 
+    }
     // tests the RandEdge Comparator TODO
+    void testRandEdge(Tester t) {
 
+    }
     // tests DisplayEdgeVisitor TODO
     void testDisplayEdgeVisitor(Tester t) {
 
@@ -1703,7 +1747,7 @@ class ExamplesMaze {
         IList<Integer> testList = new Mt<Integer>();
         ArrayList<Integer> answer = new ArrayList<Integer>();
 
-        for(int i = 0; i < 6000; i += 1) {
+        for(int i = 0; i < 100; i += 1) {
             testList = testList.addToBack(i);
             answer.add(i);
         }
@@ -1796,15 +1840,21 @@ class ExamplesMaze {
     }
 
     // tests makeImage for the MazeWorld class TODO
+    void testMakeImage(Tester t) {
 
+    }
     // tests onKeyEvent for the MazeWorld class TODO
+    void testOnKeyEvent(Tester t) {
 
+    }
     // tests onTick for the MazeWorld class TODO
+    void testOnTick(Tester t) {
 
+    }
     // tests searchComplete for the MazeWorld class TODO
+    void testSearchComplete(Tester t) {
 
-
-
+    }
     // runs the animation
     void testRunMaze(Tester t) {
         //MazeWorld maze100x60Edge = new MazeWorld(100, 60);
