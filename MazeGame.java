@@ -1043,6 +1043,7 @@ class MazeWorld extends World {
             this.gameMode = 2;
         } 
     }
+    
     public void onTick() {
         if (this.searchHeads.length() > 0 && !this.searchComplete()) {
             Cons<Vertex> sH = ((Cons<Vertex>)(this.searchHeads));
@@ -1931,64 +1932,64 @@ class ExamplesMaze {
 
         t.checkExpect(maze0.iListToArr(testList), answer);
     }
-    /*// tests Kruskel for the class UnionFind TODO
- void testKruskel(Tester t) {
+    // tests Kruskel for the class UnionFind TODO
+    void testKruskel(Tester t) {
 
-     Vertex A = new Vertex(0, 0);
-     Vertex B = new Vertex(1, 0);
-     Vertex C = new Vertex(2, 0);
-     Vertex D = new Vertex(0, 1);
-     Vertex E = new Vertex(1, 1);
-     Vertex F = new Vertex(2, 1);
+        Vertex A = new Vertex(0, 0);
+        Vertex B = new Vertex(1, 0);
+        Vertex C = new Vertex(2, 0);
+        Vertex D = new Vertex(0, 1);
+        Vertex E = new Vertex(1, 1);
+        Vertex F = new Vertex(2, 1);
 
-     Edge ec = new Edge(E, C, 15);
-     Edge cd = new Edge(C, D, 25);
-     Edge ab = new Edge(A, B, 30);
-     Edge be = new Edge(B, E, 35);
-     Edge bc = new Edge(B, C, 40);
-     Edge fd = new Edge(F, D, 50);
-     Edge ae = new Edge(A, E, 50);
-     Edge bf = new Edge(B, F, 50);
+        Edge ec = new Edge(E, C, 15);
+        Edge cd = new Edge(C, D, 25);
+        Edge ab = new Edge(A, B, 30);
+        Edge be = new Edge(B, E, 35);
+        Edge bc = new Edge(B, C, 40);
+        Edge fd = new Edge(F, D, 50);
+        Edge ae = new Edge(A, E, 50);
+        Edge bf = new Edge(B, F, 50);
 
-     A.edges = new Cons<Edge>(ab, new Mt<Edge>());
-     B.edges = new Cons<Edge>(ab, new Cons<Edge>(be,
-             new Cons<Edge>(bc, new Cons<Edge>(bf,
-                     new Mt<Edge>()))));
-     C.edges = new Cons<Edge>(ec, new Cons<Edge>(cd,
-             new Cons<Edge>(bc, new Mt<Edge>())));
-     D.edges = new Cons<Edge>(cd, new Cons<Edge>(fd,
-             new Mt<Edge>()));
-     E.edges = new Cons<Edge>(ec, new Cons<Edge>(be,
-             new Cons<Edge>(ae, new Mt<Edge>())));
-     F.edges = new Cons<Edge>(fd, new Cons<Edge>(bf,
-             new Mt<Edge>()));
+        A.edges = new Cons<Edge>(ab, new Mt<Edge>());
+        B.edges = new Cons<Edge>(ab, new Cons<Edge>(be,
+                new Cons<Edge>(bc, new Cons<Edge>(bf,
+                        new Mt<Edge>()))));
+        C.edges = new Cons<Edge>(ec, new Cons<Edge>(cd,
+                new Cons<Edge>(bc, new Mt<Edge>())));
+        D.edges = new Cons<Edge>(cd, new Cons<Edge>(fd,
+                new Mt<Edge>()));
+        E.edges = new Cons<Edge>(ec, new Cons<Edge>(be,
+                new Cons<Edge>(ae, new Mt<Edge>())));
+        F.edges = new Cons<Edge>(fd, new Cons<Edge>(bf,
+                new Mt<Edge>()));
 
-     IList<Edge> edgeList = new Mt<Edge>();
-     edgeList = edgeList.addToBack(ec);
-     edgeList = edgeList.addToBack(cd);
-     edgeList = edgeList.addToBack(ab);
-     edgeList = edgeList.addToBack(be);
-     edgeList = edgeList.addToBack(bc);
-     edgeList = edgeList.addToBack(fd);
-     edgeList = edgeList.addToBack(ae);
-     edgeList = edgeList.addToBack(bf);
+        IList<Edge> edgeList = new Mt<Edge>();
+        edgeList = edgeList.addToBack(ec);
+        edgeList = edgeList.addToBack(cd);
+        edgeList = edgeList.addToBack(ab);
+        edgeList = edgeList.addToBack(be);
+        edgeList = edgeList.addToBack(bc);
+        edgeList = edgeList.addToBack(fd);
+        edgeList = edgeList.addToBack(ae);
+        edgeList = edgeList.addToBack(bf);
 
-     HashMap<String, String> uf = new HashMap<String, String>();
-     uf.put("0-0", "0-0");
-     uf.put("1-0", "1-0");
-     uf.put("2-0", "2-0");
-     uf.put("0-1", "0-1");
-     uf.put("1-1", "1-1");
-     uf.put("2-1", "2-1");
+        HashMap<String, String> uf = new HashMap<String, String>();
+        uf.put("0-0", "0-0");
+        uf.put("1-0", "1-0");
+        uf.put("2-0", "2-0");
+        uf.put("0-1", "0-1");
+        uf.put("1-1", "1-1");
+        uf.put("2-1", "2-1");
 
-     IList<Edge> answer = new Cons<Edge>(ec, new Cons<Edge>(cd,
-             new Cons<Edge>(ab, new Cons<Edge>(be, new Cons<Edge>(bc,
-                     new Cons<Edge>(fd, new Cons<Edge>(ae, new Cons<Edge>(
-                             bf, new Mt<Edge>()))))))));
+        IList<Edge> answer = new Cons<Edge>(ec, new Cons<Edge>(cd,
+                new Cons<Edge>(ab, new Cons<Edge>(be, new Cons<Edge>(bc,
+                        new Cons<Edge>(fd, new Cons<Edge>(ae, new Cons<Edge>(
+                                bf, new Mt<Edge>()))))))));
 
-     //t.checkExpect(maze0.kruskel(edgeList), answer);
+        //t.checkExpect(maze0.kruskel(edgeList), answer);
 
- }*/
+ }
 
     // tests makeImage for the MazeWorld class TODO
     void testMakeImage(Tester t) {
@@ -2017,7 +2018,7 @@ class ExamplesMaze {
     }
     // tests onTick for the MazeWorld class TODO
     void testOnTick(Tester t) {
-
+        
     }
     // tests searchComplete for the MazeWorld class 
     void testSearchComplete(Tester t) {
