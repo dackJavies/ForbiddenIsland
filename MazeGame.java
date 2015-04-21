@@ -730,6 +730,118 @@ class Vertex {
 
 }
 
+class MoveVertex {
+    Vertex check;
+    boolean hasMove;
+    Vertex newSearchHead;
+    String dir;
+    MoveVertex(Vertex v, String s) {
+        this.check = v;
+        hasMove = false;
+        newSearchHead = v;
+    }
+    // checks if this vertex has a connecting vertex in the given direction
+    boolean canMove() {
+        if (dir.equals("up")) {
+            return true;
+        }
+        else if (dir.equals("down")) {
+            return true;
+        }
+        else if (dir.equals("left")) {
+            return true;
+        }
+        else if (dir.equals("right")) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    // returns the new SearchHead after moving
+    // EFFECTS: sets the check Vertex's hasSearchHead field to false
+    Vertex moveDir() {
+        if 
+    }
+}
+
+class hasVertex {
+    Edge container;
+    Vertex check;
+    boolean hasVert;
+    String dir;
+    hasVertex(Edge e, Vertex v, String s) {
+        this.check = v;
+        hasVert = false;
+    }
+    // checks to see if two Posn's are equal
+    boolean equalPosn(Posn p1, Posn p2) {
+        return p1.x == p2.x && p1.y == p2.y;
+    }
+    // checks if this vertex has a connecting vertex in the given direction
+    Vertex findVert() {
+        Vertex from = this.container.from;
+        Vertex to = this.container.to;
+        int pX = this.check.posn.x;
+        int pY = this.check.posn.y;
+        Posn comp = this.check.posn;
+        if (dir.equals("up")) {
+            comp = new Posn(pX, pY - 1);
+        }
+        else if (dir.equals("down")) {
+            comp = new Posn(pX, pY + 1);
+        }
+        else if (dir.equals("left")) {
+            comp = new Posn(pX - 1, pY);
+        }
+        else if (dir.equals("right")) {
+            comp = new Posn(pX + 1, pY);
+        }
+        
+        if (dir.equals("up")) {
+            
+        }
+        else if (dir.equals("down")) {
+            if (equalPosn(from.posn, new Posn(pX, pY + 1))) {
+                this.hasVert = true;
+                return from; 
+            }
+            else if (equalPosn(to.posn, new Posn(pX, pY + 1))) {
+                this.hasVert = true;
+                return to; 
+            }
+        }
+        else if (dir.equals("left")) {
+            if (equalPosn(from.posn, new Posn(pX - 1, pY))) {
+                this.hasVert = true;
+                return from; 
+            }
+            else if (equalPosn(to.posn, new Posn(pX - 1, pY))) {
+                this.hasVert = true;
+                return to; 
+            }
+        }
+        else if (dir.equals("right")) {
+            if (equalPosn(from.posn, new Posn(pX + 1, pY))) {
+                this.hasVert = true;
+                return from; 
+            }
+            else if (equalPosn(to.posn, new Posn(pX + 1, pY))) {
+                this.hasVert = true;
+                return to; 
+            }
+        }
+        else {
+            return false;
+        }
+    }
+    // returns the new SearchHead after moving
+    // EFFECTS: sets the check Vertex's hasSearchHead field to false
+    Vertex moveDir() {
+        if 
+    }
+}
+
 //represents an edge of the maze graph
 class Edge {
     Vertex from;
@@ -911,7 +1023,7 @@ class MazeWorld extends World {
 
     }
 
-   // Add edges to the given ArrayList<ArrayList<Vertex>> (overloaded for testing)
+    // Add edges to the given ArrayList<ArrayList<Vertex>> (overloaded for testing)
     void addEdges(ArrayList<ArrayList<Vertex>> grid, int r) {
 
         // Connections to the left/right
@@ -958,10 +1070,17 @@ class MazeWorld extends World {
 
             }
         }
-
         return edges;
-
     }
+    // manually moves the SearchHead in a direction
+    void moveSearchHead(String s) {
+        Cons<Vertex> searchAsCons = (Cons<Vertex>)this.searchHeads;
+        if ((s.equals("up") || s.equals("down") || s.equals("left") || s.equals("right")) 
+                && searchAsCons.first.canMove(s)) {
+            this.searchHeads = new Cons<Vertex>(searchAsCons.first.moveDir(s), new Mt<Vertex>()); 
+        }
+    }
+
     // Draws the World
     public WorldImage makeImage() {
         IComp<Edge> ranE = new RandEdge(); 
@@ -1064,10 +1183,6 @@ class UnionFind {
         this.initializeHashMap();
         this.edgeList = this.edgeList.sort(new CompEdge());
 
-    }
-    // determines if two Posns are equal
-    boolean equalPosn(Posn p1, Posn p2) {
-        return (p1.x == p2.x) && (p1.y == p2.y);
     }
     // initializes the representatives of a list of Vertices
     void initializeHashMap() {
@@ -1206,15 +1321,15 @@ class ExamplesMaze {
     // v8 
     Edge e8to9 = new Edge(v8, v9, 1);
     IList<Edge> mTE = new Mt<Edge>();
-    // row 1
+    // column 1
     IList<Edge> l1 = new Mt<Edge>();
     IList<Edge> l2 = new Mt<Edge>();
     IList<Edge> l3 = new Mt<Edge>();
-    // row 2
+    // column 2
     IList<Edge> l4 = new Mt<Edge>();
     IList<Edge> l5 = new Mt<Edge>();
     IList<Edge> l6 = new Mt<Edge>();
-    // row 3
+    // column 3
     IList<Edge> l7 = new Mt<Edge>();
     IList<Edge> l8 = new Mt<Edge>();
     IList<Edge> l9 = new Mt<Edge>();
@@ -1781,65 +1896,6 @@ class ExamplesMaze {
 
         t.checkExpect(maze0.iListToArr(testList), answer);
     }
-    /*// tests Kruskel for the class MazeWorld TODO
- void testKruskel(Tester t) {
-
-     Vertex A = new Vertex(0, 0);
-     Vertex B = new Vertex(1, 0);
-     Vertex C = new Vertex(2, 0);
-     Vertex D = new Vertex(0, 1);
-     Vertex E = new Vertex(1, 1);
-     Vertex F = new Vertex(2, 1);
-
-     Edge ec = new Edge(E, C, 15);
-     Edge cd = new Edge(C, D, 25);
-     Edge ab = new Edge(A, B, 30);
-     Edge be = new Edge(B, E, 35);
-     Edge bc = new Edge(B, C, 40);
-     Edge fd = new Edge(F, D, 50);
-     Edge ae = new Edge(A, E, 50);
-     Edge bf = new Edge(B, F, 50);
-
-     A.edges = new Cons<Edge>(ab, new Mt<Edge>());
-     B.edges = new Cons<Edge>(ab, new Cons<Edge>(be,
-             new Cons<Edge>(bc, new Cons<Edge>(bf,
-                     new Mt<Edge>()))));
-     C.edges = new Cons<Edge>(ec, new Cons<Edge>(cd,
-             new Cons<Edge>(bc, new Mt<Edge>())));
-     D.edges = new Cons<Edge>(cd, new Cons<Edge>(fd,
-             new Mt<Edge>()));
-     E.edges = new Cons<Edge>(ec, new Cons<Edge>(be,
-             new Cons<Edge>(ae, new Mt<Edge>())));
-     F.edges = new Cons<Edge>(fd, new Cons<Edge>(bf,
-             new Mt<Edge>()));
-
-     IList<Edge> edgeList = new Mt<Edge>();
-     edgeList = edgeList.addToBack(ec);
-     edgeList = edgeList.addToBack(cd);
-     edgeList = edgeList.addToBack(ab);
-     edgeList = edgeList.addToBack(be);
-     edgeList = edgeList.addToBack(bc);
-     edgeList = edgeList.addToBack(fd);
-     edgeList = edgeList.addToBack(ae);
-     edgeList = edgeList.addToBack(bf);
-
-     HashMap<String, String> uf = new HashMap<String, String>();
-     uf.put("0-0", "0-0");
-     uf.put("1-0", "1-0");
-     uf.put("2-0", "2-0");
-     uf.put("0-1", "0-1");
-     uf.put("1-1", "1-1");
-     uf.put("2-1", "2-1");
-
-     IList<Edge> answer = new Cons<Edge>(ec, new Cons<Edge>(cd,
-             new Cons<Edge>(ab, new Cons<Edge>(be, new Cons<Edge>(bc,
-                     new Cons<Edge>(fd, new Cons<Edge>(ae, new Cons<Edge>(
-                             bf, new Mt<Edge>()))))))));
-
-     //t.checkExpect(maze0.kruskel(edgeList), answer);
-
- }*/
-
     // tests makeImage for the MazeWorld class TODO
     void testMakeImage(Tester t) {
 
@@ -1856,59 +1912,168 @@ class ExamplesMaze {
     void testSearchComplete(Tester t) {
 
     }
-    // tests find for the class UnionFind TODO
+    // tests initializeHashMap for the class UnionFind 
+    void testInitializeHashMap(Tester t) {
+        HashMap<Vertex, Vertex> hashy = new HashMap<Vertex, Vertex>();
+        Vertex vertA = new Vertex(0, 0);
+        Vertex vertB = new Vertex(0, 1);
+        Vertex vertC = new Vertex(1, 0);
+        Vertex vertD = new Vertex(1, 1);
+        ArrayList<ArrayList<Vertex>> aAV = new ArrayList<ArrayList<Vertex>>();
+        ArrayList<Vertex> aV = new ArrayList<Vertex>();
+        aV.add(vertA);
+        aV.add(vertB);
+        aV.add(vertC);
+        aV.add(vertD);
+        aAV.add(aV);
+        UnionFind uF = new UnionFind(aAV, new Mt<Edge>());
+        uF.reps = new HashMap<Vertex, Vertex>();
+        t.checkExpect(uF.reps, new HashMap<Vertex, Vertex>());
+        hashy.put(vertA, vertA);
+        hashy.put(vertB, vertB);
+        hashy.put(vertC, vertC);
+        hashy.put(vertD, vertD);
+        uF.initializeHashMap();
+        t.checkExpect(uF.reps, hashy);
+
+    }
+    // tests find for the class UnionFind 
     void testFind(Tester t) {
-        UnionFind uF = new UnionFind(new ArrayList<ArrayList<Vertex>>(), new Mt<Edge>());
-        HashMap<Vertex, Vertex> hash = uF.reps;
-        Vertex v1 = new Vertex(0, 0);
-        Vertex v2 = new Vertex(0, 0);
-        Vertex v3 = new Vertex(0, 0);
-        Vertex v4 = new Vertex(0, 0);
-        Vertex v5 = new Vertex(0, 0);
-        /*hash.put(p2, new Posn(0, 0));
-     hash.put(new Posn(1, 0), new Posn(1, 0));
-     hash.put(new Posn(2, 0), new Posn(0, 1));
-     hash.put(new Posn(0, 1), new Posn(1, 1));
-     hash.put(new Posn(1, 1), new Posn(1, 1));
-     hash.put(new Posn(2, 1), new Posn(2, 1));
-     t.checkExpect(hash.get(p2), new Posn(0, 0));*/
-        //t.checkExpect(uF.find(new Posn(0, 0)), new Posn(0, 0));
+        Vertex vertA = new Vertex(0, 0);
+        Vertex vertB = new Vertex(0, 1);
+        Vertex vertC = new Vertex(1, 0);
+        Vertex vertD = new Vertex(1, 1);
+        ArrayList<ArrayList<Vertex>> aAV = new ArrayList<ArrayList<Vertex>>();
+        ArrayList<Vertex> aV = new ArrayList<Vertex>();
+        aV.add(vertA);
+        aV.add(vertB);
+        aV.add(vertC);
+        aV.add(vertD);
+        aAV.add(aV);
+        UnionFind uF = new UnionFind(aAV, new Mt<Edge>());
+        t.checkExpect(uF.find(vertA), vertA);
+        t.checkExpect(uF.find(vertB), vertB);
+        uF.reps.put(vertA, vertB);
+        t.checkExpect(uF.find(vertA), vertB);
+        uF.reps.put(vertB, vertD);
+        t.checkExpect(uF.find(vertA), vertD);
     }
-    // tests union for the class UnionFind TODO
+    // tests union for the class UnionFind 
     void testUnion(Tester t) {
+        Vertex vertA = new Vertex(0, 0);
+        Vertex vertB = new Vertex(0, 1);
+        Vertex vertC = new Vertex(1, 0);
+        Vertex vertD = new Vertex(1, 1);
+        ArrayList<ArrayList<Vertex>> aAV = new ArrayList<ArrayList<Vertex>>();
+        ArrayList<Vertex> aV = new ArrayList<Vertex>();
+        aV.add(vertA);
+        aV.add(vertB);
+        aV.add(vertC);
+        aV.add(vertD);
+        aAV.add(aV);
+        UnionFind uF = new UnionFind(aAV, new Mt<Edge>());
+        t.checkExpect(uF.find(vertA), vertA);
+        t.checkExpect(uF.find(vertB), vertB);
+        uF.union(vertA, vertB);
+        t.checkExpect(uF.find(vertA), vertB);
+        uF.union(vertB, vertD);
+        t.checkExpect(uF.find(vertA), vertD);
+    }
+    // tests formsCycle for the class UnionFind 
+    void testformsCycle(Tester t) {
+        HashMap<Posn, Posn> uf = new HashMap<Posn, Posn>();
+        Vertex vertA = new Vertex(0, 0);
+        Vertex vertB = new Vertex(0, 1);
+        Vertex vertC = new Vertex(1, 0);
+        Vertex vertD = new Vertex(1, 1);
+        Vertex vertE = new Vertex(2, 0);
+        Vertex vertF = new Vertex(2, 1);
+        ArrayList<ArrayList<Vertex>> aAV = new ArrayList<ArrayList<Vertex>>();
+        ArrayList<Vertex> aV = new ArrayList<Vertex>();
+        aV.add(vertA);
+        aV.add(vertB);
+        aV.add(vertC);
+        aV.add(vertD);
+        aV.add(vertE);
+        aV.add(vertF);
+        aAV.add(aV);
+        UnionFind uF = new UnionFind(aAV, new Mt<Edge>());
+        uF.union(vertC, vertA);
+        uF.union(vertB, vertC);
+        uF.union(vertD, vertE);
+        t.checkExpect(uF.formsCycle(vertA, vertA), true);
+        t.checkExpect(uF.formsCycle(vertB, vertC), true);
+        t.checkExpect(uF.formsCycle(vertA, vertD), false);
+        t.checkExpect(uF.formsCycle(vertB, vertE), false);
+        t.checkExpect(uF.formsCycle(vertD, vertE), true);
+    }
+    // tests Kruskel for the class UnionFind TODO
+    void testKruskel(Tester t) {
+
+        MazeWorld m1 = new MazeWorld(3, 3);
+        Vertex A = new Vertex(0, 0);
+        Vertex B = new Vertex(1, 0);
+        Vertex C = new Vertex(2, 0);
+        Vertex D = new Vertex(0, 1);
+        Vertex E = new Vertex(1, 1);
+        Vertex F = new Vertex(2, 1);
+        ArrayList<Vertex> aV = new ArrayList<Vertex>();
+        ArrayList<Vertex> aV2 = new ArrayList<Vertex>();
+        aV.add(A);
+        aV.add(B);
+        aV.add(C);
+        aV2.add(D);
+        aV2.add(E);
+        aV2.add(F);
+        ArrayList<ArrayList<Vertex>> aAV = new ArrayList<ArrayList<Vertex>>();
+        aAV.add(aV);
+        aAV.add(aV2);
+        Edge ec = new Edge(E, C, 15);
+        Edge cd = new Edge(C, D, 25);
+        Edge ab = new Edge(A, B, 30);
+        Edge be = new Edge(B, E, 35);
+        Edge bc = new Edge(B, C, 40);
+        Edge fd = new Edge(F, D, 50);
+        Edge ae = new Edge(A, E, 50);
+        Edge bf = new Edge(B, F, 50);
+
+        A.edges = new Cons<Edge>(ab, new Mt<Edge>());
+        B.edges = new Cons<Edge>(ab, new Cons<Edge>(be,
+                new Cons<Edge>(bc, new Cons<Edge>(bf,
+                        new Mt<Edge>()))));
+        C.edges = new Cons<Edge>(ec, new Cons<Edge>(cd,
+                new Cons<Edge>(bc, new Mt<Edge>())));
+        D.edges = new Cons<Edge>(cd, new Cons<Edge>(fd,
+                new Mt<Edge>()));
+        E.edges = new Cons<Edge>(ec, new Cons<Edge>(be,
+                new Cons<Edge>(ae, new Mt<Edge>())));
+        F.edges = new Cons<Edge>(fd, new Cons<Edge>(bf,
+                new Mt<Edge>()));
+
+        IList<Edge> edgeList = new Mt<Edge>();
+        edgeList = edgeList.addToBack(ec);
+        edgeList = edgeList.addToBack(cd);
+        edgeList = edgeList.addToBack(ab);
+        edgeList = edgeList.addToBack(be);
+        edgeList = edgeList.addToBack(bc);
+        edgeList = edgeList.addToBack(fd);
+        edgeList = edgeList.addToBack(ae);
+        edgeList = edgeList.addToBack(bf);
+        edgeList = edgeList.sort(new CompEdge());
+
+        IList<Edge> answer = new Cons<Edge>(ec, new Cons<Edge>(cd,
+                new Cons<Edge>(ab, new Cons<Edge>(be, new Cons<Edge>(bc,
+                        new Cons<Edge>(fd, new Cons<Edge>(ae, new Cons<Edge>(
+                                bf, new Mt<Edge>()))))))));
+        UnionFind uF = new UnionFind(aAV, edgeList);
+        // t.checkExpect(uF.kruskel(), answer);// TODO
 
     }
-    // tests formsCycle for the class UnionFind TODO
-    /*void testformsCycle(Tester t) {
-     UnionFind uF = new UnionFind(new ArrayList<ArrayList<Vertex>>(), new Mt<Edge>());
-     HashMap<Posn, Posn> uf = new HashMap<Posn, Posn>();
-     uf.put(new Posn(0, 0), new Posn(0, 0));
-     uf.put(new Posn(1, 0), new Posn(1, 0));
-     uf.put(new Posn(2, 0), new Posn(2, 0));
-     uf.put(new Posn(0, 1), new Posn(0, 1));
-     uf.put(new Posn(1, 1), new Posn(1, 1));
-     uf.put(new Posn(2, 1), new Posn(2, 1));
-     uF.reps = uf;
-
-     //t.checkExpect(uF.formsCycle(new Posn(0, 0), new Posn(1, 0)), false);
-
-     uF.reps.put(new Posn(1, 0), new Posn(0, 0));
-
-     //t.checkExpect(uF.formsCycle(new Posn(1, 0), new Posn(0, 0)), true);
-
-     uF.reps.put(new Posn(2, 0), new Posn(1, 0));
-
-     //t.checkExpect(uF.formsCycle(new Posn(2, 0), new Posn(0, 0)), false);
-
-     uF.reps.put(new Posn(2, 0), new Posn(0, 0));
-
-    // t.checkExpect(uF.formsCycle(new Posn(2, 0), new Posn(0, 0)), true);
- }*/
     // runs the animation
     void testRunMaze(Tester t) {
-        MazeWorld maze100x60Edge = new MazeWorld(100, 60);
-        maze100x60Edge.gameMode = 3;
-        MazeWorld maze100x60Wall = new MazeWorld(100, 60);
+        //MazeWorld maze100x60Edge = new MazeWorld(100, 60);
+        //maze100x60Edge.gameMode = 3;
+        //MazeWorld maze100x60Wall = new MazeWorld(100, 60);
         /* t.checkExpect(maze2.board.length(), 3);
         t.checkExpect(this.maze0.board.length(), 0);
         t.checkExpect(this.maze2.board.length(), 3);
