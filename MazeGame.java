@@ -1035,6 +1035,41 @@ class MazeWorld extends World {
             throw new IllegalArgumentException("input is not a direction");
         }
     }
+    // pauses the game TODO test
+    void pauseGame() {
+        if (this.isPaused) {
+            this.isPaused = false;
+        }
+        else {
+            this.isPaused = true;
+        }
+    }
+    
+    // Creates a new random Maze
+    void newBoard() {
+        this.gameMode = 0;
+        this.board = new Mt<Edge>();
+        this.searchHeads = new Mt<Vertex>();
+        this.unUsed = new Mt<Edge>();
+        ArrayList<ArrayList<Vertex>> blankCells = this.createGrid();
+        this.addEdges(blankCells);
+        IList<Edge> b = this.vertexToEdge(blankCells);
+        UnionFind kruskel = new UnionFind(blankCells, b);
+        this.board = kruskel.kruskel();
+        this.unUsed = kruskel.unUsed;
+    }
+    
+    // initializes the Search Algorithms
+    void initializeSearch() {
+        this.depthList = new Stack<Vertex>(new Deque<Vertex>());
+        this.cameFromEdge = new HashMap<Vertex, Edge>();
+
+        if (!this.searchHeads.isEmpty()) {
+            Vertex first = ((Cons<Vertex>)this.searchHeads).first;
+            this.depthList.push(first);
+            first.startVert = true;
+        }
+    }
 
     // Draws the World
     public WorldImage makeImage() {
@@ -1059,25 +1094,11 @@ class MazeWorld extends World {
     public void onKeyEvent(String s) {
         // reset the game
         if (s.equals("r")) {
-            this.gameMode = 0;
-            this.board = new Mt<Edge>();
-            this.searchHeads = new Mt<Vertex>();
-            this.unUsed = new Mt<Edge>();
-            ArrayList<ArrayList<Vertex>> blankCells = this.createGrid();
-            this.addEdges(blankCells);
-            IList<Edge> b = this.vertexToEdge(blankCells);
-            UnionFind kruskel = new UnionFind(blankCells, b);
-            this.board = kruskel.kruskel();
-            this.unUsed = kruskel.unUsed;
+            this.newBoard();
         }
         // display edges mode
         else if (s.equals("e")) {
-            if (!this.isPaused) { 
-                this.isPaused = true;
-            }
-            else {
-                this.isPaused = false;
-            }
+            this.pauseGame();
         }
         // manual mode
         else if (s.equals("m") && !(this.gameMode == 0)) {
@@ -1085,26 +1106,12 @@ class MazeWorld extends World {
         }
         // depth-first search mode
         else if (s.equals("d") && !(this.gameMode == 1)) {
-            depthList = new Stack<Vertex>(new Deque<Vertex>());
-            cameFromEdge = new HashMap<Vertex, Edge>();
-
-            if (!this.searchHeads.isEmpty()) {
-                Vertex first = ((Cons<Vertex>)this.searchHeads).first;
-                depthList.push(first);
-                first.startVert = true;
-            }
+            this.initializeSearch();
             this.gameMode = 1;
         }
         // breadth-first search mode
         else if (s.equals("b") && !(this.gameMode == 2)) {
-            breadthList = new Queue<Vertex>(new Deque<Vertex>());
-            cameFromEdge = new HashMap<Vertex, Edge>();
-
-            if (!this.searchHeads.isEmpty()) {
-                Vertex first = ((Cons<Vertex>)this.searchHeads).first;
-                breadthList.enqueue(first);
-                first.startVert = true;
-            }
+            this.initializeSearch();
             this.gameMode = 2;
         } 
         else if (this.gameMode == 0 && (s.equals("up") || s.equals("down") || s.equals("left") || s.equals("right"))) {
@@ -1911,7 +1918,7 @@ t.checkExpect(this.bot6.tree2List(), this.sortedL);*/
         Edge eB = new Edge(vB, vC, 3);
         // horizontally connected
         t.checkExpect(eA.displayWall(), new LineImage(new Posn(10, 0), new Posn(10, 10),
-                new Color(90, 100, 90)));
+                new Color(120, 0, 0)));
         // vertically connected
         t.checkExpect(eB.displayWall(), new LineImage(new Posn(10, 10), new Posn(20, 10),
                 new Color(120, 0, 0)));
