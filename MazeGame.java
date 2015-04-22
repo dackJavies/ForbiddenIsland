@@ -2278,6 +2278,19 @@ t.checkExpect(this.bot6.tree2List(), this.sortedL);*/
 
 
     }
+    
+    // tests breadthFirstSearch in the class MazeWorld
+    void testBFS(Tester t) {
+        
+        t.checkExpect(maze3.breadthList.contents.size(), 1);
+        
+        
+    }
+    
+    // tests depthFirstSearch in the class MazeWorld
+    void testDFS(Tester t) {
+        
+    }
 
     // runs the animation
     void testRunMaze(Tester t) {
