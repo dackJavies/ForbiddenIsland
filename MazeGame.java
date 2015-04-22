@@ -107,32 +107,32 @@ class Cons<T> implements IList<T> {
     // gets the nth element of this list
     public T get(int n) {
         if (this.length() > n) {
-        int n1 = n;
-        T result = this.first;
-        for (T t: this) {
-            if (n1 <= 0) {
-                return t;
+            int n1 = n;
+            T result = this.first;
+            for (T t: this) {
+                if (n1 <= 0) {
+                    return t;
+                }
+                else {
+                    n1 -= 1;
+                }
             }
-            else {
-                n1 -= 1;
-            }
-        }
-        return result;
+            return result;
         }
         else {
             throw new RuntimeException("get cannot be called on Mt");
         }
     }
-    
+
     public IList<T> remove(T t) {
-        
+
         if (this.first == t) {
             return this.rest;
         }
         else {
             return new Cons<T>(this.first, this.rest.remove(t));
         }
-        
+
     }
 } 
 
@@ -518,7 +518,7 @@ class RandEdge implements IComp<Edge> {
             return 0;
         }
     }
-    
+
 }
 
 //this compares two Edges randomly
@@ -592,43 +592,15 @@ class MoveVertex {
         this.current = v;
         hasDir = false;
     }
-    // if there is a possible Vertex to move to, returns that otherwise, removes 
-    // the check Vertex
-    // EFFECTS: updates this objects check, and hasMove fields 
-    Vertex move(String dir) {
-        Vertex result = this.current;
-        for (Edge e: this.current.edges) {
-            HasVertex hV = new HasVertex(e, this.current.posn, dir);
-            if (hV.hasVert) {
-                result = hV.findVert();
-                this.hasDir = true;
-            }
-        }
-        return result;
-    }
-}
-
-class HasVertex {
-    Edge edge;
-    Posn searchPosn;
-    boolean hasVert;
-    String dir;
-    HasVertex(Edge e, Posn p, String s) {
-        this.edge = e;
-        this.searchPosn = p;
-        hasVert = false;
-    }
     // checks to see if two Posn's are equal
     boolean equalPosn(Posn p1, Posn p2) {
         return (p1.x == p2.x) && (p1.y == p2.y);
     }
-    // checks if this vertex has a connecting vertex in the given direction
-    // EFFECTS: updates this objects check, and hasVert fields 
-    Vertex findVert() {
-        Vertex from = this.edge.from;
-        Vertex to = this.edge.to;
-        int pX = this.searchPosn.x;
-        int pY = this.searchPosn.y;
+    // checks each of the 
+    Vertex move(String dir) {
+        Vertex result = this.current;
+        int pX = this.current.getX();
+        int pY = this.current.getY();
         Posn comp = null;
         // picks the correct posn
         if (dir.equals("up")) {
@@ -646,18 +618,13 @@ class HasVertex {
         else {
             throw new IllegalArgumentException("dir is not a direction");
         }
-        // does the check
-        if (equalPosn(from.posn, comp)) {
-            this.hasVert = true;
-            return from; 
+        for (Vertex v: this.current.findNeighbors()) {
+            if (this.equalPosn(v.posn, comp)) {
+                result = v;
+                this.hasDir = true;
+            }
         }
-        else if (equalPosn(to.posn, comp)) {
-            this.hasVert = true;
-            return to; 
-        }
-        else {
-            throw new RuntimeException("There is no Vertex next to the current one");
-        }
+        return result;
     }
 }
 
@@ -761,6 +728,19 @@ class Vertex {
         this.edges = this.edges.addToBack(toAdd);
         other.edges = other.edges.addToBack(toAdd);
     }
+    // sets the neighbors of this vertex
+    IList<Vertex> findNeighbors() {
+        IList<Vertex> neighbors = new Mt<Vertex>();
+        for (Edge e: this.edges) {
+            if (e.from == this) {
+                neighbors = neighbors.addToBack(e.to);
+            }
+            else {
+                neighbors = neighbors.addToBack(e.from);
+            }
+        }
+        return neighbors;
+    }
     // displays the maze cell
     WorldImage displayCell() {
         int sideLength = 10;
@@ -852,7 +832,7 @@ class MazeWorld extends World {
     IList<Edge> board;
     IList<Edge> unUsed;
     IList<Vertex> searchHeads;
-    
+
     Stack<Vertex> depthList;
     Queue<Vertex> breadthList;
     HashMap<Vertex, Edge> cameFromEdge;
@@ -879,11 +859,11 @@ class MazeWorld extends World {
         //this.board = b;
         this.board = kruskel.kruskel();
         this.unUsed = kruskel.unUsed;
-        
+
         depthList = new Stack<Vertex>(new Deque<Vertex>());
         breadthList = new Queue<Vertex>(new Deque<Vertex>());
         cameFromEdge = new HashMap<Vertex, Edge>();
-        
+
         if (!this.searchHeads.isEmpty()) {
             Vertex first = ((Cons<Vertex>)this.searchHeads).first;
             depthList.push(first);
@@ -1041,10 +1021,11 @@ class MazeWorld extends World {
         Vertex searchHead = this.searchHeads.get(0);
         if (s.equals("up") || s.equals("down") || s.equals("left") || s.equals("right")) {
             MoveVertex moveVertex = new MoveVertex(searchHead); 
+            Vertex next = moveVertex.move(s);
             if (moveVertex.hasDir) {
-                
-                this.searchHeads = new Cons<Vertex>(moveVertex.move(s), new Mt<Vertex>());
-                this.searchHeads.get(0).hasSearchHead = true;
+                this.addSearchHeadToBack(next);
+                this.searchHeads.get(0).wasSearched = true;
+                this.searchHeads = this.removeSearchHead(this.searchHeads.get(0));
             }
             else {
                 this.searchHeads = this.searchHeads;
@@ -1106,7 +1087,7 @@ class MazeWorld extends World {
         else if (s.equals("d") && !(this.gameMode == 1)) {
             depthList = new Stack<Vertex>(new Deque<Vertex>());
             cameFromEdge = new HashMap<Vertex, Edge>();
-            
+
             if (!this.searchHeads.isEmpty()) {
                 Vertex first = ((Cons<Vertex>)this.searchHeads).first;
                 depthList.push(first);
@@ -1118,7 +1099,7 @@ class MazeWorld extends World {
         else if (s.equals("b") && !(this.gameMode == 2)) {
             breadthList = new Queue<Vertex>(new Deque<Vertex>());
             cameFromEdge = new HashMap<Vertex, Edge>();
-            
+
             if (!this.searchHeads.isEmpty()) {
                 Vertex first = ((Cons<Vertex>)this.searchHeads).first;
                 breadthList.enqueue(first);
@@ -1126,19 +1107,16 @@ class MazeWorld extends World {
             }
             this.gameMode = 2;
         } 
-        else if (this.gameMode == 0 && s.equals("g")) {
-            this.addSearchHeadToFront(this.searchHeads.get(0).edges.get(0).to);
-            this.addSearchHeadToFront(((Cons<Edge>)((Cons<Vertex>)(this.searchHeads)).first.edges).first.from);
-           // this.searchHeads = new Mt<Vertex>();
-            
+        else if (this.gameMode == 0 && (s.equals("up") || s.equals("down") || s.equals("left") || s.equals("right"))) {
+            this.moveSearchHead(s);
         }
     }
-    
+
     // Search through the tree using the Breadth-First algorithm
     // This method is called every tick, and therefore only advances
     // the search by one increment per call.
     void breadthFirstSearch() {
-        
+
         if (!this.breadthList.isEmpty()) {
             Vertex next = this.breadthList.dequeue();
             if (!next.wasSearched && next.endVert) {
@@ -1161,14 +1139,14 @@ class MazeWorld extends World {
                 }
             }
         }
-        
+
     }
 
     // Search through the tree using the Depth-First algorithm
     // This method is called every tick, and therefore only advances
     // the search by one increment per call.
     void depthFirstSearch() {
-        
+
         if (!this.depthList.isEmpty()) {
             Vertex next = this.depthList.pop();
             if (!next.wasSearched && next.endVert) {
@@ -1191,23 +1169,23 @@ class MazeWorld extends World {
                 }
             }
         }
-        
+
     }
-    
+
     // onTick is called at regular time intervals
     public void onTick() {
         if (!this.isPaused) {
-        // DF search
-        if (this.gameMode == 1) {
-            this.depthFirstSearch();
-        }
-        // BF search
-        else if (this.gameMode == 2) {
-            this.breadthFirstSearch();
-        }
+            // DF search
+            if (this.gameMode == 1) {
+                this.depthFirstSearch();
+            }
+            // BF search
+            else if (this.gameMode == 2) {
+                this.breadthFirstSearch();
+            }
         }
     }
-    
+
     // reconstruct the path from the end to the beginning
     IList<Vertex> reconstruct(Vertex end, IList<Vertex> finalPath) {
         if (end.startVert) {
@@ -1637,14 +1615,14 @@ class ExamplesMaze {
     // tests tree2List for the IList interface
     void testTree2(Tester t) {
         /*MazeWorld maze100x60Edge = new MazeWorld(60, 60); TODO uncomment 
-   t.checkExpect(this.bot6.tree2List(), this.sortedL);
-   ITST<Edge> tree1 = maze100x60Edge.board.list2Tree(new RandEdge());
-   Cons<Edge> lister1 = (Cons<Edge>) tree1.tree2List();
-   t.checkExpect(lister1.first.from.x, lister1.first.from.x);
-   t.checkExpect(lister1.first.from.y, lister1.first.from.y);
-   t.checkExpect(lister1.first.to.x, lister1.first.to.x);
-   t.checkExpect(lister1.first.to.y, lister1.first.to.y);
-   t.checkExpect(this.bot6.tree2List(), this.sortedL);*/
+t.checkExpect(this.bot6.tree2List(), this.sortedL);
+ITST<Edge> tree1 = maze100x60Edge.board.list2Tree(new RandEdge());
+Cons<Edge> lister1 = (Cons<Edge>) tree1.tree2List();
+t.checkExpect(lister1.first.from.x, lister1.first.from.x);
+t.checkExpect(lister1.first.from.y, lister1.first.from.y);
+t.checkExpect(lister1.first.to.x, lister1.first.to.x);
+t.checkExpect(lister1.first.to.y, lister1.first.to.y);
+t.checkExpect(this.bot6.tree2List(), this.sortedL);*/
     }
     // tests apply for the function ToString
     void testToString(Tester t) {
@@ -1707,46 +1685,46 @@ class ExamplesMaze {
     }
     // tests the CompEdge Comparator 
     void testCompEdge(Tester t) {
-        
+
         Vertex v1 = new Vertex(0, 0);
         Vertex v2 = new Vertex(1, 0);
-        
+
         Edge e1 = new Edge(v1, v2, 10);
         Edge e2 = new Edge(v1, v2, 50);
-        
+
         CompEdge cE = new CompEdge();
-        
+
         t.checkExpect(cE.compare(e1, e2), -1);
         t.checkExpect(cE.compare(e2, e1), 1);
         t.checkExpect(cE.compare(e1, e1), 0);
-        
+
     }
     // tests the CompVert Comparator 
     void testCompVert(Tester t) {
-        
+
         this.initialize();
-        
+
         CompVert cV = new CompVert();
-        
+
         t.checkExpect(cV.compare(v1, v2), -1);
         t.checkExpect(cV.compare(v2, v3), -1);
         t.checkExpect(cV.compare(v3, v4), -1);
-        
+
         t.checkExpect(cV.compare(v1, v1), 0);
         t.checkExpect(cV.compare(v2, v2), 0);
         t.checkExpect(cV.compare(v5, v5), 0);
-        
+
         t.checkExpect(cV.compare(v6, v5), 1);
         t.checkExpect(cV.compare(v6, v1), 1);
-        
+
     }
     // tests the RandVert Comparator
     void testRandVert(Tester t) {
-        
+
         this.initialize();
-        
+
         RandVert rV = new RandVert();
-        
+
         t.checkExpect(rV.compare(v1, v2, 10), -1);
         t.checkExpect(rV.compare(v1, v2, 10), 0);
         t.checkExpect(rV.compare(v1, v2, 10), -1);
@@ -1762,15 +1740,15 @@ class ExamplesMaze {
         t.checkExpect(rV.compare(v1, v2, 10), 0);
         t.checkExpect(rV.compare(v1, v2, 10), -1);
         t.checkExpect(rV.compare(v1, v2, 10), 1);
-        
+
     }
     // tests the RandEdge Comparator 
     void testRandEdge(Tester t) {
-        
+
         this.initialize();
-        
+
         RandVert rV = new RandVert();
-        
+
         t.checkExpect(rV.compare(v1, v2, 10), -1);
         t.checkExpect(rV.compare(v1, v2, 10), 0);
         t.checkExpect(rV.compare(v1, v2, 10), -1);
@@ -1786,22 +1764,22 @@ class ExamplesMaze {
         t.checkExpect(rV.compare(v1, v2, 10), 0);
         t.checkExpect(rV.compare(v1, v2, 10), -1);
         t.checkExpect(rV.compare(v1, v2, 10), 1);
-        
+
     }
     // tests DisplayEdgeVisitor 
     void testDisplayEdgeVisitor(Tester t) {
-        
+
         Vertex v1 = new Vertex(0, 0);
         Vertex v2 = new Vertex(0, 1);
-        
+
         Edge e1 = new Edge(v1, v2, 2);
-        
+
         Mt<Edge> mt = new Mt<Edge>();
         Cons<Edge> cons = new Cons<Edge>(e1, mt );
-        
+
         Leaf<Edge> l = new Leaf<Edge>();
         TTNode<Edge> n = new TTNode<Edge>(e1, l, l, l);
-        
+
         WorldImage leafImg = new LineImage(new Posn(-1, -1),
                 new Posn(-1, -1), new Color(255, 255, 255));
         WorldImage nodeImg = new OverlayImages(n.data.displayEdge(false),
@@ -1810,11 +1788,11 @@ class ExamplesMaze {
         WorldImage nodeImg2 = new OverlayImages(n.data.displayEdge(true),
                 new OverlayImages(leafImg, 
                         new OverlayImages(leafImg, leafImg)));
-        
-        
+
+
         DisplayEdgeVisitor dEV = new DisplayEdgeVisitor(false);
         DisplayEdgeVisitor dEV2 = new DisplayEdgeVisitor(true);
-        
+
         t.checkException(new IllegalArgumentException("IList is not a valid argument"),
                 dEV, "visit", mt);
         t.checkException(new IllegalArgumentException("IList is not a valid argument"),
@@ -1826,33 +1804,33 @@ class ExamplesMaze {
     }
     // tests DisplayWallVisitor 
     void testDisplayWallVisitor(Tester t) {
-        
+
         Vertex v1 = new Vertex(0, 0);
         Vertex v2 = new Vertex(0, 1);
-        
+
         Edge e1 = new Edge(v1, v2, 2);
-        
+
         Mt<Edge> mt = new Mt<Edge>();
         Cons<Edge> cons = new Cons<Edge>(e1, mt );
-        
+
         Leaf<Edge> l = new Leaf<Edge>();
         TTNode<Edge> n = new TTNode<Edge>(e1, l, l, l);
-        
+
         WorldImage leafImg = new LineImage(new Posn(-1, -1),
                 new Posn(-1, -1), new Color(255, 255, 255));
         WorldImage nodeImg = new OverlayImages(n.data.displayWall(),
                 new OverlayImages(leafImg, 
                         new OverlayImages(leafImg, leafImg)));
-        
+
         DisplayWallVisitor dWV = new DisplayWallVisitor();
-        
+
         t.checkException(new IllegalArgumentException("IList is not a valid argument"),
                 dWV, "visit", mt);
         t.checkException(new IllegalArgumentException("IList is not a valid argument"),
                 dWV, "visit", cons);
         t.checkExpect(dWV.visit(l), leafImg);
         t.checkExpect(dWV.visit(n), nodeImg);
-        
+
     }
     // tests insert in the ITST interface
     void testInsert(Tester t) {
@@ -1932,7 +1910,7 @@ class ExamplesMaze {
         t.checkExpect(vC.displayCell(), new RectangleImage(new Posn(15, 15), 10, 10, new Color(56, 176, 222)));
     }
     // initializes the testSearch method
-    void initializeSearch() {
+    void initializeN() {
 
         this.A = new Vertex(0, 0);
         this.B = new Vertex(1, 0);
@@ -1945,11 +1923,16 @@ class ExamplesMaze {
         this.C.addEdge(D, 25);
         this.A.addEdge(B, 30);
         this.B.addEdge(E, 35);
-        this.B.addEdge(C, 40);
         this.F.addEdge(D, 50);
         this.A.addEdge(E, 50);
-        this.B.addEdge(F, 50);
 
+    }
+    // tests findNeighbors in the class Vertex
+    void testFindNeighbors(Tester t) {
+        this.initializeN();
+        t.checkExpect(this.A.findNeighbors(), new Cons<Vertex>(this.B, new Cons<Vertex>(this.E, new Mt<Vertex>())));
+        t.checkExpect(this.B.findNeighbors(), new Cons<Vertex>(this.A, new Cons<Vertex>(this.E, new Mt<Vertex>())));
+        t.checkExpect(this.C.findNeighbors(), new Cons<Vertex>(this.E, new Cons<Vertex>(this.D, new Mt<Vertex>())));
     }
     // tests addEdge for the class Vertex
     void testAddEdge(Tester t) {
@@ -2018,7 +2001,7 @@ class ExamplesMaze {
                                                 e1to2, new Cons<Edge>(e1to4,
                                                         new Mt<Edge>(
                                                                 )))))))))))));
-        
+
         t.checkExpect(maze0.vertexToEdge(aVN), answer);
 
     }
@@ -2041,28 +2024,28 @@ class ExamplesMaze {
     }
     // tests onKeyEvent for the MazeWorld class
     void testOnKeyEvent(Tester t) {
-        
+
         MazeWorld testMaze = new MazeWorld(5, 5);
-        
+
         testMaze.onKeyEvent("r");
-       // t.checkExpect(testMaze, new MazeWorld(5, 5));// TODO random maze...?
-        
+        // t.checkExpect(testMaze, new MazeWorld(5, 5));// TODO random maze...?
+
         testMaze.onKeyEvent("m");
         t.checkExpect(testMaze.gameMode == 0);
-        
+
         testMaze.onKeyEvent("e");
         t.checkExpect(testMaze.isPaused);
-        
+
         testMaze.onKeyEvent("d");
         t.checkExpect(testMaze.gameMode == 1);
-        
+
         testMaze.onKeyEvent("b");
         t.checkExpect(testMaze.gameMode == 2);
-        
+
     }
     // tests onTick for the MazeWorld class TODO
     void testOnTick(Tester t) {
-        
+
     }
     // tests initializeHashMap for the class UnionFind 
     void testInitializeHashMap(Tester t) {
@@ -2160,7 +2143,7 @@ class ExamplesMaze {
     }
     // tests Kruskel for the class UnionFind TODO
     void testKruskel(Tester t) {
-        
+
         Vertex A = new Vertex(0, 0);
         Vertex B = new Vertex(1, 0);
         Vertex C = new Vertex(2, 0);
@@ -2180,7 +2163,7 @@ class ExamplesMaze {
         aAV.add(aV);
         aAV.add(aV2);
         aAV.add(aV3);
-        
+
         Edge ec = new Edge(E, C, 15);
         Edge cd = new Edge(C, D, 25);
         Edge ab = new Edge(A, B, 30);
@@ -2222,71 +2205,71 @@ class ExamplesMaze {
         //t.checkExpect(uF.kruskel(), answer);
 
     }
-    
+
     // Tests the remove method in the interface IList<T>
     void testRemoveIList(Tester t) {
-        
+
         String a = "A";
         String b = "B";
         String c = "C";
-        
+
         IList<String> l1 = new Cons<String>(a, new Cons<String>(b,
                 new Cons<String>(c, new Mt<String>())));
         IList<String> answer = new Cons<String>(b, new Cons<String>(c,
                 new Mt<String>()));
-        
+
         t.checkExpect(l1.remove(a), answer);
         t.checkExpect(answer.remove(c), new Cons<String>(b, new Mt<String>()));
-        
+
     }
-    
+
     // Tests the reconstruct method in the class MazeWorld
     void testReconstruct(Tester t) {
-        
+
         Vertex v1 = new Vertex(0, 0);
         Vertex v2 = new Vertex(1, 0);
         Vertex v3 = new Vertex(2, 0);
         Vertex v4 = new Vertex(0, 1);
         Vertex v5 = new Vertex(1, 1);
         Vertex v6 = new Vertex(2, 1);
-        
+
         Edge e1 = new Edge(v1, v4, 1);
         Edge e2 = new Edge(v4, v5, 2);
         Edge e3 = new Edge(v5, v2, 3);
         Edge e4 = new Edge(v2, v3, 4);
         Edge e5 = new Edge(v3, v6, 5);
-        
+
         v1.edges = new Cons<Edge>(e1, new Mt<Edge>());
         v2.edges = new Cons<Edge>(e1, new Cons<Edge>(e2,  new Mt<Edge>()));
         v3.edges = new Cons<Edge>(e2, new Cons<Edge>(e3, new Mt<Edge>()));
         v4.edges = new Cons<Edge>(e3, new Cons<Edge>(e4, new Mt<Edge>()));
         v5.edges = new Cons<Edge>(e4, new Cons<Edge>(e5, new Mt<Edge>()));
         v6.edges = new Cons<Edge>(e5, new Mt<Edge>());
-        
+
         HashMap<Vertex, Edge> cameFromEdge = new HashMap<Vertex, Edge>();
         cameFromEdge.put(v2, e1);
         cameFromEdge.put(v3, e2);
         cameFromEdge.put(v4, e3);
         cameFromEdge.put(v5, e4);
         cameFromEdge.put(v6, e5);
-        
+
         // Path should run v1 -> v4 -> v5 -> v2 -> v3 -> v6
         IList<Vertex> answer = new Cons<Vertex>(v1, new Cons<Vertex>(v4,
                 new Cons<Vertex>(v5, new Cons<Vertex>(v2, new Cons<Vertex>(
                         v3, new Cons<Vertex>(v6, new Mt<Vertex>()))))));
-        
-        
+
+
     }
-    
+
     // runs the animation
     void testRunMaze(Tester t) {
-        MazeWorld maze100x60 = new MazeWorld(100, 60);
+        MazeWorld maze100x60 = new MazeWorld(50, 30);
         //maze100x60.gameMode = 0;
         /* t.checkExpect(maze2.board.length(), 3);
-        t.checkExpect(this.maze0.board.length(), 0);
-        t.checkExpect(this.maze2.board.length(), 3);
-        t.checkExpect(this.maze3.board.length(), 8);
-        t.checkExpect(maze100x60.board.length(), 5999); */
+    t.checkExpect(this.maze0.board.length(), 0);
+    t.checkExpect(this.maze2.board.length(), 3);
+    t.checkExpect(this.maze3.board.length(), 8);
+    t.checkExpect(maze100x60.board.length(), 5999); */
         maze100x60.bigBang(1000, 600, .000001);
         //t.checkExpect(maze100x60.searchHeads.length(), 1);
     }
