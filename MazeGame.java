@@ -40,6 +40,9 @@ interface IList<T> extends Iterable<T> {
     boolean contains(T t);
     // gets the nth element of the list
     T get(int n);
+    // remove the given element from this list
+    // If the given T is not in the list, the list will be unchanged.
+    IList<T> remove(T t);
 }
 
 //represents a non-empty list
@@ -120,6 +123,17 @@ class Cons<T> implements IList<T> {
             throw new RuntimeException("get cannot be called on Mt");
         }
     }
+    
+    public IList<T> remove(T t) {
+        
+        if (this.first == t) {
+            return this.rest;
+        }
+        else {
+            return new Cons<T>(this.first, this.rest.remove(t));
+        }
+        
+    }
 } 
 
 //represents an empty list
@@ -165,6 +179,9 @@ class Mt<T> implements IList<T> {
     // gets the nth element of this list
     public T get(int n) {
         throw new RuntimeException("get cannot be called on Mt");
+    }
+    public IList<T> remove(T t) {
+        return this;
     }
 }
 
@@ -1098,11 +1115,18 @@ class MazeWorld extends World {
                 this.searchHeads =  reconstruct(next, new Mt<Vertex>());
             }
             else {
+                this.removeSearchHead(next);
+                next.wasSearched = true;
                 for(Edge e: next.edges) {
-                    if (e.from == next) {
-                        e.to.hasSearchHead = true;
+                    if (e.from == next && !e.to.wasSearched) {
+                        this.addSearchHeadToBack(e.to);
                         this.breadthList.enqueue(e.to);
                         this.cameFromEdge.put(e.to, e);
+                    }
+                    else if (e.to == next && !e.from.wasSearched) {
+                        this.addSearchHeadToBack(e.from);
+                        this.breadthList.enqueue(e.from);
+                        this.cameFromEdge.put(e.from, e);
                     }
                 }
             }
@@ -1121,11 +1145,18 @@ class MazeWorld extends World {
                 this.searchHeads =  reconstruct(next, new Mt<Vertex>());
             }
             else {
+                this.removeSearchHead(next);
+                next.wasSearched = true;
                 for(Edge e: next.edges) {
-                    if (e.from == next) {
-                        e.to.hasSearchHead = true;
+                    if (e.from == next && !e.from.wasSearched) {
+                        this.addSearchHeadToFront(e.to);
                         this.depthList.push(e.to);
                         this.cameFromEdge.put(e.to, e);
+                    }
+                    else if (e.to == next && !e.from.wasSearched) {
+                        this.addSearchHeadToFront(e.from);
+                        depthList.push(e.from);
+                        this.cameFromEdge.put(e.from, e);
                     }
                 }
             }
@@ -1210,6 +1241,8 @@ class UnionFind {
             }
             else {
                 this.unUsed = this.unUsed.addToFront(e);
+                e.from.edges = e.from.edges.remove(e);
+                e.to.edges = e.to.edges.remove(e);
             }
         }
         return result;
@@ -2159,16 +2192,34 @@ class ExamplesMaze {
         //t.checkExpect(uF.kruskel(), answer);
 
     }
+    
+    
+    void testRemoveIList(Tester t) {
+        
+        String a = "A";
+        String b = "B";
+        String c = "C";
+        
+        IList<String> l1 = new Cons<String>(a, new Cons<String>(b,
+                new Cons<String>(c, new Mt<String>())));
+        IList<String> answer = new Cons<String>(b, new Cons<String>(c,
+                new Mt<String>()));
+        
+        t.checkExpect(l1.remove(a), answer);
+        t.checkExpect(answer.remove(c), new Cons<String>(b, new Mt<String>()));
+        
+    }
+    
     // runs the animation
     void testRunMaze(Tester t) {
-        MazeWorld maze100x60 = new MazeWorld(100, 60);
+        MazeWorld maze100x60 = new MazeWorld(10, 6);
         //maze100x60.gameMode = 0;
         /* t.checkExpect(maze2.board.length(), 3);
         t.checkExpect(this.maze0.board.length(), 0);
         t.checkExpect(this.maze2.board.length(), 3);
         t.checkExpect(this.maze3.board.length(), 8);
         t.checkExpect(maze100x60.board.length(), 5999); */
-        maze100x60.bigBang(1000, 600, .1);
+        maze100x60.bigBang(1000, 600, .000001);
         //t.checkExpect(maze100x60.searchHeads.length(), 1);
     }
 }
