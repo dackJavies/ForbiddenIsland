@@ -1100,6 +1100,7 @@ class MazeWorld extends World {
             else {
                 for(Edge e: next.edges) {
                     if (e.from == next) {
+                        e.to.hasSearchHead = true;
                         this.breadthList.enqueue(e.to);
                         this.cameFromEdge.put(e.to, e);
                     }
@@ -1122,6 +1123,7 @@ class MazeWorld extends World {
             else {
                 for(Edge e: next.edges) {
                     if (e.from == next) {
+                        e.to.hasSearchHead = true;
                         this.depthList.push(e.to);
                         this.cameFromEdge.put(e.to, e);
                     }
@@ -2168,6 +2170,5 @@ class ExamplesMaze {
         t.checkExpect(maze100x60.board.length(), 5999); */
         maze100x60.bigBang(1000, 600, .1);
         //t.checkExpect(maze100x60.searchHeads.length(), 1);
-
     }
 }
