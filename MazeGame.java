@@ -888,6 +888,7 @@ class MazeWorld extends World {
             Vertex first = ((Cons<Vertex>)this.searchHeads).first;
             depthList.push(first);
             breadthList.enqueue(first);
+            first.startVert = true;
         }
 
     }
@@ -1090,10 +1091,26 @@ class MazeWorld extends World {
         }
         // depth-first search mode
         else if (s.equals("d") && !(this.gameMode == 1)) {
+            depthList = new Stack<Vertex>(new Deque<Vertex>());
+            cameFromEdge = new HashMap<Vertex, Edge>();
+            
+            if (!this.searchHeads.isEmpty()) {
+                Vertex first = ((Cons<Vertex>)this.searchHeads).first;
+                depthList.push(first);
+                first.startVert = true;
+            }
             this.gameMode = 1;
         }
         // breadth-first search mode
         else if (s.equals("b") && !(this.gameMode == 2)) {
+            breadthList = new Queue<Vertex>(new Deque<Vertex>());
+            cameFromEdge = new HashMap<Vertex, Edge>();
+            
+            if (!this.searchHeads.isEmpty()) {
+                Vertex first = ((Cons<Vertex>)this.searchHeads).first;
+                breadthList.enqueue(first);
+                first.startVert = true;
+            }
             this.gameMode = 2;
         } 
         else if (this.gameMode == 0 && s.equals("g")) {
@@ -1148,7 +1165,7 @@ class MazeWorld extends World {
                 this.removeSearchHead(next);
                 next.wasSearched = true;
                 for(Edge e: next.edges) {
-                    if (e.from == next && !e.from.wasSearched) {
+                    if (e.from == next && !e.to.wasSearched) {
                         this.addSearchHeadToFront(e.to);
                         this.depthList.push(e.to);
                         this.cameFromEdge.put(e.to, e);
@@ -2212,7 +2229,7 @@ class ExamplesMaze {
     
     // runs the animation
     void testRunMaze(Tester t) {
-        MazeWorld maze100x60 = new MazeWorld(10, 6);
+        MazeWorld maze100x60 = new MazeWorld(50, 30);
         //maze100x60.gameMode = 0;
         /* t.checkExpect(maze2.board.length(), 3);
         t.checkExpect(this.maze0.board.length(), 0);
