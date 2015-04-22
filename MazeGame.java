@@ -756,13 +756,6 @@ class Vertex {
     Integer getY() {
         return this.posn.y;
     }
-    // resets this cell's flags
-    void reset() {
-        
-        this.wasSearched = false;
-        this.correctPath = false;
-        this.hasSearchHead = false;
-    }
     // Add an Edge with an entered weight 
     void addEdge(Vertex other, int opt) {
         Edge toAdd = new Edge(this, other, opt);
@@ -1053,19 +1046,6 @@ class MazeWorld extends World {
             }
         }
     }
-    // resets the board
-    void resetBoard() {
-        for (Edge e: this.board) {
-            e.from.reset();
-            e.to.reset();
-        }
-        for (Vertex v: this.searchHeads) {
-            if (v.getX() != 0 || v.getY() != 0) {
-                this.searchHeads = new Cons<Vertex>(this.searchHeads.get(0), new Mt<Vertex>());
-            }
-        }
-        
-    }
 
     // Draws the World
     public WorldImage makeImage() {
@@ -1099,12 +1079,11 @@ class MazeWorld extends World {
             IList<Edge> b = this.vertexToEdge(blankCells);
             UnionFind kruskel = new UnionFind(blankCells, b);
             this.board = kruskel.kruskel();
-            this.unUsed = kruskel.unUsed;            
+            this.unUsed = kruskel.unUsed;
         }
         // manual mode
         else if (s.equals("m") && !(this.gameMode == 0)) {
             this.gameMode = 0;
-            this.resetBoard();
         }
         // display edges mode
         else if (s.equals("e") && !(this.gameMode == 3)) {
@@ -1112,30 +1091,27 @@ class MazeWorld extends World {
         }
         // depth-first search mode
         else if (s.equals("d") && !(this.gameMode == 1)) {
-            this.gameMode = 1;
-            this.searchHeads = new Mt<Vertex>();
             depthList = new Stack<Vertex>(new Deque<Vertex>());
             cameFromEdge = new HashMap<Vertex, Edge>();
-            depthList = new Stack<Vertex>(new Deque<Vertex>());
-            cameFromEdge = new HashMap<Vertex, Edge>();
+            
             if (!this.searchHeads.isEmpty()) {
                 Vertex first = ((Cons<Vertex>)this.searchHeads).first;
                 depthList.push(first);
                 first.startVert = true;
             }
+            this.gameMode = 1;
         }
         // breadth-first search mode
         else if (s.equals("b") && !(this.gameMode == 2)) {
-            this.gameMode = 2;
-            depthList = new Stack<Vertex>(new Deque<Vertex>());
+            breadthList = new Queue<Vertex>(new Deque<Vertex>());
             cameFromEdge = new HashMap<Vertex, Edge>();
-            this.searchHeads = new Mt<Vertex>();
+            
             if (!this.searchHeads.isEmpty()) {
                 Vertex first = ((Cons<Vertex>)this.searchHeads).first;
-                depthList.push(first);
+                breadthList.enqueue(first);
                 first.startVert = true;
             }
-            
+            this.gameMode = 2;
         } 
         else if (this.gameMode == 0 && s.equals("g")) {
             this.addSearchHeadToFront(this.searchHeads.get(0).edges.get(0).to);
