@@ -38,6 +38,8 @@ interface IList<T> extends Iterable<T> {
     <R> R accept(IVisitor<T, R> v);
     // determines whether the given item is in this list
     boolean contains(T t);
+    // gets the nth element of the list
+    T get(int n);
 }
 
 //represents a non-empty list
@@ -99,6 +101,25 @@ class Cons<T> implements IList<T> {
     public boolean contains(T t) {
         return this.first == t || this.rest.contains(t);
     }
+    // gets the nth element of this list
+    public T get(int n) {
+        if (this.length() > n) {
+        int n1 = n;
+        T result = this.first;
+        for (T t: this) {
+            if (n1 <= 0) {
+                return t;
+            }
+            else {
+                n1 -= 1;
+            }
+        }
+        return result;
+        }
+        else {
+            throw new RuntimeException("get cannot be called on Mt");
+        }
+    }
 } 
 
 //represents an empty list
@@ -141,7 +162,10 @@ class Mt<T> implements IList<T> {
     public boolean contains(T t) {
         return false;
     }
-
+    // gets the nth element of this list
+    public T get(int n) {
+        throw new RuntimeException("get cannot be called on Mt");
+    }
 }
 
 //represents the deque collection of items
@@ -1055,9 +1079,12 @@ class MazeWorld extends World {
         else if (s.equals("b") && !(this.gameMode == 2)) {
             this.gameMode = 2;
         } 
-       // else if (this.gameMode == 0) {
-            //this.moveSearchHead(s);
-       // }
+        else if (this.gameMode == 0 && s.equals("g")) {
+            this.addSearchHeadToFront(this.searchHeads.get(0).edges.get(0).to);
+            this.addSearchHeadToFront(((Cons<Edge>)((Cons<Vertex>)(this.searchHeads)).first.edges).first.from);
+           // this.searchHeads = new Mt<Vertex>();
+            
+        }
     }
     
     // Search through the tree using the Breadth-First algorithm
@@ -1603,6 +1630,16 @@ class ExamplesMaze {
         t.checkExpect(mTTT.iterator(), iII);
         t.checkExpect(non.iterator(), iIII);
     }
+    // tests get for the IList class
+    void testGet(Tester t) {
+        IList<Integer> mT = new Mt<Integer>();
+        IList<Integer> non = new Cons<Integer>(0, 
+                new Cons<Integer>(1, new Cons<Integer>(2, mT)));
+        t.checkExpect(non.get(0), 0);
+        t.checkExpect(non.get(1), 1);
+        t.checkExpect(non.get(2), 2);
+        t.checkException(new RuntimeException("get cannot be called on Mt"), mT, "get", 1);
+    }
     // tests the CompEdge Comparator 
     void testCompEdge(Tester t) {
         
@@ -1940,10 +1977,10 @@ class ExamplesMaze {
     // tests onKeyEvent for the MazeWorld class
     void testOnKeyEvent(Tester t) {
         
-        MazeWorld testMaze = new MazeWorld(0, 0);
+        MazeWorld testMaze = new MazeWorld(5, 5);
         
         testMaze.onKeyEvent("r");
-        t.checkExpect(testMaze, new MazeWorld(0, 0));
+       // t.checkExpect(testMaze, new MazeWorld(5, 5));// TODO random maze...?
         
         testMaze.onKeyEvent("m");
         t.checkExpect(testMaze.gameMode == 0);
@@ -2122,19 +2159,15 @@ class ExamplesMaze {
     }
     // runs the animation
     void testRunMaze(Tester t) {
-        //MazeWorld maze100x60Edge = new MazeWorld(100, 60);
-        //maze100x60Edge.gameMode = 3;
-        MazeWorld maze100x60Wall = new MazeWorld(100, 60);
-        maze100x60Wall.gameMode = 0;
+        MazeWorld maze100x60 = new MazeWorld(100, 60);
+        //maze100x60.gameMode = 0;
         /* t.checkExpect(maze2.board.length(), 3);
         t.checkExpect(this.maze0.board.length(), 0);
         t.checkExpect(this.maze2.board.length(), 3);
         t.checkExpect(this.maze3.board.length(), 8);
-        t.checkExpect(maze100x60Edge.board.length(), 5999); */
-
-        //maze100x60Edge.bigBang(1000, 600);
-        //maze100x60Wall.bigBang(1000, 600);
-        t.checkExpect(maze100x60Wall.searchHeads.length(), 1);
+        t.checkExpect(maze100x60.board.length(), 5999); */
+        maze100x60.bigBang(1000, 600, .1);
+        //t.checkExpect(maze100x60.searchHeads.length(), 1);
 
     }
 }
