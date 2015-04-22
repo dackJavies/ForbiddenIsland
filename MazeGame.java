@@ -15,6 +15,7 @@ import javalib.worldimages.LineImage;
 import javalib.worldimages.OverlayImages;
 import javalib.worldimages.Posn;
 import javalib.worldimages.RectangleImage;
+import javalib.worldimages.WorldEnd;
 import javalib.worldimages.WorldImage;
 import tester.*;
 
@@ -836,6 +837,8 @@ class MazeWorld extends World {
     Stack<Vertex> depthList;
     Queue<Vertex> breadthList;
     HashMap<Vertex, Edge> cameFromEdge;
+    
+    boolean gameOver;
 
     MazeWorld(int gameSizeX, int gameSizeY) {
         // Basic constructor stuff
@@ -870,6 +873,9 @@ class MazeWorld extends World {
             breadthList.enqueue(first);
             //first.startVert = true;
         }
+        
+        // While gameOver is false, the game runs
+        gameOver = false;
 
     }
 
@@ -1137,6 +1143,7 @@ class MazeWorld extends World {
                 for (Vertex v: reconstruct(next, new Mt<Vertex>())) {
                     v.correctPath = true;
                 }
+                this.gameOver = true;
             }
             else {
                 this.removeSearchHead(next);
@@ -1176,6 +1183,7 @@ class MazeWorld extends World {
                 for (Vertex v: reconstruct(next, new Mt<Vertex>())) {
                     v.correctPath = true;
                 }
+                this.gameOver = true;
             }
             else {
                 this.removeSearchHead(next);
@@ -1218,8 +1226,20 @@ class MazeWorld extends World {
         }
         else {
             finalPath.addToFront(cur);
-            return reconstruct(this.cameFromEdge.get(cur).from, finalPath);
+            if (this.cameFromEdge.get(cur).from == cur) {
+                return reconstruct(this.cameFromEdge.get(cur).to, finalPath);
+            }
+            else {
+                return reconstruct(this.cameFromEdge.get(cur).from, finalPath);
+            }
         }
+    }
+    
+    // End the game
+    public WorldEnd worldEnds() {
+        
+        return new WorldEnd(this.gameOver, this.makeImage());
+        
     }
 
 }
@@ -2285,23 +2305,10 @@ t.checkExpect(this.bot6.tree2List(), this.sortedL);*/
 
 
     }
-    
-    // tests breadthFirstSearch in the class MazeWorld
-    void testBFS(Tester t) {
-        
-        t.checkExpect(maze3.breadthList.contents.size(), 1);
-        
-        
-    }
-    
-    // tests depthFirstSearch in the class MazeWorld
-    void testDFS(Tester t) {
-        
-    }
 
     // runs the animation
     void testRunMaze(Tester t) {
-        MazeWorld maze100x60 = new MazeWorld(20, 12);
+        MazeWorld maze100x60 = new MazeWorld(100, 60);
         //maze100x60.gameMode = 0;
         /* t.checkExpect(maze2.board.length(), 3);
     t.checkExpect(this.maze0.board.length(), 0);
