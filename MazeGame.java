@@ -1166,12 +1166,12 @@ class MazeWorld extends World {
                 next.wasSearched = true;
                 for(Edge e: next.edges) {
                     if (e.from == next && !e.to.wasSearched) {
-                        this.addSearchHeadToFront(e.to);
+                        //this.addSearchHeadToFront(e.to);
                         this.depthList.push(e.to);
                         this.cameFromEdge.put(e.to, e);
                     }
                     else if (e.to == next && !e.from.wasSearched) {
-                        this.addSearchHeadToFront(e.from);
+                        //this.addSearchHeadToFront(e.from);
                         depthList.push(e.from);
                         this.cameFromEdge.put(e.from, e);
                     }
@@ -2210,7 +2210,7 @@ class ExamplesMaze {
 
     }
     
-    
+    // Tests the remove method in the interface IList<T>
     void testRemoveIList(Tester t) {
         
         String a = "A";
@@ -2227,9 +2227,47 @@ class ExamplesMaze {
         
     }
     
+    // Tests the reconstruct method in the class MazeWorld
+    void testReconstruct(Tester t) {
+        
+        Vertex v1 = new Vertex(0, 0);
+        Vertex v2 = new Vertex(1, 0);
+        Vertex v3 = new Vertex(2, 0);
+        Vertex v4 = new Vertex(0, 1);
+        Vertex v5 = new Vertex(1, 1);
+        Vertex v6 = new Vertex(2, 1);
+        
+        Edge e1 = new Edge(v1, v4, 1);
+        Edge e2 = new Edge(v4, v5, 2);
+        Edge e3 = new Edge(v5, v2, 3);
+        Edge e4 = new Edge(v2, v3, 4);
+        Edge e5 = new Edge(v3, v6, 5);
+        
+        v1.edges = new Cons<Edge>(e1, new Mt<Edge>());
+        v2.edges = new Cons<Edge>(e1, new Cons<Edge>(e2,  new Mt<Edge>()));
+        v3.edges = new Cons<Edge>(e2, new Cons<Edge>(e3, new Mt<Edge>()));
+        v4.edges = new Cons<Edge>(e3, new Cons<Edge>(e4, new Mt<Edge>()));
+        v5.edges = new Cons<Edge>(e4, new Cons<Edge>(e5, new Mt<Edge>()));
+        v6.edges = new Cons<Edge>(e5, new Mt<Edge>());
+        
+        HashMap<Vertex, Edge> cameFromEdge = new HashMap<Vertex, Edge>();
+        cameFromEdge.put(v2, e1);
+        cameFromEdge.put(v3, e2);
+        cameFromEdge.put(v4, e3);
+        cameFromEdge.put(v5, e4);
+        cameFromEdge.put(v6, e5);
+        
+        // Path should run v1 -> v4 -> v5 -> v2 -> v3 -> v6
+        IList<Vertex> answer = new Cons<Vertex>(v1, new Cons<Vertex>(v4,
+                new Cons<Vertex>(v5, new Cons<Vertex>(v2, new Cons<Vertex>(
+                        v3, new Cons<Vertex>(v6, new Mt<Vertex>()))))));
+        
+        
+    }
+    
     // runs the animation
     void testRunMaze(Tester t) {
-        MazeWorld maze100x60 = new MazeWorld(50, 30);
+        MazeWorld maze100x60 = new MazeWorld(100, 60);
         //maze100x60.gameMode = 0;
         /* t.checkExpect(maze2.board.length(), 3);
         t.checkExpect(this.maze0.board.length(), 0);
