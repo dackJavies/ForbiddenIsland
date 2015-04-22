@@ -790,7 +790,7 @@ class Edge {
         }
     }
     WorldImage displayWall() {
-        Color c = new Color(90, 100, 90);
+        Color c = new Color(120, 0, 0);// TODO decide new Color(90, 100, 90);
         int sideLength = 10;
         int posnShift = sideLength / 2;
         int toX = (this.to.getX() * sideLength) + posnShift;
@@ -1120,7 +1120,16 @@ class MazeWorld extends World {
         if (!this.breadthList.isEmpty()) {
             Vertex next = this.breadthList.dequeue();
             if (!next.wasSearched && next.endVert) {
-                this.searchHeads =  reconstruct(next, new Mt<Vertex>());
+                Edge temp = null;
+                for (Edge e: next.edges) {
+                    if (e.from.hasSearchHead) {
+                        temp = e;
+                    }
+                }
+                this.cameFromEdge.put(next, temp);
+                for (Vertex v: reconstruct(next, new Mt<Vertex>())) {
+                    v.correctPath = true;
+                }
             }
             else {
                 this.removeSearchHead(next);
@@ -1150,7 +1159,16 @@ class MazeWorld extends World {
         if (!this.depthList.isEmpty()) {
             Vertex next = this.depthList.pop();
             if (!next.wasSearched && next.endVert) {
-                this.searchHeads =  reconstruct(next, new Mt<Vertex>());
+                Edge temp = null;
+                for (Edge e: next.edges) {
+                    if (e.from.hasSearchHead) {
+                        temp = e;
+                    }
+                }
+                this.cameFromEdge.put(next, temp);
+                for (Vertex v: reconstruct(next, new Mt<Vertex>())) {
+                    v.correctPath = true;
+                }
             }
             else {
                 this.removeSearchHead(next);
@@ -1186,14 +1204,14 @@ class MazeWorld extends World {
         }
     }
 
-    // reconstruct the path from the end to the beginning
-    IList<Vertex> reconstruct(Vertex end, IList<Vertex> finalPath) {
-        if (end.startVert) {
+    // reconstruct the path from the cur to the beginning
+    IList<Vertex> reconstruct(Vertex cur, IList<Vertex> finalPath) {
+        if (cur.startVert) {
             return finalPath;
         }
         else {
-            finalPath.addToFront(end);
-            return reconstruct(this.cameFromEdge.get(end).from, finalPath);
+            finalPath.addToFront(cur);
+            return reconstruct(this.cameFromEdge.get(cur).from, finalPath);
         }
     }
 
@@ -1896,7 +1914,7 @@ t.checkExpect(this.bot6.tree2List(), this.sortedL);*/
                 new Color(90, 100, 90)));
         // vertically connected
         t.checkExpect(eB.displayWall(), new LineImage(new Posn(10, 10), new Posn(20, 10),
-                new Color(90, 100, 90)));
+                new Color(120, 0, 0)));
     }  
     // tests displayCell in the class Vertex
     void testDisplayCell(Tester t) {
@@ -2263,7 +2281,7 @@ t.checkExpect(this.bot6.tree2List(), this.sortedL);*/
 
     // runs the animation
     void testRunMaze(Tester t) {
-        MazeWorld maze100x60 = new MazeWorld(50, 30);
+        MazeWorld maze100x60 = new MazeWorld(20, 12);
         //maze100x60.gameMode = 0;
         /* t.checkExpect(maze2.board.length(), 3);
     t.checkExpect(this.maze0.board.length(), 0);
