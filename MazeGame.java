@@ -1062,12 +1062,14 @@ class MazeWorld extends World {
     // initializes the Search Algorithms
     void initializeSearch() {
         this.depthList = new Stack<Vertex>(new Deque<Vertex>());
+        breadthList = new Queue<Vertex>(new Deque<Vertex>());
         this.cameFromEdge = new HashMap<Vertex, Edge>();
 
         if (!this.searchHeads.isEmpty()) {
             Vertex first = ((Cons<Vertex>)this.searchHeads).first;
             this.depthList.push(first);
-            first.startVert = true;
+            //first.startVert = true;
+            breadthList.enqueue(first);
         }
     }
 
@@ -1640,14 +1642,14 @@ class ExamplesMaze {
     // tests tree2List for the IList interface
     void testTree2(Tester t) {
         /*MazeWorld maze100x60Edge = new MazeWorld(60, 60); TODO uncomment 
-t.checkExpect(this.bot6.tree2List(), this.sortedL);
-ITST<Edge> tree1 = maze100x60Edge.board.list2Tree(new RandEdge());
-Cons<Edge> lister1 = (Cons<Edge>) tree1.tree2List();
-t.checkExpect(lister1.first.from.x, lister1.first.from.x);
-t.checkExpect(lister1.first.from.y, lister1.first.from.y);
-t.checkExpect(lister1.first.to.x, lister1.first.to.x);
-t.checkExpect(lister1.first.to.y, lister1.first.to.y);
-t.checkExpect(this.bot6.tree2List(), this.sortedL);*/
+        t.checkExpect(this.bot6.tree2List(), this.sortedL);
+        ITST<Edge> tree1 = maze100x60Edge.board.list2Tree(new RandEdge());
+        Cons<Edge> lister1 = (Cons<Edge>) tree1.tree2List();
+        t.checkExpect(lister1.first.from.x, lister1.first.from.x);
+        t.checkExpect(lister1.first.from.y, lister1.first.from.y);
+        t.checkExpect(lister1.first.to.x, lister1.first.to.x);
+        t.checkExpect(lister1.first.to.y, lister1.first.to.y);
+        t.checkExpect(this.bot6.tree2List(), this.sortedL);*/
     }
     // tests apply for the function ToString
     void testToString(Tester t) {
@@ -2072,6 +2074,50 @@ t.checkExpect(this.bot6.tree2List(), this.sortedL);*/
     void testOnTick(Tester t) {
 
     }
+    // tests DepthFirstSearch for the MazeWorld class 
+    void testDepthFirstSearch(Tester t) {
+        MazeWorld maze = new MazeWorld(3, 3);
+        ArrayList<ArrayList<Vertex>> grid = maze.createGrid();
+        maze.addEdges(grid, 1);
+        maze.board = maze.vertexToEdge(grid);
+        Vertex vert = null;
+        for (Edge e: maze.board) {
+            if (new MoveVertex(new Vertex(0, 0)).equalPosn(e.from.posn, new Posn(0, 1))) {
+                vert = e.from;   
+            }
+            else if (new MoveVertex(new Vertex(0, 0)).equalPosn(e.from.posn, new Posn(0, 1))) {
+                vert = e.to;
+            }
+        }
+        t.checkExpect(vert.posn, new Posn(0, 1));
+        t.checkExpect(vert.wasSearched, false);
+        maze.depthFirstSearch();
+        maze.depthFirstSearch();
+        t.checkExpect(maze.searchHeads.length(), 5);  
+    }
+    
+    // tests BreadthFirstSearch for the MazeWorld class 
+    void testBreadthFirstSearch(Tester t) {
+        MazeWorld maze = new MazeWorld(3, 3);
+        ArrayList<ArrayList<Vertex>> grid = maze.createGrid();
+        maze.addEdges(grid, 1);
+        maze.board = maze.vertexToEdge(grid);
+        Vertex vert = null;
+        for (Edge e: maze.board) {
+            if (new MoveVertex(new Vertex(0, 0)).equalPosn(e.from.posn, new Posn(0, 1))) {
+                vert = e.from;   
+            }
+            else if (new MoveVertex(new Vertex(0, 0)).equalPosn(e.from.posn, new Posn(0, 1))) {
+                vert = e.to;
+            }
+        }
+        t.checkExpect(vert.posn, new Posn(0, 1));
+        t.checkExpect(vert.wasSearched, false);
+        maze.depthFirstSearch();
+        maze.depthFirstSearch();
+        t.checkExpect(maze.searchHeads.length(), 4);  
+    }
+    
     // tests initializeHashMap for the class UnionFind 
     void testInitializeHashMap(Tester t) {
         HashMap<Vertex, Vertex> hashy = new HashMap<Vertex, Vertex>();
@@ -2247,7 +2293,15 @@ t.checkExpect(this.bot6.tree2List(), this.sortedL);*/
         t.checkExpect(answer.remove(c), new Cons<String>(b, new Mt<String>()));
 
     }
-
+    // tests pauseGame in the class MazeWorld
+    void testPauseGame(Tester t) {
+        MazeWorld maze = new MazeWorld(1, 1);
+        t.checkExpect(maze.isPaused, false);
+        maze.pauseGame();
+        t.checkExpect(maze.isPaused, true);
+        maze.pauseGame();
+        t.checkExpect(maze.isPaused, false);
+    }
     // Tests the reconstruct method in the class MazeWorld
     void testReconstruct(Tester t) {
 
@@ -2285,30 +2339,17 @@ t.checkExpect(this.bot6.tree2List(), this.sortedL);*/
 
 
     }
-    
-    // tests breadthFirstSearch in the class MazeWorld
-    void testBFS(Tester t) {
-        
-        t.checkExpect(maze3.breadthList.contents.size(), 1);
-        
-        
-    }
-    
-    // tests depthFirstSearch in the class MazeWorld
-    void testDFS(Tester t) {
-        
-    }
 
     // runs the animation
     void testRunMaze(Tester t) {
-        MazeWorld maze100x60 = new MazeWorld(20, 12);
+        MazeWorld maze100x60 = new MazeWorld(20, 10);
         //maze100x60.gameMode = 0;
         /* t.checkExpect(maze2.board.length(), 3);
     t.checkExpect(this.maze0.board.length(), 0);
     t.checkExpect(this.maze2.board.length(), 3);
     t.checkExpect(this.maze3.board.length(), 8);
     t.checkExpect(maze100x60.board.length(), 5999); */
-        maze100x60.bigBang(1000, 600, .000001);
+       maze100x60.bigBang(1000, 600, .000001);
         //t.checkExpect(maze100x60.searchHeads.length(), 1);
     }
 }
