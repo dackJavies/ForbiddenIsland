@@ -1296,7 +1296,6 @@ class MazeWorld extends World {
                 this.searchHeads.get(0).wasSearched = true;
                 this.searchHeads = this.removeSearchHead(this.searchHeads.get(0));
                 if (this.searchHeads.get(0).endVert) {
-                    //this.reconstruct(next, new Mt<Vertex>(), this.cameFromEdge); TODO
                     this.gameOver = true;
                 }
             }
@@ -1967,7 +1966,7 @@ class ExamplesMaze {
     }
     // tests tree2List for the IList interface
     void testTree2(Tester t) {
-        /*MazeWorld maze100x60Edge = new MazeWorld(60, 60); // TODO uncomment
+        MazeWorld maze100x60Edge = new MazeWorld(60, 60); 
         t.checkExpect(this.bot6.tree2List(), this.sortedL);
         ITST<Edge> tree1 = maze100x60Edge.board.list2Tree(new RandEdge());
         Cons<Edge> lister1 = (Cons<Edge>) tree1.tree2List();
@@ -1975,7 +1974,7 @@ class ExamplesMaze {
         t.checkExpect(lister1.first.from.getY(), lister1.first.from.getY());
         t.checkExpect(lister1.first.to.getX(), lister1.first.to.getX());
         t.checkExpect(lister1.first.to.getY(), lister1.first.to.getY());
-        t.checkExpect(this.bot6.tree2List(), this.sortedL);*/
+        t.checkExpect(this.bot6.tree2List(), this.sortedL);
     }
     // tests apply for the function ToString
     void testToString(Tester t) {
@@ -2141,8 +2140,7 @@ class ExamplesMaze {
         WorldImage nodeImg2 = new OverlayImages(n.data.displayEdge(true, true),
                 new OverlayImages(leafImg, 
                         new OverlayImages(leafImg, leafImg)));
-
-
+        
         DisplayEdgeVisitor dEV = new DisplayEdgeVisitor(false, true);
         DisplayEdgeVisitor dEV2 = new DisplayEdgeVisitor(true, true);
 
@@ -2262,7 +2260,7 @@ class ExamplesMaze {
         t.checkExpect(vB.displayCell(true), new RectangleImage(new Posn(5, 15), 10, 10, new Color(65, 86, 197)));
         t.checkExpect(vC.displayCell(true), new RectangleImage(new Posn(15, 15), 10, 10, new Color(56, 176, 222)));
     }
-    // initializes the testSearch method
+    // initializes testSearch
     void initializeN() {
 
         this.A = new Vertex(0, 0);
@@ -2318,6 +2316,24 @@ class ExamplesMaze {
         t.checkExpect(v01.edges.length(), 2);
         t.checkExpect(v01.edges.length(), 2);
     }
+    // tests findEdge in the class Vertex
+    void testFindEdge(Tester t) {
+        
+        Vertex v = new Vertex(0, 0);
+        Vertex vNear = new Vertex(0, 1);
+        Vertex vFar = new Vertex(10, 10);
+        
+        Edge e = new Edge(v, vNear, 1);
+        
+        v.edges = new Cons<Edge>(e, new Mt<Edge>());
+        
+        t.checkExpect(v.findEdge(vNear), e);
+        t.checkException(new IllegalArgumentException(
+                "this vertex is not connected to that one"),
+                    v, "findEdge", vFar);
+        
+    }
+    
     // tests createGrid for the class MazeWorld
     void testCreateGrid(Tester t) {
         this.initialize();
@@ -2358,17 +2374,17 @@ class ExamplesMaze {
         t.checkExpect(maze0.vertexToEdge(aVN), answer);
 
     }
-    // tests makeImage for the MazeWorld class TODO
-    void testMakeImage(Tester t) {
 
-    }
     // tests onKeyEvent for the MazeWorld class
     void testOnKeyEvent(Tester t) {
 
         MazeWorld testMaze = new MazeWorld(5, 5);
+        ArrayList<ArrayList<Vertex>> b = testMaze.createGrid();
+        IList<Edge> b2 = testMaze.vertexToEdge(b);
+        testMaze.board = b2;
 
         testMaze.onKeyEvent("r");
-        //t.checkExpect(testMaze, new MazeWorld(5, 5));// TODO random maze...?
+        //t.checkExpect(testMaze, new MazeWorld(5, 5)); random maze...?
 
         testMaze.onKeyEvent("m");
         t.checkExpect(testMaze.gameMode == 0);
@@ -2381,10 +2397,14 @@ class ExamplesMaze {
 
         testMaze.onKeyEvent("b");
         t.checkExpect(testMaze.gameMode == 2);
-
-    }
-    // tests onTick for the MazeWorld class TODO
-    void testOnTick(Tester t) {
+        
+        testMaze.gameMode = 0;
+        testMaze.isPaused = false;
+        t.checkExpect(testMaze.searchHeads.length(), 1);
+        t.checkExpect(testMaze.searchHeads.get(0).posn, new Posn(0, 0));
+        testMaze.onKeyEvent("right");
+        t.checkExpect(testMaze.searchHeads.length(), 1);
+        t.checkExpect(testMaze.searchHeads.get(0).posn, new Posn(1, 0));       
 
     }
     // tests DepthFirstSearch for the MazeWorld class 
@@ -2462,7 +2482,55 @@ class ExamplesMaze {
         maze.breadthFirstSearch();
         t.checkExpect(maze.searchHeads.length() <= 5, true);  
     }
+    // Tests the reconstruct method in the class MazeWorld
+    void testReconstruct(Tester t) {
 
+        Vertex v1 = new Vertex(0, 0);
+        Vertex v2 = new Vertex(1, 0);
+        Vertex v3 = new Vertex(2, 0);
+        Vertex v4 = new Vertex(0, 1);
+        Vertex v5 = new Vertex(1, 1);
+        Vertex v6 = new Vertex(2, 1);
+
+        Edge e1 = new Edge(v1, v4, 1);
+        Edge e2 = new Edge(v4, v5, 2);
+        Edge e3 = new Edge(v5, v2, 3);
+        Edge e4 = new Edge(v2, v3, 4);
+        Edge e5 = new Edge(v3, v6, 5);
+
+        v1.edges = new Cons<Edge>(e1, new Mt<Edge>());
+        v2.edges = new Cons<Edge>(e3, new Cons<Edge>(e4,  new Mt<Edge>()));
+        v3.edges = new Cons<Edge>(e4, new Cons<Edge>(e5, new Mt<Edge>()));
+        v4.edges = new Cons<Edge>(e1, new Cons<Edge>(e2, new Mt<Edge>()));
+        v5.edges = new Cons<Edge>(e2, new Cons<Edge>(e3, new Mt<Edge>()));
+        v6.edges = new Cons<Edge>(e5, new Mt<Edge>());
+
+        HashMap<Vertex, Edge> cameFromEdge2 = new HashMap<Vertex, Edge>();
+        cameFromEdge2.put(v4, e1);
+        cameFromEdge2.put(v5, e2);
+        cameFromEdge2.put(v2, e3);
+        cameFromEdge2.put(v3, e4);
+        cameFromEdge2.put(v6, e5);
+        
+        t.checkExpect(cameFromEdge2.get(v6), e5);
+        t.checkExpect(cameFromEdge2.get(v3), e4);
+        t.checkExpect(cameFromEdge2.get(v2), e3);
+        t.checkExpect(cameFromEdge2.get(v5), e2);
+        t.checkExpect(cameFromEdge2.get(v4), e1);
+
+        // Path should run v1 -> v4 -> v5 -> v2 -> v3 -> v6
+        IList<Vertex> answer = new Cons<Vertex>(v1, new Cons<Vertex>(v4,
+                new Cons<Vertex>(v5, new Cons<Vertex>(v2, new Cons<Vertex>(
+                        v3, new Cons<Vertex>(v6, new Mt<Vertex>()))))));
+        
+        v1.startVert = true;
+
+        maze0.searchHeads = new Mt<Vertex>();
+
+        t.checkExpect(maze0.reconstruct(v6, new Mt<Vertex>(), cameFromEdge2), answer);
+
+
+    }
     // tests initializeHashMap for the class UnionFind 
     void testInitializeHashMap(Tester t) {
         HashMap<Vertex, Vertex> hashy = new HashMap<Vertex, Vertex>();
@@ -2620,74 +2688,7 @@ class ExamplesMaze {
         UnionFind uF = new UnionFind(aAV, edgeList);
         //t.checkExpect(uF.kruskel(), answer);
 
-    }
-
-    // Tests the remove method in the interface IList<T>
-    void testRemoveIList(Tester t) {
-
-        String a = "A";
-        String b = "B";
-        String c = "C";
-
-        IList<String> l1 = new Cons<String>(a, new Cons<String>(b,
-                new Cons<String>(c, new Mt<String>())));
-        IList<String> answer = new Cons<String>(b, new Cons<String>(c,
-                new Mt<String>()));
-
-        t.checkExpect(l1.remove(a), answer);
-        t.checkExpect(answer.remove(c), new Cons<String>(b, new Mt<String>()));
-
-    }
-    // Tests the reconstruct method in the class MazeWorld
-    void testReconstruct(Tester t) {
-
-        Vertex v1 = new Vertex(0, 0);
-        Vertex v2 = new Vertex(1, 0);
-        Vertex v3 = new Vertex(2, 0);
-        Vertex v4 = new Vertex(0, 1);
-        Vertex v5 = new Vertex(1, 1);
-        Vertex v6 = new Vertex(2, 1);
-
-        Edge e1 = new Edge(v1, v4, 1);
-        Edge e2 = new Edge(v4, v5, 2);
-        Edge e3 = new Edge(v5, v2, 3);
-        Edge e4 = new Edge(v2, v3, 4);
-        Edge e5 = new Edge(v3, v6, 5);
-
-        v1.edges = new Cons<Edge>(e1, new Mt<Edge>());
-        v2.edges = new Cons<Edge>(e3, new Cons<Edge>(e4,  new Mt<Edge>()));
-        v3.edges = new Cons<Edge>(e4, new Cons<Edge>(e5, new Mt<Edge>()));
-        v4.edges = new Cons<Edge>(e1, new Cons<Edge>(e2, new Mt<Edge>()));
-        v5.edges = new Cons<Edge>(e2, new Cons<Edge>(e3, new Mt<Edge>()));
-        v6.edges = new Cons<Edge>(e5, new Mt<Edge>());
-
-        HashMap<Vertex, Edge> cameFromEdge2 = new HashMap<Vertex, Edge>();
-        cameFromEdge2.put(v4, e1);
-        cameFromEdge2.put(v5, e2);
-        cameFromEdge2.put(v2, e3);
-        cameFromEdge2.put(v3, e4);
-        cameFromEdge2.put(v6, e5);
-        
-        t.checkExpect(cameFromEdge2.get(v6), e5);
-        t.checkExpect(cameFromEdge2.get(v3), e4);
-        t.checkExpect(cameFromEdge2.get(v2), e3);
-        t.checkExpect(cameFromEdge2.get(v5), e2);
-        t.checkExpect(cameFromEdge2.get(v4), e1);
-
-        // Path should run v1 -> v4 -> v5 -> v2 -> v3 -> v6
-        IList<Vertex> answer = new Cons<Vertex>(v1, new Cons<Vertex>(v4,
-                new Cons<Vertex>(v5, new Cons<Vertex>(v2, new Cons<Vertex>(
-                        v3, new Cons<Vertex>(v6, new Mt<Vertex>()))))));
-        
-        v1.startVert = true;
-
-        maze0.searchHeads = new Mt<Vertex>();
-
-        t.checkExpect(maze0.reconstruct(v6, new Mt<Vertex>(), cameFromEdge2), answer);
-
-
-    }
-    
+    }   
     // tests equalPosn in the class MoveVertex
     void testEqualPosn(Tester t) {
         
@@ -2736,28 +2737,12 @@ class ExamplesMaze {
         
     }
     
-    // tests findEdge in the class Vertex
-    void testFindEdge(Tester t) {
-        
-        Vertex v = new Vertex(0, 0);
-        Vertex vNear = new Vertex(0, 1);
-        Vertex vFar = new Vertex(10, 10);
-        
-        Edge e = new Edge(v, vNear, 1);
-        
-        v.edges = new Cons<Edge>(e, new Mt<Edge>());
-        
-        t.checkExpect(v.findEdge(vNear), e);
-        t.checkException(new IllegalArgumentException(
-                "this vertex is not connected to that one"),
-                    v, "findEdge", vFar);
-        
-    }
+
 
     // runs the animation
     void testRunMaze(Tester t) {
         // Correctly scaling mazes (to a 1000x600 big bang canvas) include:
-        MazeWorld maze100x60 = new MazeWorld(20, 12);
+        ///MazeWorld maze100x60 = new MazeWorld(20, 12);
         //MazeWorld maze50x30 = new MazeWorld(50, 30);
         //MazeWorld maze25x15 = new MazeWorld(25, 15);
         //MazeWorld maze20x12 = new MazeWorld(20, 12);
@@ -2767,6 +2752,6 @@ class ExamplesMaze {
         //maze50x30.bigBang(1000, 600, .000001);
         //maze25x15.bigBang(1000, 600, .000001);
         //maze20x12.bigBang(1000, 600, .000001);
-        //maze10x6.bigBang(1000, 600, .000001);
+        maze10x6.bigBang(1000, 600, .000001);
     }
 }
