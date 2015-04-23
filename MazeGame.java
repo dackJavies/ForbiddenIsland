@@ -54,6 +54,16 @@ class Cons<T> implements IList<T> {
         this.first = first;
         this.rest = rest;
     }
+    /* TEMPLATE:
+     * Fields:
+     * ...first... -- T
+     * ...rest...  -- IList<T>
+     * Methods:
+     * ...this.length()... int
+     * ...this.addToFront(T)... IList<T>
+     * ...this.addToBack(T)...  IList<T>
+     * 
+     */
     // Computes the size of this list
     public int length() {
         int result = 0;
@@ -206,7 +216,7 @@ class Deque<T> {
     void addAtHead(T t) {
         new Node<T>(t, this.header.next, this.header);
     }
-    // EFFECTS: Mutates the header and last item of the Deque's prev and next field
+    // EFFCTS: Mutates the header and last item of the Deque's prev and next field
     // adds a node to the beginning of the deque
     void addAtTail(T t) {
         new Node<T>(t, this.header, this.header.prev);
@@ -222,26 +232,6 @@ class Deque<T> {
             this.header.next = this.header.next.next;
             this.header.next.prev = this.header;
             return temp;
-        }
-    }
-    // EFFECTS: Mutates the header and last item of the Deque's prev and next field
-    // adds a node to the beginning of the deque
-    T removeFromTail() {
-        if (!this.header.prev.isNode()) {
-            throw new RuntimeException("cannot remove last item from empty list");
-        }
-        else {
-            T temp = ((Node<T>)(this.header.prev)).data;
-            this.header.prev = this.header.prev.prev;
-            this.header.prev.next = this.header;
-            return temp;
-        }
-    }
-    // removes the given node from the deque
-    void removeNode(ANode<T> n) {
-        if (n.isNode()) {
-            n.prev.next = n.next;
-            n.next.prev = n.prev;
         }
     }
 }
@@ -701,9 +691,7 @@ class Vertex {
     boolean startVert;
     boolean endVert;
     boolean hasSearchHead;
-
-    //Integer x;
-    //Integer y;
+    int size;
     Posn posn;
     Vertex(int x, int y) {
         this.edges = new Mt<Edge>();
@@ -712,10 +700,12 @@ class Vertex {
         this.startVert = false;
         this.endVert= false;
         this.hasSearchHead = false;
-
-        //this.x = x;
-        //this.y = y;
+        this.size = 10;
         this.posn = new Posn(x, y);
+    }
+    Vertex(int x, int y, int size) {
+        this(x, y);
+        this.size = size;
     }
     // returns this Vertex's x posn
     Integer getX() {
@@ -746,8 +736,8 @@ class Vertex {
     }
     // displays the maze cell
     WorldImage displayCell(boolean visiblePath) {
-        int sideLength = 10;
-        int posnShift = 5;
+        int sideLength = this.size;
+        int posnShift = sideLength / 2;
         Color c = new Color(205, 205, 205);
         if (this.correctPath || this.hasSearchHead) {
             c = new Color(65, 86, 197);
@@ -762,7 +752,7 @@ class Vertex {
             c = new Color(160, 0, 160);
         }
         return new RectangleImage(new Posn((this.getX() * sideLength) + posnShift, 
-                (this.getY() * sideLength) + posnShift), 10, 10, c);
+                (this.getY() * sideLength) + posnShift), sideLength, sideLength, c);
     }  
 
 }
@@ -779,7 +769,7 @@ class Edge {
     }
     // displays this edge 
     WorldImage displayEdge(boolean visibleLine, boolean visiblePath) {
-        int sideLength = 10;
+        int sideLength = this.from.size;
         int posnShift = sideLength / 2;
         int toX = (this.to.getX() * sideLength) + posnShift;
         int toY = (this.to.getY() * sideLength) + posnShift;
@@ -793,19 +783,19 @@ class Edge {
         }
     }
     WorldImage displayWall() {
-        Color c = new Color(120, 0, 0);// TODO decide new Color(90, 100, 90);
-        int sideLength = 10;
+        Color c = new Color(120, 0, 0);
+        int sideLength = this.from.size;
         int posnShift = sideLength / 2;
         int toX = (this.to.getX() * sideLength) + posnShift;
         int toY = (this.to.getY() * sideLength) + posnShift;
         int fromX = (this.from.getX() * sideLength) + posnShift;
         int fromY = (this.from.getY() * sideLength) + posnShift;
         // next to each other horizontally
-        Posn p2 = new Posn((toX + fromX) / 2, toY + 5);
-        Posn p1 = new Posn((toX + fromX) / 2, toY - 5);
+        Posn p2 = new Posn((toX + fromX) / 2, toY + posnShift);
+        Posn p1 = new Posn((toX + fromX) / 2, toY - posnShift);
         // next to each other vertically
-        Posn p4 = new Posn(toX + 5, (toY + fromY) / 2);
-        Posn p3 = new Posn(toX - 5, (toY + fromY) / 2);
+        Posn p4 = new Posn(toX + posnShift, (toY + fromY) / 2);
+        Posn p3 = new Posn(toX - posnShift, (toY + fromY) / 2);
         // connected horizontally
         if (fromY == toY) {
             return new LineImage(p1, p2, c);
@@ -836,6 +826,7 @@ class MazeWorld extends World {
     IList<Edge> board;
     IList<Edge> unUsedSupply;
     IList<Edge> unUsed;
+    Vertex endPiece;
     IList<Vertex> searchHeads;
 
     Stack<Vertex> depthList;
@@ -856,6 +847,7 @@ class MazeWorld extends World {
         this.board = new Mt<Edge>();
         this.searchHeads = new Mt<Vertex>();
         this.unUsed = new Mt<Edge>();
+        this.endPiece = new Vertex(-1, -1);
         // Create a basic grid of vertices
         ArrayList<ArrayList<Vertex>> blankCells = this.createGrid();
         // Give the grid edges
@@ -938,7 +930,7 @@ class MazeWorld extends World {
 
             for(int i2 = 0; i2 < gameSizeY; i2 += 1) {
 
-                result.get(i).add(new Vertex(i, i2));
+                result.get(i).add(new Vertex(i, i2, 1000 / this.gameSizeX));
 
             }
 
@@ -946,6 +938,7 @@ class MazeWorld extends World {
         if (result.size() > 0) {
             result.get(0).get(0).startVert = true;
             result.get(this.gameSizeX - 1).get(this.gameSizeY - 1).endVert = true;
+            this.endPiece = result.get(this.gameSizeX - 1).get(this.gameSizeY - 1);
             this.addSearchHeadToFront(result.get(0).get(0));
         }
         return result;
@@ -1040,9 +1033,6 @@ class MazeWorld extends World {
                 this.searchHeads.get(0).wasSearched = true;
                 this.searchHeads = this.removeSearchHead(this.searchHeads.get(0));
             }
-            else {
-                this.searchHeads = this.searchHeads;
-            }
         }
         else {
             throw new IllegalArgumentException("input is not a direction");
@@ -1074,7 +1064,8 @@ class MazeWorld extends World {
         IList<Edge> b = this.vertexToEdge(blankCells);
         UnionFind kruskel = new UnionFind(blankCells, b);
         this.board = kruskel.kruskel();
-        this.unUsed = kruskel.unUsed;
+        this.unUsed = b;
+        this.unUsedSupply = kruskel.unUsed;
     }
 
     // initializes the Search Algorithms
@@ -1161,7 +1152,7 @@ class MazeWorld extends World {
         if (!this.breadthList.isEmpty()) {
             Vertex next = this.breadthList.dequeue();
             if (!next.wasSearched && next.endVert) {
-                Edge temp = null;
+                Edge temp = next.edges.get(0);
                 for (Edge e: next.edges) {
                     if (e.from.hasSearchHead) {
                         temp = e;
@@ -1487,37 +1478,37 @@ class ExamplesMaze {
     void initialize() {
 
         this.aV0.clear();
-        this.aV0.add(new Vertex(0, 0));
+        this.aV0.add(new Vertex(0, 0, 200));
         aV0.get(0).startVert = true;
         aV0.get(0).hasSearchHead = true;
-        this.aV0.add(new Vertex(0, 1));
-        this.aV0.add(new Vertex(0, 2));
-        this.aV0.add(new Vertex(0, 3));
-        this.aV0.add(new Vertex(0, 4));
+        this.aV0.add(new Vertex(0, 1, 200));
+        this.aV0.add(new Vertex(0, 2, 200));
+        this.aV0.add(new Vertex(0, 3, 200));
+        this.aV0.add(new Vertex(0, 4, 200));
         this.aV1.clear();
-        this.aV1.add(new Vertex(1, 0));
-        this.aV1.add(new Vertex(1, 1));
-        this.aV1.add(new Vertex(1, 2));
-        this.aV1.add(new Vertex(1, 3));
-        this.aV1.add(new Vertex(1, 4));
+        this.aV1.add(new Vertex(1, 0, 200));
+        this.aV1.add(new Vertex(1, 1, 200));
+        this.aV1.add(new Vertex(1, 2, 200));
+        this.aV1.add(new Vertex(1, 3, 200));
+        this.aV1.add(new Vertex(1, 4, 200));
         this.aV2.clear();
-        this.aV2.add(new Vertex(2, 0));
-        this.aV2.add(new Vertex(2, 1));
-        this.aV2.add(new Vertex(2, 2));
-        this.aV2.add(new Vertex(2, 3));
-        this.aV2.add(new Vertex(2, 4));
+        this.aV2.add(new Vertex(2, 0, 200));
+        this.aV2.add(new Vertex(2, 1, 200));
+        this.aV2.add(new Vertex(2, 2, 200));
+        this.aV2.add(new Vertex(2, 3, 200));
+        this.aV2.add(new Vertex(2, 4, 200));
         this.aV3.clear();
-        this.aV3.add(new Vertex(3, 0));
-        this.aV3.add(new Vertex(3, 1));
-        this.aV3.add(new Vertex(3, 2));
-        this.aV3.add(new Vertex(3, 3));
-        this.aV3.add(new Vertex(3, 4));
+        this.aV3.add(new Vertex(3, 0, 200));
+        this.aV3.add(new Vertex(3, 1, 200));
+        this.aV3.add(new Vertex(3, 2, 200));
+        this.aV3.add(new Vertex(3, 3, 200));
+        this.aV3.add(new Vertex(3, 4, 200));
         this.aV4.clear();
-        this.aV4.add(new Vertex(4, 0));
-        this.aV4.add(new Vertex(4, 1));
-        this.aV4.add(new Vertex(4, 2));
-        this.aV4.add(new Vertex(4, 3));
-        this.aV4.add(new Vertex(4, 4));
+        this.aV4.add(new Vertex(4, 0, 200));
+        this.aV4.add(new Vertex(4, 1, 200));
+        this.aV4.add(new Vertex(4, 2, 200));
+        this.aV4.add(new Vertex(4, 3, 200));
+        this.aV4.add(new Vertex(4, 4, 200));
         aV4.get(4).endVert = true;
         this.aVFinal.clear();
         this.aVFinal.add(aV0);
@@ -2405,7 +2396,7 @@ class ExamplesMaze {
 
     // runs the animation
     void testRunMaze(Tester t) {
-        MazeWorld maze100x60 = new MazeWorld(100, 60);
+        MazeWorld maze100x60 = new MazeWorld(20, 12);
         //maze100x60.gameMode = 0;
         /* t.checkExpect(maze2.board.length(), 3);
     t.checkExpect(this.maze0.board.length(), 0);
