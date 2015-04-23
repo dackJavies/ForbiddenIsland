@@ -1152,13 +1152,6 @@ class MazeWorld extends World {
         if (!this.breadthList.isEmpty()) {
             Vertex next = this.breadthList.dequeue();
             if (!next.wasSearched && next.endVert) {
-                Edge temp = next.edges.get(0);
-                for (Edge e: next.edges) {
-                    if (e.from.hasSearchHead) {
-                        temp = e;
-                    }
-                }
-                this.cameFromEdge.put(next, temp);
                 for (Vertex v: reconstruct(next, new Mt<Vertex>())) {
                     v.correctPath = true;
                 }
@@ -1192,13 +1185,6 @@ class MazeWorld extends World {
         if (!this.depthList.isEmpty()) {
             Vertex next = this.depthList.pop();
             if (!next.wasSearched && next.endVert) {
-                Edge temp = null;
-                for (Edge e: next.edges) {
-                    if (e.from.hasSearchHead) {
-                        temp = e;
-                    }
-                }
-                this.cameFromEdge.put(next, temp);
                 for (Vertex v: reconstruct(next, new Mt<Vertex>())) {
                     v.correctPath = true;
                 }
@@ -1263,11 +1249,14 @@ class MazeWorld extends World {
         }
         else {
             finalPath = finalPath.addToFront(cur);
-            if (this.cameFromEdge.get(cur).from == cur) {
+            if (this.cameFromEdge.get(cur) != null && this.cameFromEdge.get(cur).from == cur) {
                 return reconstruct(this.cameFromEdge.get(cur).to, finalPath);
             }
-            else {
+            else if (this.cameFromEdge.get(cur) != null) {
                 return reconstruct(this.cameFromEdge.get(cur).from, finalPath);
+            }
+            else {
+                return finalPath;
             }
         }
     }
@@ -2430,7 +2419,7 @@ class ExamplesMaze {
     // runs the animation
     void testRunMaze(Tester t) {
         // Correctly scaling mazes (to a 1000x600 big bang canvas) include:
-        MazeWorld maze100x60 = new MazeWorld(100, 60);
+        MazeWorld maze100x60 = new MazeWorld(20, 12);
         //MazeWorld maze50x30 = new MazeWorld(50, 30);
         //MazeWorld maze25x15 = new MazeWorld(25, 15);
         //MazeWorld maze20x12 = new MazeWorld(20, 12);
