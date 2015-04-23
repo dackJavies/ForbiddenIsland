@@ -1225,7 +1225,7 @@ class MazeWorld extends World {
             return finalPath;
         }
         else {
-            finalPath.addToFront(cur);
+            finalPath = finalPath.addToFront(cur);
             if (this.cameFromEdge.get(cur).from == cur) {
                 return reconstruct(this.cameFromEdge.get(cur).to, finalPath);
             }
@@ -2308,7 +2308,7 @@ t.checkExpect(this.bot6.tree2List(), this.sortedL);*/
 
     // runs the animation
     void testRunMaze(Tester t) {
-        MazeWorld maze100x60 = new MazeWorld(100, 60);
+        MazeWorld maze100x60 = new MazeWorld(20, 12);
         //maze100x60.gameMode = 0;
         /* t.checkExpect(maze2.board.length(), 3);
     t.checkExpect(this.maze0.board.length(), 0);
