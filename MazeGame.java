@@ -586,11 +586,13 @@ class MoveVertex {
         this.current = v;
         hasDir = false;
     }
-    // checks to see if two Posn's are equal TODO test
+    // checks to see if two Posn's are equal
     boolean equalPosn(Posn p1, Posn p2) {
         return (p1.x == p2.x) && (p1.y == p2.y);
     }
-    // checks each of the  TODO test
+    // If possible, moves to a different Vertex based on
+    // the given string (interpreted as a direction)
+    // i.e. "left", "up", etc.
     Vertex move(String dir) {
         Vertex result = this.current;
         int pX = this.current.getX();
@@ -722,7 +724,7 @@ class Vertex {
         this.edges = this.edges.addToBack(toAdd);
         other.edges = other.edges.addToBack(toAdd);
     }
-    // finds the edge connecting this Vertex with the given (if any) TODO test
+    // finds the edge connecting this Vertex with the given (if any) 
     Edge findEdge(Vertex other) {
         if (this.findNeighbors().contains(other)) {
             Edge result = null;
@@ -2120,7 +2122,7 @@ class ExamplesMaze {
         MazeWorld testMaze = new MazeWorld(5, 5);
 
         testMaze.onKeyEvent("r");
-        // t.checkExpect(testMaze, new MazeWorld(5, 5));// TODO random maze...?
+        //t.checkExpect(testMaze, new MazeWorld(5, 5));// TODO random maze...?
 
         testMaze.onKeyEvent("m");
         t.checkExpect(testMaze.gameMode == 0);
@@ -2158,7 +2160,39 @@ class ExamplesMaze {
         t.checkExpect(vert.wasSearched, false);
         maze.depthFirstSearch();
         maze.depthFirstSearch();
-        t.checkExpect(maze.searchHeads.length() <= 10, true);  
+        t.checkExpect(maze.searchHeads.length() <= 10, true); 
+        
+        
+        MazeWorld maze2 = new MazeWorld(3, 3);
+        
+        this.initialize();
+        this.initializeV();
+        
+        maze2.board = new Cons<Edge>(e1to4, new Cons<Edge>(e1to2,
+                new Cons<Edge>(e2to5, new Cons<Edge>(e2to3, new Cons<Edge>(
+                        e3to6, new Cons<Edge>(e4to7, new Cons<Edge>(e4to5, 
+                                new Cons<Edge>(e5to8, new Cons<Edge>(e5to6, 
+                                        new Cons<Edge>(e6to9, new Cons<Edge>(
+                                                e7to8, new Cons<Edge>(e8to9, 
+                                                        new Mt<Edge>()))))))))
+                                                            ))));
+        
+        maze2.startPiece = v1;
+        maze2.endPiece = v9;
+        maze2.searchHeads = new Cons<Vertex>(v1, new Mt<Vertex>());
+        maze2.depthList = new Stack<Vertex>(new Deque<Vertex>());
+        maze2.depthList.push(v1);
+        maze2.breadthList = new Queue<Vertex>(new Deque<Vertex>());
+        maze2.breadthList.enqueue(v1);
+        
+        maze2.cameFromEdge = new HashMap<Vertex, Edge>();
+        
+        HashMap<Vertex, Edge> answerMap = new HashMap<Vertex, Edge>();
+        answerMap.put(v2, e1to2);
+        answerMap.put(v4, e1to4);
+        
+        maze2.depthFirstSearch();
+        
     }
 
     // tests BreadthFirstSearch for the MazeWorld class 
@@ -2277,7 +2311,7 @@ class ExamplesMaze {
         t.checkExpect(uF.formsCycle(vertB, vertE), false);
         t.checkExpect(uF.formsCycle(vertD, vertE), true);
     }
-    // tests Kruskel for the class UnionFind TODO
+    // tests Kruskel for the class UnionFind 
     void testKruskel(Tester t) {
 
         Vertex A = new Vertex(0, 0);
@@ -2407,6 +2441,72 @@ class ExamplesMaze {
 
 
     }
+    
+    // tests equalPosn in the class MoveVertex
+    void testEqualPosn(Tester t) {
+        
+        Vertex v = new Vertex(0, 0);
+        MoveVertex mV = new MoveVertex(v);
+        
+        Posn p1 = new Posn(1, 1);
+        Posn p2 = new Posn(2, 3);
+        Posn p3 = new Posn(1, 1);
+        
+        t.checkExpect(mV.equalPosn(p1, p2), false);
+        t.checkExpect(mV.equalPosn(p1, p3), true);
+        t.checkExpect(mV.equalPosn(p1, p1), true);
+        t.checkExpect(mV.equalPosn(p3, p2), false);
+        
+    }
+    
+    // tests move in the class MoveVertex
+    void testMove(Tester t) {
+        
+        Vertex v = new Vertex(1, 1);
+        MoveVertex mV = new MoveVertex(v);
+        
+        Vertex vTop = new Vertex(1, 0);
+        Vertex vBot = new Vertex(1, 2);
+        Vertex vLeft = new Vertex(0, 1);
+        Vertex vRight = new Vertex(2, 1);
+        
+        Edge eTop = new Edge(v, vTop, 1);
+        Edge eBot = new Edge(v, vBot, 1);
+        Edge eLeft = new Edge(vLeft, v, 1);
+        Edge eRight = new Edge(vRight, v, 1);
+        
+        v.edges = new Cons<Edge>(eTop, new Cons<Edge>(eBot,
+                new Cons<Edge>(eLeft, new Cons<Edge>(eRight,
+                        new Mt<Edge>()))));
+        vTop.edges = new Cons<Edge>(eTop, new Mt<Edge>());
+        vBot.edges = new Cons<Edge>(eBot, new Mt<Edge>());
+        vLeft.edges = new Cons<Edge>(eLeft, new Mt<Edge>());
+        vRight.edges = new Cons<Edge>(eRight, new Mt<Edge>());
+        
+        t.checkExpect(mV.move("up"), vTop);
+        t.checkExpect(mV.move("down"), vBot);
+        t.checkExpect(mV.move("left"), vLeft);
+        t.checkExpect(mV.move("right"), vRight);
+        
+    }
+    
+    // tests findEdge in the class Vertex
+    void testFindEdge(Tester t) {
+        
+        Vertex v = new Vertex(0, 0);
+        Vertex vNear = new Vertex(0, 1);
+        Vertex vFar = new Vertex(10, 10);
+        
+        Edge e = new Edge(v, vNear, 1);
+        
+        v.edges = new Cons<Edge>(e, new Mt<Edge>());
+        
+        t.checkExpect(v.findEdge(vNear), e);
+        t.checkException(new IllegalArgumentException(
+                "this vertex is not connected to that one"),
+                    v, "findEdge", vFar);
+        
+    }
 
     // runs the animation
     void testRunMaze(Tester t) {
@@ -2421,6 +2521,6 @@ class ExamplesMaze {
         //maze50x30.bigBang(1000, 600, .000001);
         //maze25x15.bigBang(1000, 600, .000001);
         //maze20x12.bigBang(1000, 600, .000001);
-        maze10x6.bigBang(1000, 600, .000001);
+        //maze10x6.bigBang(1000, 600, .000001);
     }
 }
