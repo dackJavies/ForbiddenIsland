@@ -15,6 +15,7 @@ import javalib.worldimages.LineImage;
 import javalib.worldimages.OverlayImages;
 import javalib.worldimages.Posn;
 import javalib.worldimages.RectangleImage;
+import javalib.worldimages.TextImage;
 import javalib.worldimages.WorldEnd;
 import javalib.worldimages.WorldImage;
 import tester.*;
@@ -585,11 +586,11 @@ class MoveVertex {
         this.current = v;
         hasDir = false;
     }
-    // checks to see if two Posn's are equal
+    // checks to see if two Posn's are equal TODO test
     boolean equalPosn(Posn p1, Posn p2) {
         return (p1.x == p2.x) && (p1.y == p2.y);
     }
-    // checks each of the 
+    // checks each of the  TODO test
     Vertex move(String dir) {
         Vertex result = this.current;
         int pX = this.current.getX();
@@ -721,6 +722,21 @@ class Vertex {
         this.edges = this.edges.addToBack(toAdd);
         other.edges = other.edges.addToBack(toAdd);
     }
+    // finds the edge connecting this Vertex with the given (if any) TODO test
+    Edge findEdge(Vertex other) {
+        if (this.findNeighbors().contains(other)) {
+            Edge result = null;
+            for (Edge e: this.edges) {
+                if (e.from == other || e.to == other) {
+                    result = e;
+                }
+            }
+            return result;
+        }
+        else {
+            throw new IllegalArgumentException("this vertex is not connected to that one");
+        }
+    }
     // sets the neighbors of this vertex
     IList<Vertex> findNeighbors() {
         IList<Vertex> neighbors = new Mt<Vertex>();
@@ -826,6 +842,7 @@ class MazeWorld extends World {
     IList<Edge> board;
     IList<Edge> unUsedSupply;
     IList<Edge> unUsed;
+    Vertex startPiece;
     Vertex endPiece;
     IList<Vertex> searchHeads;
 
@@ -847,6 +864,7 @@ class MazeWorld extends World {
         this.board = new Mt<Edge>();
         this.searchHeads = new Mt<Vertex>();
         this.unUsed = new Mt<Edge>();
+        this.startPiece = new Vertex(-1, -1);
         this.endPiece = new Vertex(-1, -1);
         // Create a basic grid of vertices
         ArrayList<ArrayList<Vertex>> blankCells = this.createGrid();
@@ -937,6 +955,7 @@ class MazeWorld extends World {
         }
         if (result.size() > 0) {
             result.get(0).get(0).startVert = true;
+            this.startPiece = result.get(0).get(0);
             result.get(this.gameSizeX - 1).get(this.gameSizeY - 1).endVert = true;
             this.endPiece = result.get(this.gameSizeX - 1).get(this.gameSizeY - 1);
             this.addSearchHeadToFront(result.get(0).get(0));
@@ -1031,26 +1050,17 @@ class MazeWorld extends World {
             if (moveVertex.hasDir) {
                 this.addSearchHeadToBack(next);
                 this.searchHeads.get(0).wasSearched = true;
+                this.cameFromEdge.put(next, this.searchHeads.get(0).findEdge(next)); // TODO check add reconstruct
                 this.searchHeads = this.removeSearchHead(this.searchHeads.get(0));
+                if (this.searchHeads.get(0).endVert) {
+                    this.reconstruct(next, new Mt<Vertex>());
+                    this.gameOver = true;
+                }
             }
         }
         else {
             throw new IllegalArgumentException("input is not a direction");
         }
-    }
-    // toggle the game pause TODO test
-    void pauseGame() {
-        if (this.isPaused) {
-            this.isPaused = false;
-        }
-        else {
-            this.isPaused = true;
-        }
-    }
-
-    // toggles the rendering of paths TODO test
-    void togglePath() {
-
     }
 
     // Creates a new random Maze
@@ -1070,18 +1080,30 @@ class MazeWorld extends World {
 
     // initializes the Search Algorithms
     void initializeSearch() {
+        for (Vertex v: this.searchHeads) {
+            v.hasSearchHead = false;
+        }
+        this.searchHeads = new Cons<Vertex>(this.startPiece, new Mt<Vertex>());
+        this.startPiece.hasSearchHead = true;
         this.depthList = new Stack<Vertex>(new Deque<Vertex>());
         breadthList = new Queue<Vertex>(new Deque<Vertex>());
         this.cameFromEdge = new HashMap<Vertex, Edge>();
 
         if (!this.searchHeads.isEmpty()) {
-            Vertex first = ((Cons<Vertex>)this.searchHeads).first;
+            Vertex first = this.searchHeads.get(0);
             this.depthList.push(first);
-            //first.startVert = true;
             breadthList.enqueue(first);
         }
+        for (Edge e: this.board) {
+            e.from.wasSearched = false;
+            e.to.wasSearched = false;
+        }
     }
-
+    // Draws the last image
+    WorldImage lastImage() {
+        return new OverlayImages(this.makeImage(), new TextImage(new Posn(500, 300), "You win!", 180, new Color(255, 0, 0)));
+        
+    }
     // Draws the World
     public WorldImage makeImage() {
         IComp<Edge> ranE = new RandEdge(); 
@@ -1091,7 +1113,6 @@ class MazeWorld extends World {
                 new DisplayEdgeVisitor(this.isPaused, this.showPaths);
         DisplayWallVisitor dWVisitor = 
                 new DisplayWallVisitor();
-
         if (this.isPaused) {
             return boardTree.accept(dEVisitor);
         } 
@@ -1122,7 +1143,9 @@ class MazeWorld extends World {
 
         // manual mode
         if (s.equals("m") && !(this.gameMode == 0)) {
+            this.initializeSearch();
             this.gameMode = 0;
+            this.depthList.push(this.startPiece);
         }
         // depth-first search mode
         else if (s.equals("d") && !(this.gameMode == 1)) {
@@ -1255,7 +1278,6 @@ class MazeWorld extends World {
     // reconstruct the path from the cur to the beginning
     IList<Vertex> reconstruct(Vertex cur, IList<Vertex> finalPath) {
         if (cur.startVert) {
-            finalPath = finalPath.addToFront(cur);
             for (Vertex v: this.searchHeads) {
                 v.hasSearchHead = false;
             }
@@ -1271,32 +1293,11 @@ class MazeWorld extends World {
             }
         }
     }
-    
-    // same as reconstruct, but with an added parameter that allows for 
-    // testing with a specified hashmap
-    IList<Vertex> reconstructTest(Vertex cur, IList<Vertex> finalPath, HashMap<Vertex, Edge> cameFromEdge2) {
-        if (cur.startVert) {
-            finalPath = finalPath.addToFront(cur);
-            for (Vertex v: this.searchHeads) {
-                v.hasSearchHead = false;
-            }
-            return finalPath;
-        }
-        else {
-            finalPath = finalPath.addToFront(cur);
-            if (cameFromEdge2.get(cur).from == cur) {
-                return reconstructTest(cameFromEdge2.get(cur).to, finalPath, cameFromEdge2);
-            }
-            else {
-                return reconstructTest(cameFromEdge2.get(cur).from, finalPath, cameFromEdge2);
-            }
-        }
-    }
 
     // End the game
     public WorldEnd worldEnds() {
 
-        return new WorldEnd(this.gameOver, this.makeImage());
+        return new WorldEnd(this.gameOver, this.lastImage());
 
     }
 
@@ -2369,15 +2370,6 @@ class ExamplesMaze {
         t.checkExpect(answer.remove(c), new Cons<String>(b, new Mt<String>()));
 
     }
-    // tests pauseGame in the class MazeWorld
-    void testPauseGame(Tester t) {
-        MazeWorld maze = new MazeWorld(1, 1);
-        t.checkExpect(maze.isPaused, false);
-        maze.pauseGame();
-        t.checkExpect(maze.isPaused, true);
-        maze.pauseGame();
-        t.checkExpect(maze.isPaused, false);
-    }
     // Tests the reconstruct method in the class MazeWorld
     void testReconstruct(Tester t) {
 
@@ -2395,51 +2387,40 @@ class ExamplesMaze {
         Edge e5 = new Edge(v3, v6, 5);
 
         v1.edges = new Cons<Edge>(e1, new Mt<Edge>());
-        v2.edges = new Cons<Edge>(e3, new Cons<Edge>(e4,  new Mt<Edge>()));
-        v3.edges = new Cons<Edge>(e4, new Cons<Edge>(e5, new Mt<Edge>()));
-        v4.edges = new Cons<Edge>(e1, new Cons<Edge>(e2, new Mt<Edge>()));
-        v5.edges = new Cons<Edge>(e2, new Cons<Edge>(e3, new Mt<Edge>()));
+        v2.edges = new Cons<Edge>(e1, new Cons<Edge>(e2,  new Mt<Edge>()));
+        v3.edges = new Cons<Edge>(e2, new Cons<Edge>(e3, new Mt<Edge>()));
+        v4.edges = new Cons<Edge>(e3, new Cons<Edge>(e4, new Mt<Edge>()));
+        v5.edges = new Cons<Edge>(e4, new Cons<Edge>(e5, new Mt<Edge>()));
         v6.edges = new Cons<Edge>(e5, new Mt<Edge>());
 
-        HashMap<Vertex, Edge> cameFromEdge2 = new HashMap<Vertex, Edge>();
-        cameFromEdge2.put(v4, e1);
-        cameFromEdge2.put(v5, e2);
-        cameFromEdge2.put(v2, e3);
-        cameFromEdge2.put(v3, e4);
-        cameFromEdge2.put(v6, e5);
-        
-        t.checkExpect(cameFromEdge2.get(v6), e5);
-        t.checkExpect(cameFromEdge2.get(v3), e4);
-        t.checkExpect(cameFromEdge2.get(v2), e3);
-        t.checkExpect(cameFromEdge2.get(v5), e2);
-        t.checkExpect(cameFromEdge2.get(v4), e1);
+        HashMap<Vertex, Edge> cameFromEdge = new HashMap<Vertex, Edge>();
+        cameFromEdge.put(v2, e1);
+        cameFromEdge.put(v3, e2);
+        cameFromEdge.put(v4, e3);
+        cameFromEdge.put(v5, e4);
+        cameFromEdge.put(v6, e5);
 
         // Path should run v1 -> v4 -> v5 -> v2 -> v3 -> v6
         IList<Vertex> answer = new Cons<Vertex>(v1, new Cons<Vertex>(v4,
                 new Cons<Vertex>(v5, new Cons<Vertex>(v2, new Cons<Vertex>(
                         v3, new Cons<Vertex>(v6, new Mt<Vertex>()))))));
-        
-        v1.startVert = true;
-        
-        maze0.searchHeads = new Mt<Vertex>();
-        
-        t.checkExpect(maze0.reconstructTest(v6, new Mt<Vertex>(), cameFromEdge2), answer);
+
 
     }
 
     // runs the animation
     void testRunMaze(Tester t) {
         // Correctly scaling mazes (to a 1000x600 big bang canvas) include:
-        MazeWorld maze100x60 = new MazeWorld(100, 60);
+        //MazeWorld maze100x60 = new MazeWorld(100, 60);
         //MazeWorld maze50x30 = new MazeWorld(50, 30);
         //MazeWorld maze25x15 = new MazeWorld(25, 15);
         //MazeWorld maze20x12 = new MazeWorld(20, 12);
-        //MazeWorld maze10x6 = new MazeWorld(10, 6);
+        MazeWorld maze10x6 = new MazeWorld(10, 6);
         
-        maze100x60.bigBang(1000, 800, .000001);
+        //maze100x60.bigBang(1000, 800, .000001);
         //maze50x30.bigBang(1000, 600, .000001);
         //maze25x15.bigBang(1000, 600, .000001);
         //maze20x12.bigBang(1000, 600, .000001);
-        //maze10x6.bigBang(1000, 600, .000001);
+        maze10x6.bigBang(1000, 600, .000001);
     }
 }
