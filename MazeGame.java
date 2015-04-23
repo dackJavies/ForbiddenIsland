@@ -1053,7 +1053,7 @@ class MazeWorld extends World {
                 this.cameFromEdge.put(next, this.searchHeads.get(0).findEdge(next)); // TODO check add reconstruct
                 this.searchHeads = this.removeSearchHead(this.searchHeads.get(0));
                 if (this.searchHeads.get(0).endVert) {
-                    this.reconstruct(next, new Mt<Vertex>());
+                    this.reconstruct(next, new Mt<Vertex>(), this.cameFromEdge);
                     this.gameOver = true;
                 }
             }
@@ -1175,7 +1175,7 @@ class MazeWorld extends World {
         if (!this.breadthList.isEmpty()) {
             Vertex next = this.breadthList.dequeue();
             if (!next.wasSearched && next.endVert) {
-                for (Vertex v: reconstruct(next, new Mt<Vertex>())) {
+                for (Vertex v: reconstruct(next, new Mt<Vertex>(), this.cameFromEdge)) {
                     v.correctPath = true;
                 }
                 this.gameOver = true;
@@ -1208,7 +1208,7 @@ class MazeWorld extends World {
         if (!this.depthList.isEmpty()) {
             Vertex next = this.depthList.pop();
             if (!next.wasSearched && next.endVert) {
-                for (Vertex v: reconstruct(next, new Mt<Vertex>())) {
+                for (Vertex v: reconstruct(next, new Mt<Vertex>(), this.cameFromEdge)) {
                     v.correctPath = true;
                 }
                 this.gameOver = true;
@@ -1260,10 +1260,12 @@ class MazeWorld extends World {
         }
      
     }
-
-    // reconstruct the path from the cur to the beginning
-    IList<Vertex> reconstruct(Vertex cur, IList<Vertex> finalPath) {
+    
+    // same as reconstruct, but with an added parameter that allows for 
+    // testing with a specified hashmap
+    IList<Vertex> reconstruct(Vertex cur, IList<Vertex> finalPath, HashMap<Vertex, Edge> cameFromEdge2) {
         if (cur.startVert) {
+            finalPath = finalPath.addToFront(cur);
             for (Vertex v: this.searchHeads) {
                 v.hasSearchHead = false;
             }
@@ -1271,14 +1273,11 @@ class MazeWorld extends World {
         }
         else {
             finalPath = finalPath.addToFront(cur);
-            if (this.cameFromEdge.get(cur) != null && this.cameFromEdge.get(cur).from == cur) {
-                return reconstruct(this.cameFromEdge.get(cur).to, finalPath);
-            }
-            else if (this.cameFromEdge.get(cur) != null) {
-                return reconstruct(this.cameFromEdge.get(cur).from, finalPath);
+            if (cameFromEdge2.get(cur).from == cur) {
+                return reconstruct(cameFromEdge2.get(cur).to, finalPath, cameFromEdge2);
             }
             else {
-                return finalPath;
+                return reconstruct(cameFromEdge2.get(cur).from, finalPath, cameFromEdge2);
             }
         }
     }
@@ -2376,23 +2375,35 @@ class ExamplesMaze {
         Edge e5 = new Edge(v3, v6, 5);
 
         v1.edges = new Cons<Edge>(e1, new Mt<Edge>());
-        v2.edges = new Cons<Edge>(e1, new Cons<Edge>(e2,  new Mt<Edge>()));
-        v3.edges = new Cons<Edge>(e2, new Cons<Edge>(e3, new Mt<Edge>()));
-        v4.edges = new Cons<Edge>(e3, new Cons<Edge>(e4, new Mt<Edge>()));
-        v5.edges = new Cons<Edge>(e4, new Cons<Edge>(e5, new Mt<Edge>()));
+        v2.edges = new Cons<Edge>(e3, new Cons<Edge>(e4,  new Mt<Edge>()));
+        v3.edges = new Cons<Edge>(e4, new Cons<Edge>(e5, new Mt<Edge>()));
+        v4.edges = new Cons<Edge>(e1, new Cons<Edge>(e2, new Mt<Edge>()));
+        v5.edges = new Cons<Edge>(e2, new Cons<Edge>(e3, new Mt<Edge>()));
         v6.edges = new Cons<Edge>(e5, new Mt<Edge>());
 
-        HashMap<Vertex, Edge> cameFromEdge = new HashMap<Vertex, Edge>();
-        cameFromEdge.put(v2, e1);
-        cameFromEdge.put(v3, e2);
-        cameFromEdge.put(v4, e3);
-        cameFromEdge.put(v5, e4);
-        cameFromEdge.put(v6, e5);
+        HashMap<Vertex, Edge> cameFromEdge2 = new HashMap<Vertex, Edge>();
+        cameFromEdge2.put(v4, e1);
+        cameFromEdge2.put(v5, e2);
+        cameFromEdge2.put(v2, e3);
+        cameFromEdge2.put(v3, e4);
+        cameFromEdge2.put(v6, e5);
+        
+        t.checkExpect(cameFromEdge2.get(v6), e5);
+        t.checkExpect(cameFromEdge2.get(v3), e4);
+        t.checkExpect(cameFromEdge2.get(v2), e3);
+        t.checkExpect(cameFromEdge2.get(v5), e2);
+        t.checkExpect(cameFromEdge2.get(v4), e1);
 
         // Path should run v1 -> v4 -> v5 -> v2 -> v3 -> v6
         IList<Vertex> answer = new Cons<Vertex>(v1, new Cons<Vertex>(v4,
                 new Cons<Vertex>(v5, new Cons<Vertex>(v2, new Cons<Vertex>(
                         v3, new Cons<Vertex>(v6, new Mt<Vertex>()))))));
+        
+        v1.startVert = true;
+
+        maze0.searchHeads = new Mt<Vertex>();
+
+        t.checkExpect(maze0.reconstruct(v6, new Mt<Vertex>(), cameFromEdge2), answer);
 
 
     }
