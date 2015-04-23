@@ -57,13 +57,34 @@ class Cons<T> implements IList<T> {
     }
     /* TEMPLATE:
      * Fields:
-     * ...first... -- T
-     * ...rest...  -- IList<T>
+     * ...this.first... -- T
+     * ...this.rest...  -- IList<T>
      * Methods:
-     * ...this.length()... int
-     * ...this.addToFront(T)... IList<T>
-     * ...this.addToBack(T)...  IList<T>
-     * 
+     * ...this.length()...               --int
+     * ...this.addToFront(T)...          --IList<T>
+     * ...this.addToBack(T)...           --IList<T>
+     * ...this.append(IList<T>)...       --IList<T>
+     * ...this.list2Tree(IComp<T>)...    --ITST<T>
+     * ...this.sort(IComp<T>)...         --IList<T>
+     * ...this.isEmpty()...              --boolean
+     * ...this.iterator()...             --Iterator<T>
+     * ...this.accept(Visitor<T, R>)...  --R
+     * ...this.contains(T)...            --boolean
+     * ...this.get(int)...               --T
+     * ...this.remove(T)...              --IList<T>
+     * Methods on Fields:
+     * ...this.rest.length()...               --int
+     * ...this.rest.addToFront(T)...          --IList<T>
+     * ...this.rest.addToBack(T)...           --IList<T>
+     * ...this.rest.append(IList<T>)...       --IList<T>
+     * ...this.rest.list2Tree(IComp<T>)...    --ITST<T>
+     * ...this.rest.sort(IComp<T>)...         --IList<T>
+     * ...this.rest.isEmpty()...              --boolean
+     * ...this.rest.iterator()...             --Iterator<T>
+     * ...this.rest.accept(Visitor<T, R>)...  --R
+     * ...this.vcontains(T)...            --boolean
+     * ...this.rest.get(int)...               --T
+     * ...this.rest.remove(T)...              --IList<T>
      */
     // Computes the size of this list
     public int length() {
@@ -150,6 +171,21 @@ class Cons<T> implements IList<T> {
 
 //represents an empty list
 class Mt<T> implements IList<T> {
+    /* TEMPLATE:
+     * Methods:
+     * ...this.length()...               --int
+     * ...this.addToFront(T)...          --IList<T>
+     * ...this.addToBack(T)...           --IList<T>
+     * ...this.append(IList<T>)...       --IList<T>
+     * ...this.list2Tree(IComp<T>)...    --ITST<T>
+     * ...this.sort(IComp<T>)...         --IList<T>
+     * ...this.isEmpty()...              --boolean
+     * ...this.iterator()...             --Iterator<T>
+     * ...this.accept(Visitor<T, R>)...  --R
+     * ...this.contains(T)...            --boolean
+     * ...this.get(int)...               --T
+     * ...this.remove(T)...              --IList<T>
+     */
     // Computes the size of this list
     public int length() {
         return 0;
@@ -198,7 +234,20 @@ class Mt<T> implements IList<T> {
 }
 
 //represents the deque collection of items
-class Deque<T> {
+class Deque<T> {   
+    /* TEMPLATE:
+     * Fields:
+     * ...this.header... -- Sentinel
+     * Methods:
+     * ...this.size()...                              --int
+     * ...this.addAtHead(T)...                        -- void
+     * ...this.addAtTail(T)...                        -- void
+     * ...this.removeFromHead(IList<T>)...            -- T 
+     * Methods on Fields:
+     * ...this.header.updateSelf(ANode<T>, boolea)... -- void
+     * ...this.header.isNode()...                     -- boolean
+     * ...this.header.countNodes(T)...                -- int
+     */
     Sentinel<T> header;
     // initializes the deque with a new Sentinel
     Deque() {
@@ -245,6 +294,22 @@ abstract class ANode<T> {
         this.next = next;
         this.prev = prev;
     }
+    /* TEMPLATE:
+     * Fields:
+     * ...this.next... -- ANode<T>
+     * ...this.next... -- ANode<T>
+     * Methods:
+     * ...this.updateSelf(ANode<T>, boolean)...            --int
+     * ...this.isNode()...                                 -- boolean
+     * ...this.countNodes()...                             -- int
+     * Methods on Fields:
+     * ...this.next.updateSelf(ANode<T>, boolean)...       --int
+     * ...this.next.isNode()...                            -- boolean
+     * ...this.next.countNodes()...                        -- int
+     * ...this.prev.updateSelf(ANode<T>, boolean)...       --int
+     * ...this.prev.isNode()...                            -- boolean
+     * ...this.prev.countNodes()...                        -- int
+     */
     // EFFECTS: Mutates the prev or next field
     // updates this node with a new prev or next node
     void updateSelf(ANode<T> n, boolean isPrev) {
@@ -272,6 +337,22 @@ class Sentinel<T> extends ANode<T> {
         this.next = this;
         this.prev = this;
     }
+    /* TEMPLATE:
+     * Fields:
+     * ...this.next... -- ANode<T>
+     * ...this.next... -- ANode<T>
+     * Methods:
+     * ...this.updateSelf(ANode<T>, boolean)...            --int
+     * ...this.isNode()...                                 -- boolean
+     * ...this.countNodes()...                             -- int
+     * Methods on Fields:
+     * ...this.next.updateSelf(ANode<T>, boolean)...       --int
+     * ...this.next.isNode()...                            -- boolean
+     * ...this.next.countNodes()...                        -- int
+     * ...this.prev.updateSelf(ANode<T>, boolean)...       --int
+     * ...this.prev.isNode()...                            -- boolean
+     * ...this.prev.countNodes()...                        -- int
+     */
     // updates this sentinel with a new prev or next node
     void updateSelf(ANode<T> n, boolean isPrev) {
         if (isPrev) {
@@ -299,6 +380,22 @@ class Node<T> extends ANode<T> {
         super(null, null);
         this.data = data;
     }
+    /* TEMPLATE:
+     * Fields:
+     * ...this.next... -- ANode<T>
+     * ...this.next... -- ANode<T>
+     * Methods:
+     * ...this.updateSelf(ANode<T>, boolean)...            --int
+     * ...this.isNode()...                                 -- boolean
+     * ...this.countNodes()...                             -- int
+     * Methods on Fields:
+     * ...this.next.updateSelf(ANode<T>, boolean)...       --int
+     * ...this.next.isNode()...                            -- boolean
+     * ...this.next.countNodes()...                        -- int
+     * ...this.prev.updateSelf(ANode<T>, boolean)...       --int
+     * ...this.prev.isNode()...                            -- boolean
+     * ...this.prev.countNodes()...                        -- int
+     */
     // EFFECTS: Mutates the prev and next's prev and next field
     // creates a node with connecting nodes
     Node(T data, ANode<T> next, ANode<T> prev) {
@@ -322,7 +419,19 @@ class Node<T> extends ANode<T> {
 //represents a Stack
 //Used for Depth First Search
 class Stack<T> {
-
+    /* TEMPLATE:
+     * Fields:
+     * ...this.contents...                           -- Deque<T>
+     * Methods:
+     * ...this.push(T)...                            -- void
+     * ...this.isEmpty()...                          -- boolean
+     * ...this.pop()...                              -- int
+     * Methods on Fields:
+     * ...this.contents.size()...                    --int
+     * ...this.contents.addAtHead(T)...              -- void
+     * ...this.contents.addAtTail(T)...              -- void
+     * ...this.contents.removeFromHead(IList<T>)...  -- T 
+     */
     Deque<T> contents;
     Stack(Deque<T> contents) { 
         this.contents = contents; 
@@ -350,7 +459,19 @@ class Queue<T> {
     Queue(Deque<T> contents) {
         this.contents = contents;
     }
-
+    /* TEMPLATE:
+     * Fields:
+     * ...this.contents...                           -- Deque<T>
+     * Methods:
+     * ...this.enqueue(T)...                         -- void
+     * ...this.isEmpty()...                          -- boolean
+     * ...this.dequeue()...                          -- int
+     * Methods on Fields:
+     * ...this.contents.size()...                    --int
+     * ...this.contents.addAtHead(T)...              -- void
+     * ...this.contents.addAtTail(T)...              -- void
+     * ...this.contents.removeFromHead(IList<T>)...  -- T 
+     */
     // Adds an item to the tail of this list
     void enqueue(T item) {
         this.contents.addAtTail(item);
@@ -378,6 +499,11 @@ interface IVisitor<T, R> {
 class DisplayWallVisitor implements IVisitor<Edge, WorldImage> {
     DisplayWallVisitor() {
     }
+    /* TEMPLATE:
+     * Methods:
+     * ...this.visit(TTNode<Edge>)...                           -- WorldImage
+     * ...this.visit(Leaf<Edge>)...                           -- WorldImage
+     */
     // visits an empty
     public WorldImage visit(Mt<Edge> m) {
         throw new IllegalArgumentException("IList is not a valid argument");
@@ -406,6 +532,11 @@ class DisplayEdgeVisitor implements IVisitor<Edge, WorldImage> {
         this.visibleEdges = visibleEdges;
         this.visiblePath = visiblePath;
     }
+    /* TEMPLATE:
+     * Methods:
+     * ...this.visit(TTNode<Edge>)...                           -- WorldImage
+     * ...this.visit(Leaf<Edge>)...                           -- WorldImage
+     */
     // visits an empty
     public WorldImage visit(Mt<Edge> m) {
         throw new IllegalArgumentException("IList is not a valid argument");
@@ -445,7 +576,18 @@ class IListIterator<T> implements Iterator<T> {
 
     IList<T> src;
 
-    IListIterator(IList<T> src) { this.src = src; }
+    IListIterator(IList<T> src) { 
+        this.src = src; 
+    }
+    /* TEMPLATE:
+     * Fields:
+     * ...this.src...                           -- IList<T>
+     * Methods:
+     * ...this.hasNext(T)...                         -- boolean
+     * ...this.isEmpty()...                          -- boolean
+     * Methods on Fields:
+     * ...this.contents... (IList template)          
+     */
     // does this iterator have an iterator?
     public boolean hasNext() {
 
@@ -586,7 +728,17 @@ class MoveVertex {
         this.current = v;
         hasDir = false;
     }
-    // checks to see if two Posn's are equal
+    /* TEMPLATE:
+     * Fields:
+     * ...this.current...                            -- Vertex
+     * ...this.hasDir...                             -- boolean
+     * Methods:
+     * ...this.equalPosn(Posn, Posn)...              -- boolean
+     * ...this.move(String)...                             -- Vertex
+     * Methods on Fields:
+     * ...this.current... (Vertex template)          
+     */
+    // checks to see if two Posn's are equal 
     boolean equalPosn(Posn p1, Posn p2) {
         return (p1.x == p2.x) && (p1.y == p2.y);
     }
@@ -646,6 +798,26 @@ class TTNode<T> implements ITST<T> {
         this.middle = middle;
         this.right = right;
     }
+    /* TEMPLATE:
+     * Fields:
+     * ...this.left...                               -- ITST<T>
+     * ...this.middle...                             -- ITST<T>
+     * ...this.right...                              -- ITST<T>
+     * Methods:
+     * ...this.insert(IComp<T>, T )...               -- ITST<T>
+     * ...this.accept(IVisitor<T, R>)...             -- R
+     * ...this.tree2List()...                        -- IList<T>
+     * Methods on Fields:
+     * ...this.left.insert(IComp<T>, T )...               -- ITST<T>
+     * ...this.left.accept(IVisitor<T, R>)...             -- R
+     * ...this.left.tree2List()...                        -- IList<T>  
+     * ...this.middle.insert(IComp<T>, T )...               -- ITST<T>
+     * ...this.middle.accept(IVisitor<T, R>)...             -- R
+     * ...this.middle.tree2List()...                        -- IList<T>     
+     * ...this.right.insert(IComp<T>, T )...               -- ITST<T>
+     * ...this.right.accept(IVisitor<T, R>)...             -- R
+     * ...this.right.tree2List()...                        -- IList<T>            
+     */
     // inserts an item into this tree according to the given comparator
     public ITST<T> insert(IComp<T> comp, T t) {
         if (comp.compare(this.data, t) > 0) {
@@ -671,6 +843,12 @@ class TTNode<T> implements ITST<T> {
 
 //represents an empty Binary Tree
 class Leaf<T> implements ITST<T> {
+    /* TEMPLATE:
+     * Methods:
+     * ...this.insert(IComp<T>, T )...               -- ITST<T>
+     * ...this.accept(IVisitor<T, R>)...             -- R
+     * ...this.tree2List()...                        -- IList<T>      
+     */
     // inserts an item into this tree according to the given comparator
     public ITST<T> insert(IComp<T> comp, T t) {
         return new TTNode<T>(t, this, this, this);        
@@ -706,6 +884,24 @@ class Vertex {
         this.size = 10;
         this.posn = new Posn(x, y);
     }
+    /* TEMPLATE:
+     * Fields:
+     * ...this.edges...                            -- boolean
+     * ...this.wasSearched...                      -- boolean
+     * ...this.correctPath...                      -- boolean
+     * ...this.startVert...                        -- boolean
+     * ...this.endVert...                          -- boolean
+     * ...this.hasSearchHead...                    -- boolean
+     * ...this.size...                             -- int
+     * ...this.posn...                             -- Posn
+     * Methods:
+     * ...this.getX()...                           -- int
+     * ...this.getY()...                           -- int
+     * ...this.addEdge(Vertex, int)...             -- void
+     * ...this.findEdge()...                       -- int
+     * ...this.findNeighbors()...                  -- int
+     * ...this.displayCell(boolean)...             -- void       
+     */
     Vertex(int x, int y, int size) {
         this(x, y);
         this.size = size;
@@ -785,6 +981,18 @@ class Edge {
         this.to = to;
         this.weight = weight;
     }
+    /* TEMPLATE:
+     * Fields:
+     * ...this.from...                            -- Vertex
+     * ...this.to...                              -- Vertex
+     * ...this.weight...                          -- int
+     * Methods:
+     * ...this.displayEdge(boolean, boolean)...   -- WorldImage
+     * ...this.displayWall()...                   -- WorldImage  
+     * Methods on Fields:
+     * ...this.from...  (Vertex template)
+     * ...this.to...    (Vertex template)
+     */
     // displays this edge 
     WorldImage displayEdge(boolean visibleLine, boolean visiblePath) {
         int sideLength = this.from.size;
@@ -841,31 +1049,34 @@ class MazeWorld extends World {
     int gameMode;
     boolean showPaths;
     boolean isPaused;
+    boolean gameOver;
+    // The lists needed to create the game
     IList<Edge> board;
     IList<Edge> unUsedSupply;
     IList<Edge> unUsed;
     Vertex startPiece;
     Vertex endPiece;
     IList<Vertex> searchHeads;
-
+    // used for searching
     Stack<Vertex> depthList;
     Queue<Vertex> breadthList;
     HashMap<Vertex, Edge> cameFromEdge;
-
-    boolean gameOver;
-
+    
     MazeWorld(int gameSizeX, int gameSizeY) {
-        // Basic constructor stuff
+        // Basic constructor Size
         this.gameSizeX = gameSizeX;
         this.gameSizeY = gameSizeY;
         // Default game mode is 0, or manual
         this.gameMode = 0;
         this.isPaused = false;
-        this.showPaths = true;                
+        this.showPaths = true;          
+        // While gameOver is false, the game runs
+        gameOver = false;
         // Initialize lists and hashmaps to empty
         this.board = new Mt<Edge>();
         this.searchHeads = new Mt<Vertex>();
         this.unUsed = new Mt<Edge>();
+        // dummy Vertices
         this.startPiece = new Vertex(-1, -1);
         this.endPiece = new Vertex(-1, -1);
         // Create a basic grid of vertices
@@ -878,7 +1089,6 @@ class MazeWorld extends World {
         UnionFind kruskel = new UnionFind(blankCells, b);
         this.board = b;
         this.board = kruskel.kruskel();
-        //this.unUsed = kruskel.unUsed;
         this.unUsed = b;
         this.unUsedSupply = kruskel.unUsed;
 
@@ -892,11 +1102,56 @@ class MazeWorld extends World {
             breadthList.enqueue(first);
             //first.startVert = true;
         }
-
-        // While gameOver is false, the game runs
-        gameOver = false;
-
     }
+    
+    /* TEMPLATE:
+     * Fields:
+     * ...this.gameSizeX...                       -- int
+     * ...this.gameSizeY...                       -- int
+     * ...this.gameMode...                        -- int
+     * ...this.showPaths...                       -- boolean
+     * ...this.isPaused...                        -- boolean
+     * ...this.gameOver...                        -- boolean
+     * ...this.board...                           -- IList<Edge>
+     * ...this.unUsedSupply...                    -- IList<Edge>
+     * ...this.unUsed...                          -- IList<Edge>
+     * ...this.startPiece...                      -- Vertex
+     * ...this.endPiece...                        -- Vertex
+     * ...this.searchHeads...                     -- IList<Vertex>
+     * ...this.depthList...                       -- Stack<Vertex>
+     * ...this.breadthList...                     -- Queu <Vertex>
+     * ...this.cameFromEdge...                    -- HashMap<Vertex, Edge>
+     * Methods:
+     * ...this.addSearchHeadToFront(Vertex)...                              -- void
+     * ...this.addSearchHeadToBack(Vertex)...                               -- void
+     * ...this.removeSearchHead(Vertex)...                                  -- IList<Vertex>
+     * ...this.creatGrid()...                                               -- ArrayList<ArrayList<Vertex>>
+     * ...this.addEdges(ArrayList<ArrayList<Vertex>>)...                    -- void
+     * ...this.addEdges(ArrayList<ArrayList<Vertex>>, int)...               -- void
+     * ...this.vertexToEdge(ArrayList<ArrayList<Vertex>>)...                -- IList<Edge>
+     * ...this.moveSearchHead(String)...                                    -- void
+     * ...this.newBoard()...                                                -- void
+     * ...this.initializeSearch()...                                        -- void
+     * ...this.lastImage()...                                               -- WorldImage
+     * ...this.makeImage()...                                               -- WorldImage
+     * ...this.onKeyEvent(String)...                                        -- void
+     * ...this.breadthFirstSearch()...                                      -- void
+     * ...this.depthFirstSearch()...                                        -- void
+     * ...this.constructMaze(IList<Edge>, IList<Edge>)...                   -- void
+     * ...this.reconstruct(Vertex, IList<Vertex>, HashMap<Vertex, Edge>)... -- IList<Vertex>
+     * ...this.worldEnds()...                                               -- WorldEnd
+     * Methods on Fields:
+     * ...this.board...             (IList template)
+     * ...this.unUsedSupply...      (IList template)
+     * ...this.unUsed...            (IList template)
+     * ...this.searchHeads...       (IList template)
+     * ...this.startPiece...        (Vertex template)
+     * ...this.endPiece...          (Vertex template)
+     * ...this.depthList...         (Stack template)
+     * ...this.breadthList...       (Queue template)
+     * ...this.cameFromEdge.put(Vertex, Edge)...                                          -- void
+     * ...this.cameFromEdge.get(Vertex)...                                                -- Edge
+     */
 
     // gives a Vertex a SearchHead
     // EFFECTS: Updates the hasSearchHead Field of the vertex
@@ -923,19 +1178,6 @@ class MazeWorld extends World {
         v.hasSearchHead = false;
         return result;
     }
-    // Change an IList<T> into an ArrayList<T>
-    <T> ArrayList<T> iListToArr(IList<T> toChange) {
-
-        ArrayList<T> result = new ArrayList<T>();
-
-        for(T t: toChange) {
-            result.add(t);
-        }
-
-        return result;
-
-    }
-
     // Create a grid of blank Vertices
     ArrayList<ArrayList<Vertex>> createGrid() {
         ArrayList<ArrayList<Vertex>> result = new ArrayList<ArrayList<Vertex>>();
@@ -1052,10 +1294,9 @@ class MazeWorld extends World {
             if (moveVertex.hasDir) {
                 this.addSearchHeadToBack(next);
                 this.searchHeads.get(0).wasSearched = true;
-                this.cameFromEdge.put(next, this.searchHeads.get(0).findEdge(next)); // TODO check add reconstruct
                 this.searchHeads = this.removeSearchHead(this.searchHeads.get(0));
                 if (this.searchHeads.get(0).endVert) {
-                    this.reconstruct(next, new Mt<Vertex>(), this.cameFromEdge);
+                    //this.reconstruct(next, new Mt<Vertex>(), this.cameFromEdge); TODO
                     this.gameOver = true;
                 }
             }
@@ -1168,6 +1409,23 @@ class MazeWorld extends World {
         }
 
     }
+   // onTick is called at regular time intervals
+    public void onTick() {
+        if (!(this.unUsedSupply.length() == this.unUsed.length())) {
+            this.unUsed = this.constructMaze(this.unUsed, this.unUsedSupply);
+        }
+        else if (!this.isPaused) {
+            // DF search
+            if (this.gameMode == 1) {
+                this.depthFirstSearch();
+            }
+            // BF search
+            else if (this.gameMode == 2) {
+                this.breadthFirstSearch();
+            }
+        }
+
+    } 
 
     // Search through the tree using the Breadth-First algorithm
     // This method is called every tick, and therefore only advances
@@ -1245,24 +1503,6 @@ class MazeWorld extends World {
             return consUU.rest;
         }
     }
-    // onTick is called at regular time intervals
-    public void onTick() {
-        if (!(this.unUsedSupply.length() == this.unUsed.length())) {
-            this.unUsed = this.constructMaze(this.unUsed, this.unUsedSupply);
-        }
-        else if (!this.isPaused) {
-            // DF search
-            if (this.gameMode == 1) {
-                this.depthFirstSearch();
-            }
-            // BF search
-            else if (this.gameMode == 2) {
-                this.breadthFirstSearch();
-            }
-        }
-     
-    }
-    
     // same as reconstruct, but with an added parameter that allows for 
     // testing with a specified hashmap
     IList<Vertex> reconstruct(Vertex cur, IList<Vertex> finalPath, HashMap<Vertex, Edge> cameFromEdge2) {
@@ -1306,8 +1546,25 @@ class UnionFind {
         this.unUsed = new Mt<Edge>();
         this.initializeHashMap();
         this.edgeList = this.edgeList.sort(new CompEdge());
-
     }
+    /* TEMPLATE:
+     * Fields:
+     * ...this.reps...                            -- HashMap<Vertex, Vertex> 
+     * ...this.vertList...                        -- ArrayList<ArrayList<Vertex>> 
+     * ...this.edgeList...                        -- IList<Edge>
+     * ...this.unUsed...                          -- IList<Edge>
+     * Methods:
+     * ...this.initializeHashMap()...            -- void
+     * ...this.find(Vertex)...                   -- Vertex  
+     * ...this.union(Vertex, Vertex)...          -- void
+     * ...this.formsCycle(Vertex, Vertex)...     -- boolean
+     * ...this.kruskel()...                      -- IList<Edge>
+     * Methods on Fields:
+     * ...this.reps...      (HashMap template)
+     * ...this.vertList...  (ArrayList template)
+     * ...this.edgeList...  (IList template)
+     * ...this.unUsed...    (IList template)
+     */
     // initializes the representatives of a list of Vertices
     void initializeHashMap() {
         for(ArrayList<Vertex> aV: vertList) {
@@ -1350,6 +1607,8 @@ class UnionFind {
         return result;
     }
 }
+
+
 
 //examples and tests for the MazeWorld
 class ExamplesMaze {
@@ -2098,19 +2357,6 @@ class ExamplesMaze {
 
         t.checkExpect(maze0.vertexToEdge(aVN), answer);
 
-    }
-    // tests IListToArr in the class MazeWorld
-    void testIListToArr(Tester t) {
-
-        IList<Integer> testList = new Mt<Integer>();
-        ArrayList<Integer> answer = new ArrayList<Integer>();
-
-        for(int i = 0; i < 100; i += 1) {
-            testList = testList.addToBack(i);
-            answer.add(i);
-        }
-
-        t.checkExpect(maze0.iListToArr(testList), answer);
     }
     // tests makeImage for the MazeWorld class TODO
     void testMakeImage(Tester t) {
