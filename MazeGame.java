@@ -2666,6 +2666,16 @@ class ExamplesMaze {
         Vertex D = new Vertex(0, 1);
         Vertex E = new Vertex(1, 1);
         Vertex F = new Vertex(2, 1);
+        ArrayList<Vertex> vA = new ArrayList<Vertex>();
+        ArrayList<ArrayList<Vertex>> vAA = new ArrayList<ArrayList<Vertex>>();
+        vA.add(A);
+        vA.add(B);
+        vA.add(C);
+        vA.add(D);
+        vA.add(E);
+        vA.add(F);
+        vAA.add(vA);
+        
 
         Edge ec = new Edge(E, C, 15);
         Edge cd = new Edge(C, D, 25);
@@ -2675,19 +2685,6 @@ class ExamplesMaze {
         Edge fd = new Edge(F, D, 50);
         Edge ae = new Edge(A, E, 50);
         Edge bf = new Edge(B, F, 50);
-
-        A.edges = new Cons<Edge>(ab, new Mt<Edge>());
-        B.edges = new Cons<Edge>(ab, new Cons<Edge>(be,
-                new Cons<Edge>(bc, new Cons<Edge>(bf,
-                        new Mt<Edge>()))));
-        C.edges = new Cons<Edge>(ec, new Cons<Edge>(cd,
-                new Cons<Edge>(bc, new Mt<Edge>())));
-        D.edges = new Cons<Edge>(cd, new Cons<Edge>(fd,
-                new Mt<Edge>()));
-        E.edges = new Cons<Edge>(ec, new Cons<Edge>(be,
-                new Cons<Edge>(ae, new Mt<Edge>())));
-        F.edges = new Cons<Edge>(fd, new Cons<Edge>(bf,
-                new Mt<Edge>()));
 
         IList<Edge> edgeList = new Mt<Edge>();
         edgeList = edgeList.addToBack(ec);
@@ -2707,12 +2704,11 @@ class ExamplesMaze {
         uf.put("1-1", "1-1");
         uf.put("2-1", "2-1");
 
-        IList<Edge> answer = new Cons<Edge>(ec, new Cons<Edge>(cd,
-                new Cons<Edge>(ab, new Cons<Edge>(be, new Cons<Edge>(bc,
-                        new Cons<Edge>(fd, new Cons<Edge>(ae, new Cons<Edge>(
-                                bf, new Mt<Edge>()))))))));
-
-      //  t.checkExpect(maze0.kruskel(edgeList), answer);
+        IList<Edge> answer = new Cons<Edge>(bf, new Cons<Edge>(be,
+                new Cons<Edge>(ab, new Cons<Edge>(cd, 
+                        new Cons<Edge>(ec, new Mt<Edge>())))));
+        UnionFind uF = new UnionFind(vAA, edgeList);
+       t.checkExpect(uF.kruskel(), answer);
 
  }
     // tests equalPosn in the class MoveVertex
