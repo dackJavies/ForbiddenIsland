@@ -2429,14 +2429,17 @@ class ExamplesMaze {
 
     // runs the animation
     void testRunMaze(Tester t) {
-        MazeWorld maze100x60 = new MazeWorld(20, 12);
-        //maze100x60.gameMode = 0;
-        /* t.checkExpect(maze2.board.length(), 3);
-    t.checkExpect(this.maze0.board.length(), 0);
-    t.checkExpect(this.maze2.board.length(), 3);
-    t.checkExpect(this.maze3.board.length(), 8);
-    t.checkExpect(maze100x60.board.length(), 5999); */
-        maze100x60.bigBang(1000, 600, .000001);
-        //t.checkExpect(maze100x60.searchHeads.length(), 1);
+        // Correctly scaling mazes (to a 1000x600 big bang canvas) include:
+        MazeWorld maze100x60 = new MazeWorld(100, 60);
+        //MazeWorld maze50x30 = new MazeWorld(50, 30);
+        //MazeWorld maze25x15 = new MazeWorld(25, 15);
+        //MazeWorld maze20x12 = new MazeWorld(20, 12);
+        //MazeWorld maze10x6 = new MazeWorld(10, 6);
+        
+        maze100x60.bigBang(1000, 800, .000001);
+        //maze50x30.bigBang(1000, 600, .000001);
+        //maze25x15.bigBang(1000, 600, .000001);
+        //maze20x12.bigBang(1000, 600, .000001);
+        //maze10x6.bigBang(1000, 600, .000001);
     }
 }
