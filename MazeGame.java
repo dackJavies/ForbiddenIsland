@@ -1288,17 +1288,23 @@ class MazeWorld extends World {
     // manually moves the SearchHead in a direction
     void moveSearchHead(String s) {
         Vertex searchHead = this.searchHeads.get(0);
+        // Key input
         if (s.equals("up") || s.equals("down") || s.equals("left") || s.equals("right")) {
+            // Create a MoveVertex object to access movement methods
             MoveVertex moveVertex = new MoveVertex(searchHead); 
             Vertex next = moveVertex.move(s);
+            // If the movement is legal (i.e. not running into a wall),
+            // add non-encountered vertices to the cameFromEdge HashMap
             if (moveVertex.hasDir) {
                 Edge between = next.findEdge(searchHead);
                 if (!next.wasSearched) {
                     this.cameFromEdge.put(next, between);
                 }
+                // Update searchHeads list accordingly
                 this.addSearchHeadToBack(next);
                 this.searchHeads.get(0).wasSearched = true;
                 this.searchHeads = this.removeSearchHead(this.searchHeads.get(0));
+                // If you've reached the end, draw the path and end the game
                 if (this.searchHeads.get(0).endVert) {
                     for (Vertex v: this.reconstruct(next, new Mt<Vertex>(), this.cameFromEdge)) {
                         v.correctPath = true;
@@ -1440,12 +1446,14 @@ class MazeWorld extends World {
 
         if (!this.breadthList.isEmpty()) {
             Vertex next = this.breadthList.dequeue();
+            // reached the end
             if (!next.wasSearched && next.endVert) {
                 for (Vertex v: reconstruct(next, new Mt<Vertex>(), this.cameFromEdge)) {
                     v.correctPath = true;
                 }
                 this.gameOver = true;
             }
+            // otherwise, add to worklist and move the search heads
             else {
                 this.removeSearchHead(next);
                 next.wasSearched = true;
@@ -1473,12 +1481,14 @@ class MazeWorld extends World {
 
         if (!this.depthList.isEmpty()) {
             Vertex next = this.depthList.pop();
+            // reached the end
             if (!next.wasSearched && next.endVert) {
                 for (Vertex v: reconstruct(next, new Mt<Vertex>(), this.cameFromEdge)) {
                     v.correctPath = true;
                 }
                 this.gameOver = true;
             }
+            // otherwise, add to worklist and move the search heads
             else {
                 this.removeSearchHead(next);
                 next.wasSearched = true;
