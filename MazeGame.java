@@ -1292,11 +1292,17 @@ class MazeWorld extends World {
             MoveVertex moveVertex = new MoveVertex(searchHead); 
             Vertex next = moveVertex.move(s);
             if (moveVertex.hasDir) {
+                Edge between = next.findEdge(searchHead);
+                if (!next.wasSearched) {
+                    this.cameFromEdge.put(next, between);
+                }
                 this.addSearchHeadToBack(next);
                 this.searchHeads.get(0).wasSearched = true;
                 this.searchHeads = this.removeSearchHead(this.searchHeads.get(0));
                 if (this.searchHeads.get(0).endVert) {
-                    //this.reconstruct(next, new Mt<Vertex>(), this.cameFromEdge); TODO
+                    for (Vertex v: this.reconstruct(next, new Mt<Vertex>(), this.cameFromEdge)) {
+                        v.correctPath = true;
+                    }
                     this.gameOver = true;
                 }
             }
@@ -2389,25 +2395,6 @@ class ExamplesMaze {
     }
     // tests DepthFirstSearch for the MazeWorld class 
     void testDepthFirstSearch(Tester t) {
-        MazeWorld maze = new MazeWorld(3, 3);
-        ArrayList<ArrayList<Vertex>> grid = maze.createGrid();
-        maze.addEdges(grid, 1);
-        maze.board = maze.vertexToEdge(grid);
-        Vertex vert = null;
-        for (Edge e: maze.board) {
-            if (new MoveVertex(new Vertex(0, 0)).equalPosn(e.from.posn, new Posn(0, 1))) {
-                vert = e.from;   
-            }
-            else if (new MoveVertex(new Vertex(0, 0)).equalPosn(e.from.posn, new Posn(0, 1))) {
-                vert = e.to;
-            }
-        }
-        t.checkExpect(vert.posn, new Posn(0, 1));
-        t.checkExpect(vert.wasSearched, false);
-        maze.depthFirstSearch();
-        maze.depthFirstSearch();
-        t.checkExpect(maze.searchHeads.length() <= 10, true); 
-        
         
         MazeWorld maze2 = new MazeWorld(3, 3);
         
@@ -2437,30 +2424,67 @@ class ExamplesMaze {
         answerMap.put(v2, e1to2);
         answerMap.put(v4, e1to4);
         
+        Stack<Vertex> answerStack = new Stack<Vertex>(new Deque<Vertex>());
+        answerStack.push(v4);
+        answerStack.push(v2);
+        
         maze2.depthFirstSearch();
+        
+        t.checkExpect(maze2.cameFromEdge, answerMap);
+        t.checkExpect(maze2.depthList, answerStack);
+        
+        maze2.depthFirstSearch();
+        
+        answerMap.put(v3, e2to3);
+        answerMap.put(v5, e2to5);
+        
+        answerStack.pop();
+        answerStack.push(v5);
+        answerStack.push(v3);
+        
+        t.checkExpect(maze2.cameFromEdge, answerMap);
+        t.checkExpect(maze2.depthList, answerStack);
         
     }
 
     // tests BreadthFirstSearch for the MazeWorld class 
     void testBreadthFirstSearch(Tester t) {
-        MazeWorld maze = new MazeWorld(3, 3);
-        ArrayList<ArrayList<Vertex>> grid = maze.createGrid();
-        maze.addEdges(grid, 1);
-        maze.board = maze.vertexToEdge(grid);
-        Vertex vert = null;
-        for (Edge e: maze.board) {
-            if (new MoveVertex(new Vertex(0, 0)).equalPosn(e.from.posn, new Posn(0, 1))) {
-                vert = e.from;   
-            }
-            else if (new MoveVertex(new Vertex(0, 0)).equalPosn(e.from.posn, new Posn(0, 1))) {
-                vert = e.to;
-            }
-        }
-        t.checkExpect(vert.posn, new Posn(0, 1));
-        t.checkExpect(vert.wasSearched, false);
-        maze.breadthFirstSearch();
-        maze.breadthFirstSearch();
-        t.checkExpect(maze.searchHeads.length() <= 5, true);  
+        MazeWorld maze2 = new MazeWorld(3, 3);
+        
+        this.initialize();
+        this.initializeV();
+        
+        maze2.board = new Cons<Edge>(e1to4, new Cons<Edge>(e1to2,
+                new Cons<Edge>(e2to5, new Cons<Edge>(e2to3, new Cons<Edge>(
+                        e3to6, new Cons<Edge>(e4to7, new Cons<Edge>(e4to5, 
+                                new Cons<Edge>(e5to8, new Cons<Edge>(e5to6, 
+                                        new Cons<Edge>(e6to9, new Cons<Edge>(
+                                                e7to8, new Cons<Edge>(e8to9, 
+                                                        new Mt<Edge>()))))))))
+                                                            ))));
+        
+        maze2.startPiece = v1;
+        maze2.endPiece = v9;
+        maze2.searchHeads = new Cons<Vertex>(v1, new Mt<Vertex>());
+        maze2.depthList = new Stack<Vertex>(new Deque<Vertex>());
+        maze2.depthList.push(v1);
+        maze2.breadthList = new Queue<Vertex>(new Deque<Vertex>());
+        maze2.breadthList.enqueue(v1);
+        
+        maze2.cameFromEdge = new HashMap<Vertex, Edge>();
+        
+        HashMap<Vertex, Edge> answerMap = new HashMap<Vertex, Edge>();
+        answerMap.put(v2, e1to2);
+        answerMap.put(v4, e1to4);
+        
+        Queue<Vertex> answerQueue = new Queue<Vertex>(new Deque<Vertex>());
+        answerQueue.enqueue(v4);
+        answerQueue.enqueue(v2);
+        
+        maze2.breadthFirstSearch();
+        
+        t.checkExpect(maze2.cameFromEdge, answerMap);
+        t.checkExpect(maze2.breadthList, answerQueue);
     }
 
     // tests initializeHashMap for the class UnionFind 
@@ -2767,6 +2791,6 @@ class ExamplesMaze {
         //maze50x30.bigBang(1000, 600, .000001);
         //maze25x15.bigBang(1000, 600, .000001);
         //maze20x12.bigBang(1000, 600, .000001);
-        //maze10x6.bigBang(1000, 600, .000001);
+        maze10x6.bigBang(1000, 600, .000001);
     }
 }
